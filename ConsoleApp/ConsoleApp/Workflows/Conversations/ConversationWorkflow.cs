@@ -1,28 +1,40 @@
-﻿using ConsoleApp.Workflows.Conversations.ReAct;
+﻿using Azure.Core;
+using ConsoleApp.Workflows.Conversations.ReAct;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 
 namespace ConsoleApp.Workflows.Conversations;
 
-public class ConversationWorkflow(AIAgent reasonAgent, AIAgent actAgent)
+public class ConversationWorkflow(AIAgent reasonAgent, AIAgent actAgent, CheckpointStore checkPointStore, CheckpointManager checkpointManager)
 {
-    public async Task Execute(string userInput, CancellationToken cancellationToken)
+    public async Task<ConversationWorkFlowResponse> Execute(ConversationWorkFlowRequest request, CancellationToken cancellationToken)
     {
-        var checkpointManager = CheckpointManager.CreateInMemory();
-        var checkpoints = new List<CheckpointInfo>();
-
         var reasonNode = new ReasonNode(reasonAgent);
         var actNode = new ActNode(actAgent);
 
         var inputPort = RequestPort.Create<UserRequest, UserResponse>("user-input");
 
         var builder = new WorkflowBuilder(reasonNode);
+        
         builder.AddEdge(reasonNode, actNode);
         builder.AddEdge(actNode, inputPort);
+        builder.AddEdge( inputPort, actNode);
 
         var workflow = await builder.BuildAsync<string>();
 
-        var run = await InProcessExecution.StreamAsync(workflow, userInput, checkpointManager, cancellationToken: cancellationToken);
+        Checkpointed<StreamingRun> run;
+
+        if (checkPointStore.HasCheckpoint(request.SessionId))
+        {
+            var checkpointInfo = checkPointStore.Get(request.SessionId);
+            
+            run = await InProcessExecution.ResumeStreamAsync(workflow, checkpointInfo, checkpointManager, checkpointInfo.RunId, cancellationToken: cancellationToken);
+        }
+        else
+        {
+            run = await InProcessExecution.StreamAsync(workflow, request.Message, checkpointManager, cancellationToken: cancellationToken);
+        }
+       
 
         await foreach (var evt in run.Run.WatchStreamAsync(cancellationToken))
         {
@@ -38,7 +50,10 @@ public class ConversationWorkflow(AIAgent reasonAgent, AIAgent actAgent)
                 var checkpoint = superStepCompletedEvt.CompletionInfo!.Checkpoint;
                 if (checkpoint != null)
                 {
-                    checkpoints.Add(checkpoint);
+                    checkPointStore.Add(request.SessionId, checkpoint);
+
+                    Console.WriteLine();
+                    Console.WriteLine($"-Checkpoint added: {checkpoint}, {request.SessionId}");
                 }
             }
 
@@ -49,9 +64,22 @@ public class ConversationWorkflow(AIAgent reasonAgent, AIAgent actAgent)
 
             if (evt is RequestInfoEvent requestInfoEvent)
             {
-                return;
+                if (request.State == ConversationWorkflowState.UserResponse)
+                {
+                    var resp = requestInfoEvent.Request.CreateResponse(new UserResponse() { Message = request.Message});
+                    await run.Run.SendResponseAsync(resp);
+                }
+                else
+                {
+                    return new ConversationWorkFlowResponse()
+                        { Message = requestInfoEvent.Data?.ToString(), State = ConversationWorkflowState.AssistantRequest, SessionId = request.SessionId };
+                }
             }
             
         }
-    }
+
+        return new ConversationWorkFlowResponse()
+            { Message = string.Empty, State = ConversationWorkflowState.Completed, SessionId = request.SessionId};
+
+     }
 }

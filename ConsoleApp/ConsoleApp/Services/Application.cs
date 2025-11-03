@@ -1,11 +1,13 @@
-﻿using System.ClientModel;
-using Azure.AI.OpenAI;
+﻿using Azure.AI.OpenAI;
 using ConsoleApp.Settings;
+using ConsoleApp.Workflows;
 using ConsoleApp.Workflows.Conversations;
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using OpenAI;
+using System.ClientModel;
 
 namespace ConsoleApp.Services;
 
@@ -13,6 +15,12 @@ public class Application(IOptions<LanguageModelSettings> settings, IPromptServic
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        var sessionId = Guid.NewGuid();
+
+        var checkpointManager = CheckpointManager.CreateInMemory();
+
+        var checkPointStore = new CheckpointStore();
+        
         var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
                 new ApiKeyCredential(
                     settings.Value.ApiKey))
@@ -28,6 +36,8 @@ public class Application(IOptions<LanguageModelSettings> settings, IPromptServic
             Instructions = promptService.GetPrompt("Act-Agent")
         });
 
+        var workflowState = ConversationWorkflowState.Started;
+        
         while (!cancellationToken.IsCancellationRequested)
         {
             Console.Write(">");
@@ -38,9 +48,17 @@ public class Application(IOptions<LanguageModelSettings> settings, IPromptServic
       
             if (userInput.Equals("exit", StringComparison.OrdinalIgnoreCase)) break;
        
-            var conversationWorkflow = new ConversationWorkflow(reasonAgent, actAgent);
+            var conversationWorkflow = new ConversationWorkflow(reasonAgent, actAgent, checkPointStore, checkpointManager);
 
-            await conversationWorkflow.Execute(userInput, cancellationToken);
+            var workflowRequest = new ConversationWorkFlowRequest()
+                { Message = userInput, State = workflowState, SessionId = sessionId};
+            
+            var response = await conversationWorkflow.Execute(workflowRequest, cancellationToken);
+
+            if (response.State == ConversationWorkflowState.AssistantRequest)
+            {
+                workflowState = ConversationWorkflowState.UserResponse;
+            }
 
             Console.WriteLine();
         }
