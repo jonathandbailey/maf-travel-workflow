@@ -1,10 +1,8 @@
 ﻿using System.ClientModel;
 using Azure.AI.OpenAI;
-using Azure.Core;
 using ConsoleApp.Settings;
-using ConsoleApp.Workflows.ReAct;
+using ConsoleApp.Workflows.Conversations;
 using Microsoft.Agents.AI;
-using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using OpenAI;
@@ -32,38 +30,17 @@ public class Application(IOptions<LanguageModelSettings> settings, IPromptServic
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            Console.Write("You: ");
+            Console.Write(">");
+            
             var userInput = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(userInput))
-            {
-                continue;   
-            }
+            if (string.IsNullOrWhiteSpace(userInput)) continue;   
+      
+            if (userInput.Equals("exit", StringComparison.OrdinalIgnoreCase)) break;
+       
+            var conversationWorkflow = new ConversationWorkflow(reasonAgent, actAgent);
 
-            if (userInput.Equals("exit", StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteLine("Goodbye!");
-                break;
-            }
-
-            var reasonNode = new ReasonNode(reasonAgent);
-            var actNode = new ActNode(actAgent);
-
-            var builder = new WorkflowBuilder(reasonNode);
-            builder.AddEdge(reasonNode, actNode);
-            
-            var workflow = await builder.BuildAsync<string>();
-
-            var run = await InProcessExecution.StreamAsync(workflow, userInput, cancellationToken: cancellationToken);
-
-            await foreach (var evt in run.WatchStreamAsync(cancellationToken))
-            {
-                if (evt is ConversationStreamingEvent { Data: not null } streamingEvent)
-                {
-                    var messageString = streamingEvent.Data?.ToString() ?? string.Empty;
-                    Console.Write(messageString);
-                }
-            }
+            await conversationWorkflow.Execute(userInput, cancellationToken);
 
             Console.WriteLine();
         }

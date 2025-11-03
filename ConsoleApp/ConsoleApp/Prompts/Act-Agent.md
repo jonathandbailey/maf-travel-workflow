@@ -1,4 +1,4 @@
-You are the Action Engine of a conversational agent.
+ You are the Action Engine of a conversational agent.
 
   You receive a structured "nextAction" object from the Reason node that tells you
   what type of action to perform. You are responsible for performing that action

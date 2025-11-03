@@ -4,7 +4,7 @@ using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Text;
 
-namespace ConsoleApp.Workflows.ReAct;
+namespace ConsoleApp.Workflows.Conversations.ReAct;
 
 public class ActNode(AIAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMessageHandler<string, string>
 {
@@ -18,9 +18,15 @@ public class ActNode(AIAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IM
             stringBuilder.Append(update.Text);
             await context.AddEventAsync(new ConversationStreamingEvent(update.Text), cancellationToken);
         }
+    
+        var response = stringBuilder.ToString();
+
+        await context.SendMessageAsync(new UserRequest() {Message = response}, cancellationToken: cancellationToken);
 
         return  stringBuilder.ToString();
     }
 }
 
 public class ConversationStreamingEvent(string message) : WorkflowEvent(message) { }
+
+public class WaitForUserInputEvent() : WorkflowEvent() { }
