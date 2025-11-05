@@ -6,7 +6,7 @@ using Microsoft.Extensions.AI;
 
 namespace Application.Workflows.Conversations;
 
-public class Workflow(IAgent reasonAgent, IAgent actAgent)
+public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager)
 {
     public async Task<WorkflowResponse> Execute(ChatMessage message)
     {
@@ -23,9 +23,9 @@ public class Workflow(IAgent reasonAgent, IAgent actAgent)
 
         var workflow = await builder.BuildAsync<ChatMessage>();
 
-        var run = await InProcessExecution.StreamAsync(workflow, message);
+        var run = await InProcessExecution.StreamAsync(workflow, message, checkpointManager);
 
-        await foreach (var evt in run.WatchStreamAsync())
+        await foreach (var evt in run.Run.WatchStreamAsync())
         {
             if (evt is RequestInfoEvent requestInfoEvent)
             {
