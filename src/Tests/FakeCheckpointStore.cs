@@ -19,10 +19,8 @@ public class FakeCheckpointStore(ITestOutputHelper outputHelper) : JsonCheckpoin
         var checkpointInfo = new CheckpointInfo(runId, Guid.NewGuid().ToString());
 
         _checkpointElements.Add(checkpointInfo, value);
-
-        var message = $"Created : {checkpointInfo}, {value}";
         
-        outputHelper.WriteLine(message); 
+        outputHelper.WriteLine($"Created: {DateTime.Now} {checkpointInfo}");
 
         return ValueTask.FromResult(checkpointInfo);
     }
