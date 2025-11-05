@@ -45,20 +45,24 @@ public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, Checkpoin
 
             if (evt is RequestInfoEvent requestInfoEvent)
             {
-                if (_state == WorkflowState.WaitingForUserInput)
+                switch (_state)
                 {
-                    var resp = requestInfoEvent.Request.CreateResponse(new UserResponse(message.Text));
+                    case WorkflowState.Executing:
+                    {
+                        var response = Handle(requestInfoEvent);
 
-                    _state = WorkflowState.Executing;
-                    await run.Run.SendResponseAsync(resp);
-                }
-                else
-                {
-                    var response = Handle(requestInfoEvent);
+                        _state = WorkflowState.WaitingForUserInput;
 
-                    _state = WorkflowState.WaitingForUserInput;
+                        return response;
+                    }
+                    case WorkflowState.WaitingForUserInput:
+                    {
+                        var resp = requestInfoEvent.Request.CreateResponse(new UserResponse(message.Text));
 
-                    return response;
+                        _state = WorkflowState.Executing;
+                        await run.Run.SendResponseAsync(resp);
+                        break;
+                    }
                 }
             }
         }

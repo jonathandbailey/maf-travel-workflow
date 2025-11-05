@@ -6,14 +6,14 @@ using Microsoft.Extensions.AI;
 
 namespace Application.Workflows.Conversations.Nodes;
 
-public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMessageHandler<ChatMessage>, 
+public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMessageHandler<ActRequest>, 
     IMessageHandler<UserResponse>
 
 {
-    public async ValueTask HandleAsync(ChatMessage message, IWorkflowContext context,
+    public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        var response = await agent.RunAsync(new List<ChatMessage> { message }, cancellationToken: cancellationToken);
+        var response = await agent.RunAsync(new List<ChatMessage> { request.Message }, cancellationToken: cancellationToken);
 
         if (JsonOutputParser.HasJson(response.Text))
         {

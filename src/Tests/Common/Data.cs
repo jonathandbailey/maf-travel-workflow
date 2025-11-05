@@ -1,4 +1,4 @@
-﻿namespace Tests;
+﻿namespace Tests.Common;
 
 public static class Data
 {
@@ -15,16 +15,16 @@ public static class Data
         """;
 
     public const string ActAgentUserComplete = """
-                                                        All required information now complete. 
-                                                        ```json
-                                                        {
-                                                          "route": "workflow_complete",
-                                                          "metadata": {
-                                                            "reason": "Requesting missing input for flight research"
-                                                          }
-                                                        }
-                                                        ```
-                                                        """;
+        All required information now complete. 
+        ```json
+        {
+          "route": "workflow_complete",
+          "metadata": {
+            "reason": "Requesting missing input for flight research"
+          }
+        }
+        ```
+        """;
 
     public const string ReasonTripToParisDeparturePointRequired =
         "User want to plan a trip to Paris.Departure Point is required";

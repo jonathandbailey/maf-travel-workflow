@@ -3,7 +3,7 @@ using System.Text.Json;
 using Microsoft.Agents.AI.Workflows.Checkpointing;
 using Xunit.Abstractions;
 
-namespace Tests;
+namespace Tests.Common;
 
 public class FakeCheckpointStore(ITestOutputHelper outputHelper) : JsonCheckpointStore
 {

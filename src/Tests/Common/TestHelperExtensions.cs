@@ -3,7 +3,7 @@ using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Moq;
 
-namespace Tests;
+namespace Tests.Common;
 
 public static class TestHelperExtensions
 {
