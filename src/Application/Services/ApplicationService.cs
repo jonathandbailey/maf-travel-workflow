@@ -2,7 +2,6 @@
 using Application.Workflows.Conversations;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
-using System.Diagnostics;
 using Application.Observability;
 
 namespace Application.Services;
@@ -13,9 +12,7 @@ public class ApplicationService(IAgentFactory agentFactory) : IApplicationServic
 
     public async Task<string> Execute(string userInput)
     {
-        using var activity = Telemetry.StarActivity("Executing-Workflow");
-        
-        activity?.SetTag("User Input", userInput);
+        var initializeActivity = Telemetry.StarActivity("Initialize");
 
         var reasonAgent = await agentFactory.CreateReasonAgent();
 
@@ -23,9 +20,17 @@ public class ApplicationService(IAgentFactory agentFactory) : IApplicationServic
 
         var checkpointManager = CheckpointManager.CreateJson(new ConversationCheckpointStore());
 
+        initializeActivity?.Dispose();
+
+        var workflowActivity = Telemetry.StarActivity("Workflow");
+
+        workflowActivity?.SetTag("User Input", userInput);
+
         var workflow = new ConversationWorkflow(reasonAgent, actAgent, checkpointManager);
 
         var response = await workflow.Execute(new ChatMessage(ChatRole.User, userInput));
+
+        workflowActivity?.Dispose();
 
         return response.Message;
     }
