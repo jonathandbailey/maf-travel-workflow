@@ -1,4 +1,5 @@
 ﻿using Application.Agents;
+using Application.Observability;
 using Application.Workflows.Conversations.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
@@ -12,7 +13,13 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
     public async ValueTask<ActRequest> HandleAsync(ChatMessage message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
+        using var activity = Telemetry.StarActivity("Reason-Node");
+
+        activity?.SetTag("User", message.Text);
+
         var response = await agent.RunAsync(new List<ChatMessage> { message }, cancellationToken: cancellationToken);
+
+        activity?.SetTag("Assistant", response.Messages.First().Text);
 
         return new ActRequest(response.Messages.First());
     }
