@@ -16,7 +16,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.StarActivity("Act");
+        using var activity = Telemetry.StarActivity("Act-[handle]");
 
         activity?.SetTag("Reason Request (Act Node)", request.Message);
 
@@ -32,19 +32,23 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
             {
                 var cleanedResponse = JsonOutputParser.Remove(response.Text);
 
-                using var askUserActivity = Telemetry.StarActivity("Act-User-Request");
+                using var askUserActivity = Telemetry.StarActivity("Act-[user-request]");
 
                 askUserActivity?.SetTag("RequestUser:", cleanedResponse);
 
                 await context.SendMessageAsync(new UserRequest(cleanedResponse), cancellationToken: cancellationToken);
             }
         }
+        else
+        {
+            using var askUserActivity = Telemetry.StarActivity("Act-[no-action]");
+        }
     }
 
     public async ValueTask HandleAsync(UserResponse userResponse, IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act");
+        using var activity = Telemetry.StarActivity("Act-[user-response]");
 
         activity?.SetTag("User Response/Observation:", userResponse);
 
@@ -53,7 +57,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
 
     protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act-Checkpoint-[save]");
+        using var activity = Telemetry.StarActivity("Act-[save]");
 
         return context.QueueStateUpdateAsync("act-node-messages", _messages, cancellationToken: cancellationToken);
     }
@@ -61,7 +65,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
     protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act-Checkpoint-[restore]");
+        using var activity = Telemetry.StarActivity("Act-[restore]");
 
         _messages = (await context.ReadStateAsync<List<ChatMessage>>("act-node-messages", cancellationToken: cancellationToken))!;
     }

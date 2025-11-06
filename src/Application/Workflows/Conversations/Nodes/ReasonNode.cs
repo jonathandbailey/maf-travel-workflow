@@ -8,14 +8,14 @@ using Microsoft.Extensions.AI;
 namespace Application.Workflows.Conversations.Nodes;
 
 public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNode") , IMessageHandler<ChatMessage, ActRequest>,
-    IMessageHandler<ActObservation, ChatMessage>
+    IMessageHandler<ActObservation, ActRequest>
 {
     private List<ChatMessage> _messages = [];
     
     public async ValueTask<ActRequest> HandleAsync(ChatMessage message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.StarActivity("Reason");
+        using var activity = Telemetry.StarActivity("Reason-[handle]");
 
         activity?.SetTag("User", message.Text);
 
@@ -32,19 +32,25 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
         return new ActRequest(response.Messages.First());
     }
 
-    public async ValueTask<ChatMessage> HandleAsync(ActObservation actObservation, IWorkflowContext context,
+    public async ValueTask<ActRequest> HandleAsync(ActObservation actObservation, IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
+        using var activity = Telemetry.StarActivity("Reason-[observe]");
+
+        activity?.SetTag("User", actObservation.Message);
+
         var requestMessage = new ChatMessage(ChatRole.User, actObservation.Message);
 
         var response = await agent.RunAsync(new List<ChatMessage> { requestMessage }, cancellationToken: cancellationToken);
 
-        return response.Messages.First();
+        activity?.SetTag("Assistant", response.Messages.First().Text);
+
+        return new ActRequest(response.Messages.First());
     }
 
     protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("ReasonCheckpoint-[save]");
+        using var activity = Telemetry.StarActivity("Reason-[save]");
 
         return context.QueueStateUpdateAsync("reason-node-messages", _messages, cancellationToken: cancellationToken);
     }
@@ -52,7 +58,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
     protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Reason-Checkpoint-[restore]");
+        using var activity = Telemetry.StarActivity("Reason-[restore]");
 
         _messages = (await context.ReadStateAsync<List<ChatMessage>>("reason-node-messages", cancellationToken: cancellationToken))!;
     }
