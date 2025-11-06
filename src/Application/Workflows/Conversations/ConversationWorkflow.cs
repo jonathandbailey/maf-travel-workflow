@@ -7,7 +7,7 @@ using Microsoft.Extensions.AI;
 
 namespace Application.Workflows.Conversations;
 
-public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager)
+public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, IWorkflowManager workflowManager)
 {
     private WorkflowState _state  = WorkflowState.Initialized;
     private CheckpointInfo? _checkpointInfo = null;
@@ -73,12 +73,12 @@ public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, Checkpoin
         switch (_state)
         {
             case WorkflowState.Initialized:
-                return await InProcessExecution.StreamAsync(workflow, message, checkpointManager);
+                return await InProcessExecution.StreamAsync(workflow, message, workflowManager.CheckpointManager);
             case WorkflowState.WaitingForUserInput:
                 var activity = Telemetry.StarActivity("Workflow-[resume]");
                 activity?.SetTag("RunId", _checkpointInfo.RunId);
                 activity?.SetTag("CheckpointId", _checkpointInfo.CheckpointId);
-                var run =  await InProcessExecution.ResumeStreamAsync(workflow, _checkpointInfo, checkpointManager,
+                var run =  await InProcessExecution.ResumeStreamAsync(workflow, _checkpointInfo, workflowManager.CheckpointManager,
                     _checkpointInfo.RunId);
                 activity?.Dispose();
                 return run;

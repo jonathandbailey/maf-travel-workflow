@@ -2,11 +2,11 @@
 using Application.Infrastructure;
 using Application.Observability;
 using Application.Workflows.Conversations;
-using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Infrastructure.Settings;
+using Application.Workflows;
 using Application.Workflows.Conversations.Dto;
 using Microsoft.Extensions.Options;
 
@@ -32,17 +32,19 @@ public class ApplicationService(IAgentFactory agentFactory, IAzureStorageReposit
 
         var actAgent = await agentFactory.CreateActAgent();
 
-        var store = new ConversationCheckpointStore();
-
-        var checkpointManager = CheckpointManager.CreateJson(store);
-
+        var store = await GetOrCreateCheckpointStore(request.SessionId);
+      
         initializeActivity?.Dispose();
 
         var workflowActivity = Telemetry.StarActivity("Workflow");
 
         workflowActivity?.SetTag("User Input", request.Message);
 
-        var workflow = new ConversationWorkflow(reasonAgent, actAgent, checkpointManager);
+        var workflowManager = new WorkflowManager(store, repository, settings);
+
+        await workflowManager.Initialize(request.SessionId);
+
+        var workflow = new ConversationWorkflow(reasonAgent, actAgent, workflowManager);
 
         var response = await workflow.Execute(new ChatMessage(ChatRole.User, request.Message));
 
@@ -54,6 +56,25 @@ public class ApplicationService(IAgentFactory agentFactory, IAzureStorageReposit
             serializedConversation, ApplicationJsonContentType);
 
         return new ConversationResponse(request.SessionId, response.Message);
+    }
+
+    private async Task<ConversationCheckpointStore> GetOrCreateCheckpointStore(Guid sessionId)
+    {
+        var blobExists = await repository.BlobExists($"{sessionId}.json", settings.Value.ContainerName);
+
+        if (blobExists == false)
+        {
+            return new ConversationCheckpointStore();
+        }
+
+        var blob = await repository.DownloadTextBlobAsync($"{sessionId}.json", settings.Value.ContainerName);
+
+        var store = JsonSerializer.Deserialize<ConversationCheckpointStore>(blob, SerializerOptions);
+
+        if (store == null)
+            throw new JsonException($"Failed to deserialize Checkpoint Store for session : {sessionId}");
+
+        return store;
     }
 }
 

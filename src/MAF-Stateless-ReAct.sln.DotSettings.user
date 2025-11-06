@@ -3,7 +3,5 @@
   &lt;Assembly Path="C:\Users\jonat\.nuget\packages\microsoft.agents.ai.workflows\1.0.0-preview.251016.1\lib\net9.0\Microsoft.Agents.AI.Workflows.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=1beddbe0_002D8857_002D4a02_002D972a_002Da99dbf9b3027/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;xUnit::5556AC49-98A6-4EC7-8CA1-01C3E45148CB::net9.0::Tests.ConversationWorkflowTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="C:\source\github\maf-stateless-worflow-checkpoints\src\Tests" Presentation="&amp;lt;Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
