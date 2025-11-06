@@ -1,5 +1,6 @@
 ﻿using Api.Dto;
 using Application.Services;
+using Application.Workflows.Conversations.Dto;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,8 +21,8 @@ public static class ApiMappings
 
     private static async Task<Ok<ConversationResponseDto>> ConversationExchange([FromBody] ConversationRequestDto requestDto, IApplicationService service, HttpContext context)
     {
-        var response = await service.Execute(requestDto.Message);
+        var response = await service.Execute(new ConversationRequest(requestDto.SessionId, requestDto.Message));
         
-        return TypedResults.Ok(new ConversationResponseDto(response));
+        return TypedResults.Ok(new ConversationResponseDto(response.Message, response.SessionId));
     }
 }
