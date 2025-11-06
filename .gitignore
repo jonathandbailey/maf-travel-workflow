@@ -5,4 +5,4 @@
 **/.vs
 **/Debug
 **/obj
-/ConsoleApp/ConsoleApp.sln.DotSettings.user
+*.user
