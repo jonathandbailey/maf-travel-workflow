@@ -54,7 +54,10 @@ public class WorkflowManager(IAzureStorageRepository repository, IOptions<AzureS
     {
         using var activity = Telemetry.StarActivity("WorkflowManager-[save]");
 
-        var storeStates = _checkpointStore.CheckpointElements.Select(x => new StoreStateDto(x.Key, x.Value)).ToList();
+        // Create a snapshot to avoid race condition with concurrent modifications
+        var storeStates = _checkpointStore.CheckpointElements.ToList()
+            .Select(x => new StoreStateDto(x.Key, x.Value))
+            .ToList();
 
         var workflowStateDto = new WorkflowStateDto(State, CheckpointInfo, storeStates);
         

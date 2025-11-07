@@ -1,5 +1,4 @@
-﻿using Application.Observability;
-using Microsoft.Agents.AI.Workflows;
+﻿using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Checkpointing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,6 +10,7 @@ public class ConversationCheckpointStore : JsonCheckpointStore
 {
     [JsonConverter(typeof(CheckpointDictionaryConverter))]
     private readonly Dictionary<CheckpointInfo, JsonElement> _checkpointElements = new();
+    private readonly object _lock = new();
 
     [JsonConstructor]
     public ConversationCheckpointStore(Dictionary<CheckpointInfo, JsonElement>? checkpointElements = null)
@@ -33,28 +33,42 @@ public class ConversationCheckpointStore : JsonCheckpointStore
     [JsonConverter(typeof(CheckpointDictionaryConverter))]
     public Dictionary<CheckpointInfo, JsonElement> CheckpointElements
     {
-        get => _checkpointElements;
+        get
+        {
+            lock (_lock)
+            {
+                return new Dictionary<CheckpointInfo, JsonElement>(_checkpointElements);
+            }
+        }
         init => _checkpointElements = value;
     }
     
     public override ValueTask<IEnumerable<CheckpointInfo>> RetrieveIndexAsync(string runId, CheckpointInfo? withParent = null)
     {
-        return ValueTask.FromResult<IEnumerable<CheckpointInfo>>(_checkpointElements.Keys.ToList());
+        lock (_lock)
+        {
+            return ValueTask.FromResult<IEnumerable<CheckpointInfo>>(_checkpointElements.Keys.ToList());
+        }
     }
 
     public override ValueTask<CheckpointInfo> CreateCheckpointAsync(string runId, JsonElement value, CheckpointInfo? parent = null)
     {
         var checkpointInfo = new CheckpointInfo(runId, Guid.NewGuid().ToString());
 
-        _checkpointElements.Add(checkpointInfo, value);
+        lock (_lock)
+        {
+            _checkpointElements.Add(checkpointInfo, value);
+        }
 
         return ValueTask.FromResult(checkpointInfo);
     }
 
     public override ValueTask<JsonElement> RetrieveCheckpointAsync(string runId, CheckpointInfo key)
     {
-        var element = _checkpointElements[key];
-
-        return ValueTask.FromResult(element);
+        lock (_lock)
+        {
+            var element = _checkpointElements[key];
+            return ValueTask.FromResult(element);
+        }
     }
 }
