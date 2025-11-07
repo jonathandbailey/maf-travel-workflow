@@ -24,6 +24,8 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
 
         var response = await agent.RunAsync(_messages, cancellationToken: cancellationToken);
 
+        activity?.SetTag("Act-[response]", response.Messages.First().Text);
+
         if (JsonOutputParser.HasJson(response.Text))
         {
             var routeAction = JsonOutputParser.Parse<RouteAction>(response.Text);
@@ -37,6 +39,15 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
                 askUserActivity?.SetTag("RequestUser:", cleanedResponse);
 
                 await context.SendMessageAsync(new UserRequest(cleanedResponse), cancellationToken: cancellationToken);
+            }
+
+            if (routeAction.Route == "complete")
+            {
+                var cleanedResponse = JsonOutputParser.Remove(response.Text);
+
+                using var askUserActivity = Telemetry.StarActivity("Act-[complete]");
+
+                askUserActivity?.SetTag("Response:", cleanedResponse);
             }
         }
         else
@@ -57,16 +68,12 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
 
     protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act-[save]");
-
         return context.QueueStateUpdateAsync("act-node-messages", _messages, cancellationToken: cancellationToken);
     }
 
     protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act-[restore]");
-
         _messages = (await context.ReadStateAsync<List<ChatMessage>>("act-node-messages", cancellationToken: cancellationToken))!;
     }
 }

@@ -52,16 +52,12 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
 
     protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Reason-[save]");
-
         return context.QueueStateUpdateAsync("reason-node-messages", _messages, cancellationToken: cancellationToken);
     }
 
     protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Reason-[restore]");
-
         _messages = (await context.ReadStateAsync<List<ChatMessage>>("reason-node-messages", cancellationToken: cancellationToken))!;
     }
 }

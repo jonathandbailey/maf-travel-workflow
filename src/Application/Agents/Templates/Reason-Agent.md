@@ -25,7 +25,7 @@ You are the reasoning engine of a conversational agent.
     "missing_inputs": ["..."],
     "rationale": "short reason",
     "nextAction": {
-      "type": "AskUser | CallOrchestrator",
+      "type": "AskUser | Complete",
       "parameters": { }
     }
   }
