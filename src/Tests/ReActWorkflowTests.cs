@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Tests;
 
-public class ConversationWorkflowTests(ITestOutputHelper outputHelper)
+public class ReActWorkflowTests(ITestOutputHelper outputHelper)
 {
     [Fact]
     public async Task Execute_WhenActAgentRequestsUserInput_ShouldWait()
@@ -39,14 +39,14 @@ public class ConversationWorkflowTests(ITestOutputHelper outputHelper)
 
         await workflowManager.LoadAsync(sessionId);
 
-        var workFlow = new ConversationWorkflow(
+        var workFlow = new ReActWorkflow(
             reasonAgent.Object,
             actAgent.Object, CheckpointManager.CreateJson(new FakeCheckpointStore(outputHelper)), null, WorkflowState.Initialized);
 
         var response = await workFlow.Execute(new ChatMessage(ChatRole.User, Data.PlanTripToParisUserRequest));
 
         Assert.NotNull(response);
-        Assert.Equal(WorkflowResponseState.UserInputRequired, response.State);
+        Assert.Equal(WorkflowState.WaitingForUserInput, response.State);
         Assert.Equal(Data.ActAgentDepartureCityUserResponse, response.Message);
 
         reasonAgent.SetupAgentResponse(Data.ReasonTripInformationCompete);

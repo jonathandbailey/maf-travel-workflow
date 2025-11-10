@@ -6,7 +6,7 @@ using Microsoft.Extensions.AI;
 
 namespace Application.Workflows.Conversations;
 
-public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager, CheckpointInfo checkpointInfo, WorkflowState state)
+public class ReActWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager, CheckpointInfo checkpointInfo, WorkflowState state)
 {
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
@@ -51,7 +51,7 @@ public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, Checkpoin
 
             if (evt is ReasonActWorkflowCompleteEvent reasonActWorkflowCompleteEvent)
             {
-                return new WorkflowResponse(WorkflowResponseState.Completed, reasonActWorkflowCompleteEvent.Message);
+                return new WorkflowResponse(WorkflowState.Completed, reasonActWorkflowCompleteEvent.Message);
             }
 
             if (evt is RequestInfoEvent requestInfoEvent)
@@ -78,7 +78,7 @@ public class ConversationWorkflow(IAgent reasonAgent, IAgent actAgent, Checkpoin
             }
         }
 
-        return new WorkflowResponse(WorkflowResponseState.Completed, string.Empty);
+        return new WorkflowResponse(WorkflowState.Completed, string.Empty);
     }
 }
 

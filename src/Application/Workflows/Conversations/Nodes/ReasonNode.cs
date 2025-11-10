@@ -15,7 +15,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
     public async ValueTask<ActRequest> HandleAsync(ChatMessage message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.StarActivity("Reason-[handle]");
+        using var activity = Telemetry.Trace("Reason-[handle]");
 
         activity?.SetTag("User", message.Text);
 
@@ -35,7 +35,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
     public async ValueTask<ActRequest> HandleAsync(ActObservation actObservation, IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Reason-[observe]");
+        using var activity = Telemetry.Trace("Reason-[observe]");
 
         activity?.SetTag("User", actObservation.Message);
 

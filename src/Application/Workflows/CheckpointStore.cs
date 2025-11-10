@@ -4,9 +4,9 @@ using System.Text.Json;
 using Application.Infrastructure;
 using Application.Workflows.Conversations.Dto;
 
-namespace Application.Workflows.Conversations;
+namespace Application.Workflows;
 
-public class ConversationCheckpointStore(ICheckpointRepository checkpointRepository) : JsonCheckpointStore
+public class CheckpointStore(ICheckpointRepository checkpointRepository) : JsonCheckpointStore
 {
     private readonly Dictionary<CheckpointInfo, JsonElement> _checkpointElements = new();
     

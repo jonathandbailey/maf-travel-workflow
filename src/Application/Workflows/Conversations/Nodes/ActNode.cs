@@ -16,7 +16,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.StarActivity("Act-[handle]");
+        using var activity = Telemetry.Trace("Act-[handle]");
 
         activity?.SetTag("Reason Request (Act Node)", request.Message);
 
@@ -36,7 +36,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
             {
                 var cleanedResponse = JsonOutputParser.Remove(response.Text);
 
-                using var askUserActivity = Telemetry.StarActivity("Act-[user-request]");
+                using var askUserActivity = Telemetry.Trace("Act-[user-request]");
 
                 askUserActivity?.SetTag("RequestUser:", cleanedResponse);
 
@@ -47,7 +47,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
             {
                 var cleanedResponse = JsonOutputParser.Remove(response.Text);
 
-                using var askUserActivity = Telemetry.StarActivity("Act-[complete]");
+                using var askUserActivity = Telemetry.Trace("Act-[complete]");
 
                 askUserActivity?.SetTag("Response:", cleanedResponse);
 
@@ -57,14 +57,14 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
         }
         else
         {
-            using var askUserActivity = Telemetry.StarActivity("Act-[no-action]");
+            using var askUserActivity = Telemetry.Trace("Act-[no-action]");
         }
     }
 
     public async ValueTask HandleAsync(UserResponse userResponse, IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.StarActivity("Act-[user-response]");
+        using var activity = Telemetry.Trace("Act-[user-response]");
 
         activity?.SetTag("User Response/Observation:", userResponse);
 
