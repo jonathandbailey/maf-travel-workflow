@@ -35,9 +35,9 @@ public class ConversationWorkflowTests(ITestOutputHelper outputHelper)
         reasonAgent.SetupAgentResponse(Data.ReasonTripToParisDeparturePointRequired);
         actAgent.SetupAgentResponse(Data.ActAgentDepartureCityResponse);
 
-        var workflowManager = new WorkflowManager(repositoryMock.Object, settingsMock.Object);
+        var workflowManager = new WorkflowRepository(repositoryMock.Object, settingsMock.Object);
 
-        await workflowManager.Initialize(sessionId);
+        await workflowManager.LoadAsync(sessionId);
 
         var workFlow = new ConversationWorkflow(
             reasonAgent.Object,

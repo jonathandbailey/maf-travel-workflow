@@ -3,13 +3,12 @@ using Application.Infrastructure;
 using Application.Observability;
 using Application.Workflows.Conversations;
 using Microsoft.Extensions.AI;
-using Application.Workflows;
 using Application.Workflows.Conversations.Dto;
 using Microsoft.Agents.AI.Workflows;
 
 namespace Application.Services;
 
-public class ApplicationService(IAgentFactory agentFactory, IWorkflowManager workflowManager, ICheckpointRepository repository)
+public class ApplicationService(IAgentFactory agentFactory, IWorkflowRepository workflowRepository, ICheckpointRepository repository)
     : IApplicationService
 {
     public async Task<ConversationResponse> Execute(ConversationRequest request)
@@ -26,7 +25,7 @@ public class ApplicationService(IAgentFactory agentFactory, IWorkflowManager wor
 
         workflowActivity?.SetTag("User Input", request.Message);
    
-        var state = await workflowManager.Initialize(request.SessionId);
+        var state = await workflowRepository.LoadAsync(request.SessionId);
 
         var checkpointManager = CheckpointManager.CreateJson(new ConversationCheckpointStore(repository));
 
@@ -36,7 +35,7 @@ public class ApplicationService(IAgentFactory agentFactory, IWorkflowManager wor
 
         workflowActivity?.Dispose();
 
-        await workflowManager.Save(workflow.State, workflow.CheckpointInfo);
+        await workflowRepository.SaveAsync(request.SessionId, workflow.State, workflow.CheckpointInfo);
 
         return new ConversationResponse(request.SessionId, response.Message);
     }
