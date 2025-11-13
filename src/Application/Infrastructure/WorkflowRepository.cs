@@ -20,7 +20,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
         Converters = { new JsonStringEnumConverter() }
     };
   
-    public async Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo checkpointInfo)
+    public async Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo)
     {
         using var activity = Telemetry.Trace("WorkflowManager-[save]");
 
@@ -56,7 +56,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
 
 public interface IWorkflowRepository
 {
-    Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo checkpointInfo);
+    Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo);
    
     Task<WorkflowStateDto> LoadAsync(Guid sessionId);
 }

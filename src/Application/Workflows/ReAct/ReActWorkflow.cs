@@ -6,7 +6,7 @@ using Microsoft.Extensions.AI;
 
 namespace Application.Workflows.ReAct;
 
-public class ReActWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager, CheckpointInfo checkpointInfo, WorkflowState state)
+public class ReActWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManager checkpointManager, CheckpointInfo? checkpointInfo, WorkflowState state)
 {
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
@@ -71,7 +71,7 @@ public class ReActWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManage
 
     private async Task<Workflow<ChatMessage>> BuildWorkflow()
     {
-        var inputPort = RequestPort.Create<UserRequest, UserResponse>("user-input");
+        var requestPort = RequestPort.Create<UserRequest, UserResponse>("user-input");
 
         var reasonNode = new ReasonNode(reasonAgent);
         var actNode = new ActNode(actAgent);
@@ -79,8 +79,8 @@ public class ReActWorkflow(IAgent reasonAgent, IAgent actAgent, CheckpointManage
         var builder = new WorkflowBuilder(reasonNode);
 
         builder.AddEdge(reasonNode, actNode);
-        builder.AddEdge(actNode, inputPort);
-        builder.AddEdge(inputPort, actNode);
+        builder.AddEdge(actNode, requestPort);
+        builder.AddEdge(requestPort, actNode);
         builder.AddEdge(actNode, reasonNode);
 
         return await builder.BuildAsync<ChatMessage>();
