@@ -22,7 +22,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
   
     public async Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo)
     {
-        using var activity = Telemetry.Trace("WorkflowManager-[save]");
+        using var activity = Telemetry.Start("WorkflowManager-[save]");
 
         var workflowStateDto = new WorkflowStateDto(state, checkpointInfo);
         
@@ -34,7 +34,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
 
     public async Task<WorkflowStateDto> LoadAsync(Guid sessionId)
     {
-        using var activity = Telemetry.Trace("WorkflowManager-[initialize]");
+        using var activity = Telemetry.Start("WorkflowManager-[initialize]");
 
         var blobExists = await repository.BlobExists($"{sessionId}.json", settings.Value.ContainerName);
 

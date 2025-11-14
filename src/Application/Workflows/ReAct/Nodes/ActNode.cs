@@ -1,4 +1,5 @@
-﻿using Application.Agents;
+﻿using System.Diagnostics;
+using Application.Agents;
 using Application.Observability;
 using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
@@ -16,40 +17,45 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Trace("Act-[handle]");
+        using var activity = Telemetry.Start("act_handle_request");
+        
+        activity?.SetTag("react.node", "act_node");
 
-        activity?.SetTag("Reason Request (Act Node)", request.Message);
+
+        activity?.SetTag("react.input.message", request.Message.Text);
 
         _messages.Add(request.Message);
 
+        activity?.AddEvent(new ActivityEvent("llm_request_sent"));
+
         var response = await agent.RunAsync(_messages, cancellationToken: cancellationToken);
+
+        activity?.AddEvent(new ActivityEvent("llm_response_received"));
 
         _messages.Add(response.Messages.First());
 
-        activity?.SetTag("Act-[response]", response.Messages.First().Text);
+        activity?.SetTag("react.output.message", response.Messages.First().Text);
 
         if (JsonOutputParser.HasJson(response.Text))
         {
             var routeAction = JsonOutputParser.Parse<RouteAction>(response.Text);
 
+            activity?.SetTag("react.route", routeAction.Route);
+
+            var cleanedResponse = JsonOutputParser.Remove(response.Text);
+
             if (routeAction.Route == "ask_user")
             {
-                var cleanedResponse = JsonOutputParser.Remove(response.Text);
-
-                using var askUserActivity = Telemetry.Trace("Act-[user-request]");
-
-                askUserActivity?.SetTag("RequestUser:", cleanedResponse);
+                activity?.AddEvent(new ActivityEvent("react_user_request"));
+                activity?.SetTag("react.user.message", cleanedResponse);
 
                 await context.SendMessageAsync(new UserRequest(cleanedResponse), cancellationToken: cancellationToken);
             }
 
             if (routeAction.Route == "complete")
             {
-                var cleanedResponse = JsonOutputParser.Remove(response.Text);
-
-                using var askUserActivity = Telemetry.Trace("Act-[complete]");
-
-                askUserActivity?.SetTag("Response:", cleanedResponse);
+                activity?.AddEvent(new ActivityEvent("react_complete"));
+                activity?.SetTag("react.complete.result", cleanedResponse);
 
                 await context.AddEventAsync(new ReasonActWorkflowCompleteEvent(cleanedResponse), cancellationToken);
 
@@ -57,16 +63,16 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>("ActNode"), IMe
         }
         else
         {
-            using var askUserActivity = Telemetry.Trace("Act-[no-action]");
+            activity?.AddEvent(new ActivityEvent("react_no_action"));
         }
     }
 
     public async ValueTask HandleAsync(UserResponse userResponse, IWorkflowContext context,
         CancellationToken cancellationToken = new CancellationToken())
     {
-        using var activity = Telemetry.Trace("Act-[user-response]");
+        using var activity = Telemetry.Start("act_handle_user_response");
 
-        activity?.SetTag("User Response/Observation:", userResponse);
+        activity?.SetTag("react.user.response_message", userResponse.Message);
 
         await context.SendMessageAsync(new ActObservation(userResponse.Message), cancellationToken: cancellationToken);
     }

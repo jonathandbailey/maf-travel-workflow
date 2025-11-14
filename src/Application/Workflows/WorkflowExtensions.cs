@@ -9,7 +9,7 @@ public static class WorkflowExtensions
 {
     public static async Task<Checkpointed<StreamingRun>> CreateStreamingRun<T>(this Workflow<T> workflow, T message, WorkflowState state, CheckpointManager checkpointManager, CheckpointInfo? checkpointInfo) where T : notnull
     {
-        using var workflowActivity = Telemetry.Trace("Workflow-[create-run]");
+        using var workflowActivity = Telemetry.Start("Workflow-[create-run]");
 
         workflowActivity?.SetTag("State:", state);
 
@@ -26,7 +26,7 @@ public static class WorkflowExtensions
 
     private static async Task<Checkpointed<StreamingRun>> StartStreamingRun<T>(Workflow<T> workflow, T message, CheckpointManager checkpointManager) where T : notnull
     {
-        using var workflowActivity = Telemetry.Trace("Workflow-[start]");
+        using var workflowActivity = Telemetry.Start("Workflow-[start]");
 
 
         return await InProcessExecution.StreamAsync(workflow, message, checkpointManager);
@@ -41,7 +41,7 @@ public static class WorkflowExtensions
         var run = await InProcessExecution.ResumeStreamAsync(workflow, checkpointInfo, checkpointManager,
             checkpointInfo.RunId);
 
-        using var workflowActivity = Telemetry.Trace("Workflow-[resume]");
+        using var workflowActivity = Telemetry.Start("Workflow-[resume]");
 
         workflowActivity?.SetTag("RunId:", checkpointInfo.RunId);
         workflowActivity?.SetTag("CheckpointId:", checkpointInfo.CheckpointId);

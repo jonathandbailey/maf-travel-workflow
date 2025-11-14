@@ -14,7 +14,7 @@ public class ApplicationService(IAgentFactory agentFactory, IWorkflowRepository 
 {
     public async Task<ConversationResponse> Execute(ConversationRequest request)
     {
-        var initializeActivity = Telemetry.Trace("Initialize");
+        var initializeActivity = Telemetry.Start("Initialize");
 
         var reasonAgent = await agentFactory.CreateReasonAgent();
 
@@ -22,7 +22,7 @@ public class ApplicationService(IAgentFactory agentFactory, IWorkflowRepository 
       
         initializeActivity?.Dispose();
 
-        var workflowActivity = Telemetry.Trace("Workflow");
+        var workflowActivity = Telemetry.Start("Workflow");
 
         workflowActivity?.SetTag("User Input", request.Message);
    
