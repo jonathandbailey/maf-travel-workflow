@@ -12,12 +12,12 @@ capabilities: [
   {
     "name": "research_flights",
     "description": "Searches flight options between two cities or airports.",
-    "required_inputs": ["origin", "destination", "depart_date"]
+    "required_inputs": ["origin","destination", "depart_date", "return_date"]
   },
   {
     "name": "research_trains",
     "description": "Searches train options between two cities or train stations.",
-    "required_inputs": ["origin", "destination", "depart_date"]
+    "required_inputs": ["origin","destination", "depart_date", "return_date"]
   },
   {
     "name": "research_hotels",

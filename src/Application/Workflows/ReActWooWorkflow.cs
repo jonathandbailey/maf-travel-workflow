@@ -2,6 +2,7 @@
 using Application.Observability;
 using Application.Workflows.ReAct.Dto;
 using Application.Workflows.ReAct.Nodes;
+using Application.Workflows.ReWoo.Dto;
 using Application.Workflows.ReWoo.Nodes;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
@@ -86,6 +87,10 @@ public class ReActWooWorkflow(IAgent reasonAgent, IAgent actAgent, IAgent orches
         var actNode = new ActNode(actAgent);
         var orchestrationNode = new OrchestrationNode(orchestrationAgent);
 
+        var flightWorkerNode = new FlightWorkerNode();
+        var hotelWorkerNode = new HotelWorkerNode();
+        var trainWorkerNode = new TrainWorkerNode();
+
         var builder = new WorkflowBuilder(reasonNode);
 
         builder.AddEdge(reasonNode, actNode);
@@ -93,6 +98,21 @@ public class ReActWooWorkflow(IAgent reasonAgent, IAgent actAgent, IAgent orches
         builder.AddEdge(requestPort, actNode);
         builder.AddEdge(actNode, reasonNode);
         builder.AddEdge(actNode, orchestrationNode);
+
+        builder.AddEdge<OrchestratorWorkerTaskDto>(
+            source: orchestrationNode, 
+            target:flightWorkerNode, 
+            condition: result => result?.Worker == "research_flights");
+
+        builder.AddEdge<OrchestratorWorkerTaskDto>(
+            source: orchestrationNode,
+            target: trainWorkerNode,
+            condition: result => result?.Worker == "research_trains");
+
+        builder.AddEdge<OrchestratorWorkerTaskDto>(
+            source: orchestrationNode,
+            target: hotelWorkerNode,
+            condition: result => result?.Worker == "research_hotels");
 
         return await builder.BuildAsync<ChatMessage>();
     }

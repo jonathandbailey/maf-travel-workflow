@@ -11,17 +11,17 @@ ACTION TYPES
 ### AskUser
 - Speak to the user in a short, natural, friendly way.
 - Use the “questions” list to form the message. You may combine them naturally, but you must preserve their meaning.
-- ALWAYS include the opening and closing tags surrounding the JSON object : ```json {} ```
+- ALWAYS include the opening and closing tags surrounding the JSON Tags : <JSON></JSON>
 - After sending the user-facing message (plain text), output a JSON object on a new line:
 
-```json
+<JSON>
 {
   "route": "ask_user",
   "metadata": {
     "reason": "<brief explanation>"
   }
 }
-```
+</JSON>
 
 
 ### Complete
@@ -29,24 +29,24 @@ ACTION TYPES
 - Inform the user that request is completed.
 - After sending the user-facing message (plain text), output a JSON object on a new line:
 
-```json
+<JSON>
 {
   "route": "complete",
   "metadata": {
     "reason": "<brief explanation>"
   }
 }
-```
+</JSON>
 
 ### Orchestrate
 - When the Reason node sends a `nextAction` object with `"type": "Orchestrate"`, your job is to prepare and output the orchestration request.
 - The orchestration request is *not* a user-facing message. Do not speak to the user.
-- You MUST wrap the JSON output in the JSON tags : ```json ```, exactly the same way you do for AskUser and Complete actions.
+- You MUST wrap the JSON output in the JSON tags : <JSON></JSON>.
 - The JSON tags are mandatory and must surround the entire JSON object.
 
 Your output MUST follow this exact pattern:
 
-```json
+<JSON>
 {
   "route": "orchestrate",
   "metadata": {
@@ -54,7 +54,7 @@ Your output MUST follow this exact pattern:
     "plan": "<the structured plan provided by the Reason node>"
   }
 }
-```
+</JSON>
 
 Rules:
 - Do NOT rephrase, adjust, or reinterpret the plan.
