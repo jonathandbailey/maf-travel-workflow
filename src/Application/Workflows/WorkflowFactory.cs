@@ -13,17 +13,17 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 {
     public async Task<Workflow> Create()
     {
-        var reasonAgent = await agentFactory.CreateReasonAgent();
+        var reasonAgent = await agentFactory.Create(Agents.AgentTypes.Reason);
 
-        var actAgent = await agentFactory.CreateActAgent();
+        var actAgent = await agentFactory.Create(Agents.AgentTypes.Act);
 
-        var orchestrationAgent = await agentFactory.CreateOrchestrationAgent();
+        var orchestrationAgent = await agentFactory.Create(Agents.AgentTypes.Orchestration);
 
-        var flightAgent = await agentFactory.CreateFlightWorkerAgent();
+        var flightAgent = await agentFactory.Create(Agents.AgentTypes.FlightWorker);
 
-        var hotelAgent = await agentFactory.CreateHotelWorkerAgent();
+        var hotelAgent = await agentFactory.Create(Agents.AgentTypes.HotelWorker);
 
-        var trainAgent = await agentFactory.CreateTrainWorkerAgent();
+        var trainAgent = await agentFactory.Create(Agents.AgentTypes.TrainWorker);
 
         var requestPort = RequestPort.Create<UserRequest, UserResponse>("user-input");
 

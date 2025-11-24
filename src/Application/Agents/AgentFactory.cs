@@ -4,41 +4,29 @@ using Azure.AI.OpenAI;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.Options;
 using OpenAI;
-using System.ClientModel;
 using Azure.Identity;
 
 namespace Application.Agents;
 
 public class AgentFactory(IAgentTemplateRepository templateRepository, IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
-    public async Task<IAgent> CreateReasonAgent()
+    private readonly Dictionary<AgentTypes, string> _agentTemplates = new()
     {
-        return await Create("Reason-Agent");
-    }
+        { AgentTypes.Reason, "Reason-Agent" },
+        { AgentTypes.Act, "Act-Agent" },
+        { AgentTypes.Orchestration, "Orchestration-Agent" },
+        { AgentTypes.FlightWorker, "Flight-Agent" },
+        { AgentTypes.HotelWorker, "Hotel-Agent" },
+        { AgentTypes.TrainWorker, "Train-Agent" }
+    };
 
-    public async Task<IAgent> CreateActAgent()
+    public async Task<IAgent> Create(AgentTypes agentType)
     {
-        return await Create("Act-Agent");
-    }
-
-    public async Task<IAgent> CreateOrchestrationAgent()
-    {
-        return await Create("Orchestration-Agent");
-    }
-
-    public async Task<IAgent> CreateFlightWorkerAgent()
-    {
-        return await Create("Flight-Agent");
-    }
-
-    public async Task<IAgent> CreateHotelWorkerAgent()
-    {
-        return await Create("Hotel-Agent");
-    }
-
-    public async Task<IAgent> CreateTrainWorkerAgent()
-    {
-        return await Create("Train-Agent");
+        if (_agentTemplates.TryGetValue(agentType, out var templateName))
+        {
+            return await Create(templateName);
+        }
+        throw new ArgumentException($"Agent type {agentType} is not recognized.");
     }
 
     private async Task<IAgent> Create(string templateName)
@@ -60,10 +48,15 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IOptions<
 
 public interface IAgentFactory
 {
-    Task<IAgent> CreateReasonAgent();
-    Task<IAgent> CreateActAgent();
-    Task<IAgent> CreateOrchestrationAgent();
-    Task<IAgent> CreateFlightWorkerAgent();
-    Task<IAgent> CreateHotelWorkerAgent();
-    Task<IAgent> CreateTrainWorkerAgent();
+    Task<IAgent> Create(AgentTypes agentType);
+}
+
+public enum AgentTypes
+{
+    Reason,
+    Act,
+    Orchestration,
+    FlightWorker,
+    HotelWorker,
+    TrainWorker
 }
