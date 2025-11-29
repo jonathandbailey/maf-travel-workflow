@@ -2,10 +2,13 @@
 using Application.Infrastructure;
 using Application.Settings;
 using Azure.AI.OpenAI;
+using Azure.Identity;
 using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using OpenAI;
-using Azure.Identity;
+using System.Text.Json;
+using Application.Workflows.ReWoo.Dto;
 
 namespace Application.Agents;
 
@@ -21,6 +24,15 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
         { AgentTypes.TrainWorker, "Train-Agent" }
     };
 
+    private readonly Dictionary<AgentTypes, ChatOptions> _agentChatOptions = new()
+    {
+        { AgentTypes.FlightWorker, CreateFlightChatOptions() },
+        { AgentTypes.Reason, new ChatOptions() },
+        { AgentTypes.Act, new ChatOptions() },
+        { AgentTypes.Orchestration, new ChatOptions() },
+        { AgentTypes.HotelWorker, new ChatOptions() },
+        { AgentTypes.TrainWorker, new ChatOptions() }
+    };
     public async Task<IAgent> Create(AgentTypes agentType)
     {
         if (_agentTemplates.TryGetValue(agentType, out var templateName))
@@ -40,10 +52,26 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
 
         var reasonAgent = chatClient.CreateAIAgent(new ChatClientAgentOptions
         {
-            Instructions = template
+            Instructions = template,
+            ChatOptions = _agentChatOptions[type]
         });
 
         return new Agent(reasonAgent, agentThreadRepository, type);
+    }
+
+    private static ChatOptions CreateFlightChatOptions()
+    {
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(FlightSearchResultDto));
+
+        ChatOptions chatOptions = new()
+        {
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: schema,
+                schemaName: "FlightPlan",
+                schemaDescription: "User Flight Options for their vacation.")
+        };
+
+        return chatOptions;
     }
 }
 
