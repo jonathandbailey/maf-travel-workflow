@@ -22,6 +22,9 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
 
         activity?.SetTag("react.input.message", requestDto.Message.Text);
 
+        await context.QueueStateUpdateAsync("SessionId", requestDto.SessionId, scopeName:"Global", cancellationToken);
+        await context.QueueStateUpdateAsync("UserId", requestDto.UserId, scopeName:"Global", cancellationToken);
+
         return await Process(requestDto.Message, activity, cancellationToken);
     }
 

@@ -17,8 +17,9 @@ public class ArtifactStorageNode(IArtifactRepository artifactRepository) : Refle
 
         activity?.SetTag("re-woo.input.message", message.Content);
 
-        await artifactRepository.SaveAsync(Guid.NewGuid(), message.Content, message.Key);
+        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName:"Global", cancellationToken);
+        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName:"Global", cancellationToken);
 
-
+        await artifactRepository.SaveAsync(sessionId, userId, message.Content, message.Key);
     }
 }

@@ -13,9 +13,9 @@ public class ApplicationService(IWorkflowFactory workflowFactory, IWorkflowRepos
     {
         var workflow = await workflowFactory.Create();
         
-        var state = await workflowRepository.LoadAsync(request.SessionId);
+        var state = await workflowRepository.LoadAsync(request.UserId, request.SessionId);
 
-        var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository));
+        var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, request.UserId, request.SessionId));
 
         var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State);
 
@@ -26,7 +26,7 @@ public class ApplicationService(IWorkflowFactory workflowFactory, IWorkflowRepos
                 request.SessionId
             ));
 
-        await workflowRepository.SaveAsync(request.SessionId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
+        await workflowRepository.SaveAsync(request.UserId, request.SessionId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
 
         return new ConversationResponse(request.SessionId, request.UserId, response.Message);
     }

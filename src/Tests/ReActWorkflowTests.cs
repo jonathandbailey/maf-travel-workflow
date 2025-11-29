@@ -16,6 +16,8 @@ public class ReActWorkflowTests(ITestOutputHelper outputHelper)
     [Fact]
     public async Task Execute_WhenActAgentRequestsUserInput_ShouldWait()
     {
+        var userId = Guid.NewGuid();
+        
         var sessionId = Guid.NewGuid();
         
         var reasonAgent = new Mock<IAgent>();
@@ -36,7 +38,7 @@ public class ReActWorkflowTests(ITestOutputHelper outputHelper)
 
         var workflowManager = new WorkflowRepository(repositoryMock.Object, settingsMock.Object);
 
-        await workflowManager.LoadAsync(sessionId);
+        await workflowManager.LoadAsync(userId, sessionId);
 
         var workFlow = new ReActWorkflow(
             reasonAgent.Object,

@@ -17,20 +17,20 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public async Task SaveAsync(StoreStateDto storeState)
+    public async Task SaveAsync(Guid userId, Guid sessionId , StoreStateDto storeState)
     {
         var serializedConversation = JsonSerializer.Serialize(storeState, SerializerOptions);
 
-        await repository.UploadTextBlobAsync(GetCheckpointFileName(
+        await repository.UploadTextBlobAsync(GetCheckpointFileName(userId, sessionId,
             storeState.CheckpointInfo.CheckpointId, 
             storeState.CheckpointInfo.RunId), 
             settings.Value.ContainerName, 
             serializedConversation, ApplicationJsonContentType);
     }
 
-    public async Task<StoreStateDto> LoadAsync(string checkpointId, string runId)
+    public async Task<StoreStateDto> LoadAsync(Guid userId, Guid sessionid, string checkpointId, string runId)
     {
-        var blob = await repository.DownloadTextBlobAsync(GetCheckpointFileName(checkpointId, runId), settings.Value.ContainerName);
+        var blob = await repository.DownloadTextBlobAsync(GetCheckpointFileName(userId, sessionid, checkpointId, runId), settings.Value.ContainerName);
 
         var stateDto = JsonSerializer.Deserialize<StoreStateDto>(blob, SerializerOptions);
 
@@ -41,7 +41,7 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         return stateDto;
     }
 
-    public async Task<List<StoreStateDto>> GetAsync(string runId)
+    public async Task<List<StoreStateDto>> GetAsync(Guid userId, Guid sessionId, string runId)
     {
         var blobNames = await repository.ListBlobsAsync(settings.Value.ContainerName, $"{runId}/");
         var checkpoints = new List<StoreStateDto>();
@@ -60,15 +60,15 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         return checkpoints;
     }
 
-    private static string GetCheckpointFileName(string checkpointId, string runId)
+    private static string GetCheckpointFileName(Guid userId, Guid sessionId, string checkpointId, string runId)
     {
-        return $"{runId}/{checkpointId}.json";
+        return $"{userId}/{sessionId}/checkpoints/{runId}/{checkpointId}.json";
     }
 }
 
 public interface ICheckpointRepository
 {
-    Task SaveAsync(StoreStateDto storeState);
-    Task<StoreStateDto> LoadAsync(string checkpointId, string runId);
-    Task<List<StoreStateDto>> GetAsync(string runId);
+    Task SaveAsync(Guid userId, Guid sessionId, StoreStateDto storeState);
+    Task<StoreStateDto> LoadAsync(Guid userId, Guid sessionId, string checkpointId, string runId);
+    Task<List<StoreStateDto>> GetAsync(Guid userId, Guid sessionId, string runId);
 }

@@ -20,26 +20,26 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
         Converters = { new JsonStringEnumConverter() }
     };
   
-    public async Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo)
+    public async Task SaveAsync(Guid userId, Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo)
     {
         var workflowStateDto = new WorkflowStateDto(state, checkpointInfo);
         
         var serializedWorkflowState = JsonSerializer.Serialize(workflowStateDto, SerializerOptions);
 
-        await repository.UploadTextBlobAsync($"{sessionId}.json", settings.Value.ContainerName,
+        await repository.UploadTextBlobAsync(GetFileName(userId, sessionId), settings.Value.ContainerName,
             serializedWorkflowState, ApplicationJsonContentType);
     }
 
-    public async Task<WorkflowStateDto> LoadAsync(Guid sessionId)
+    public async Task<WorkflowStateDto> LoadAsync(Guid userId, Guid sessionId)
     {
-        var blobExists = await repository.BlobExists($"{sessionId}.json", settings.Value.ContainerName);
+        var blobExists = await repository.BlobExists(GetFileName(userId, sessionId), settings.Value.ContainerName);
 
         if (blobExists == false)
         {
             return new WorkflowStateDto(WorkflowState.Initialized, null);
         }
 
-        var blob = await repository.DownloadTextBlobAsync($"{sessionId}.json", settings.Value.ContainerName);
+        var blob = await repository.DownloadTextBlobAsync(GetFileName(userId, sessionId), settings.Value.ContainerName);
 
         var stateDto = JsonSerializer.Deserialize<WorkflowStateDto>(blob, SerializerOptions);
 
@@ -48,11 +48,16 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
 
         return stateDto;
     }
+
+    private static string GetFileName(Guid userId, Guid sessionId)
+    {
+        return $"{userId}/{sessionId}/workflows/state.json";
+    }
 }
 
 public interface IWorkflowRepository
 {
-    Task SaveAsync(Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo);
+    Task SaveAsync(Guid userId, Guid sessionId, WorkflowState state, CheckpointInfo? checkpointInfo);
    
-    Task<WorkflowStateDto> LoadAsync(Guid sessionId);
+    Task<WorkflowStateDto> LoadAsync(Guid userId, Guid sessionId);
 }

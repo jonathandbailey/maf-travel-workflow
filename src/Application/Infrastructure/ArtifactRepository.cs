@@ -6,20 +6,20 @@ public class ArtifactRepository(IAzureStorageRepository repository, IOptions<Azu
 {
     private const string ApplicationJsonContentType = "application/json";
 
-    public async Task SaveAsync(Guid sessionId, string artifact, string name)
+    public async Task SaveAsync(Guid sessionId, Guid userId, string artifact, string name)
     {
-        await repository.UploadTextBlobAsync(GetCheckpointFileName(sessionId, name),
+        await repository.UploadTextBlobAsync(GetCheckpointFileName(sessionId, userId, name),
             settings.Value.ContainerName,
             artifact, ApplicationJsonContentType);
     }
 
-    private static string GetCheckpointFileName(Guid sessionId, string name)
+    private static string GetCheckpointFileName(Guid sessionId, Guid userId, string name)
     {
-        return $"artifacts/{sessionId}/{name}.json";
+        return $"{userId}/{sessionId}/artifacts/{name}.json";
     }
 }
 
 public interface IArtifactRepository
 {
-    Task SaveAsync(Guid sessionId, string artifact, string name);
+    Task SaveAsync(Guid sessionId, Guid userId, string artifact, string name);
 }
