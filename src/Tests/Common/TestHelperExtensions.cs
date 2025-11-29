@@ -11,7 +11,7 @@ public static class TestHelperExtensions
     {
         var agentRunResponse = new AgentRunResponse(new ChatMessage(ChatRole.Assistant, response));
 
-        agent.Setup(x => x.RunAsync(It.IsAny<IEnumerable<ChatMessage>>(), null, null, It.IsAny<CancellationToken>()))
+        agent.Setup(x => x.RunAsync(It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(agentRunResponse);
     }
 }

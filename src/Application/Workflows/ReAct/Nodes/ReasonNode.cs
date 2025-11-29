@@ -11,7 +11,6 @@ namespace Application.Workflows.ReAct.Nodes;
 public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNode") , IMessageHandler<TravelWorkflowRequestDto, ActRequest>,
     IMessageHandler<ActObservation, ActRequest>
 {
-    private List<ChatMessage> _messages = [];
     
     public async ValueTask<ActRequest> HandleAsync(TravelWorkflowRequestDto requestDto, IWorkflowContext context,
         CancellationToken cancellationToken = default)
@@ -25,7 +24,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
         await context.QueueStateUpdateAsync("SessionId", requestDto.SessionId, scopeName:"Global", cancellationToken);
         await context.QueueStateUpdateAsync("UserId", requestDto.UserId, scopeName:"Global", cancellationToken);
 
-        return await Process(requestDto.Message, activity, cancellationToken);
+        return await Process(requestDto.Message, activity, cancellationToken, context);
     }
 
     public async ValueTask<ActRequest> HandleAsync(ActObservation actObservation, IWorkflowContext context,
@@ -39,40 +38,26 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
 
         var message = new ChatMessage(ChatRole.User, actObservation.Message);
 
-        return await Process(message, activity, cancellationToken);
+        return await Process(message, activity, cancellationToken, context);
     }
 
-    private async Task<ActRequest> Process(ChatMessage message, Activity? activity, CancellationToken cancellationToken)
+    private async Task<ActRequest> Process(ChatMessage message, Activity? activity, CancellationToken cancellationToken, IWorkflowContext context)
     {
-        _messages.Add(message);
-
         activity?.AddEvent(new ActivityEvent("LLMRequestSent"));
 
-        var response = await agent.RunAsync(_messages, cancellationToken: cancellationToken);
+        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName: "Global", cancellationToken);
+        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName: "Global", cancellationToken);
+
+        var response = await agent.RunAsync(new List<ChatMessage> { message }, sessionId, userId, cancellationToken);
 
         activity?.AddEvent(new ActivityEvent("LLMResponseReceived"));
-
-        var responseMessage = response.Messages.First();
 
         activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
         activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
         activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
 
-        _messages.Add(responseMessage);
-
         activity?.SetTag("react.output.message", response.Messages.First().Text);
 
         return new ActRequest(response.Messages.First());
-    }
-
-    protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
-    {
-        return context.QueueStateUpdateAsync("reason-node-messages", _messages, cancellationToken: cancellationToken);
-    }
-
-    protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
-    {
-        _messages = (await context.ReadStateAsync<List<ChatMessage>>("reason-node-messages", cancellationToken: cancellationToken))!;
     }
 }

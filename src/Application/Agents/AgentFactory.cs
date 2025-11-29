@@ -1,4 +1,5 @@
 ﻿using Application.Agents.Repository;
+using Application.Infrastructure;
 using Application.Settings;
 using Azure.AI.OpenAI;
 using Microsoft.Agents.AI;
@@ -8,7 +9,7 @@ using Azure.Identity;
 
 namespace Application.Agents;
 
-public class AgentFactory(IAgentTemplateRepository templateRepository, IOptions<LanguageModelSettings> settings) : IAgentFactory
+public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThreadRepository agentThreadRepository, IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
     private readonly Dictionary<AgentTypes, string> _agentTemplates = new()
     {
@@ -24,12 +25,12 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IOptions<
     {
         if (_agentTemplates.TryGetValue(agentType, out var templateName))
         {
-            return await Create(templateName);
+            return await Create(templateName, agentType);
         }
         throw new ArgumentException($"Agent type {agentType} is not recognized.");
     }
 
-    private async Task<IAgent> Create(string templateName)
+    private async Task<IAgent> Create(string templateName, AgentTypes type)
     {
         var template = await templateRepository.Load(templateName);
 
@@ -42,7 +43,7 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IOptions<
             Instructions = template
         });
 
-        return new Agent(reasonAgent);
+        return new Agent(reasonAgent, agentThreadRepository, type);
     }
 }
 

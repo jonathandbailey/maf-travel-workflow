@@ -27,7 +27,10 @@ public class OrchestrationNode(IAgent agent) : ReflectingExecutor<OrchestrationN
 
         activity?.AddEvent(new ActivityEvent("LLMRequestSent"));
 
-        var response = await agent.RunAsync(_messages, cancellationToken: cancellationToken);
+        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName: "Global", cancellationToken);
+        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName: "Global", cancellationToken);
+
+        var response = await agent.RunAsync(_messages, sessionId, userId, cancellationToken: cancellationToken);
 
         activity?.AddEvent(new ActivityEvent("LLMResponseReceived"));
 

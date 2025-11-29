@@ -19,10 +19,10 @@ public static class ApplicationExtensions
 
         services.Configure<AzureStorageSeedSettings>((options) => configuration.GetSection("AzureStorageSeedSettings").Bind(options));
 
-
         services.AddScoped<IAgentFactory, AgentFactory>();
         services.AddScoped<IAgentTemplateRepository, AgentTemplateRepository>();
         services.AddScoped<IApplicationService, ApplicationService>();
+        services.AddScoped<IAgentThreadRepository, AgentThreadRepository>();
 
         services.AddScoped<IArtifactRepository, ArtifactRepository>();
         services.AddScoped<IWorkflowFactory, WorkflowFactory>();

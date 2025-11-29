@@ -30,7 +30,10 @@ public class HotelWorkerNode(IAgent agent) : ReflectingExecutor<HotelWorkerNode>
 
         activity?.AddEvent(new ActivityEvent("LLMRequestSent"));
 
-        var response = await agent.RunAsync(new List<ChatMessage> { new(ChatRole.User, serialized) }, cancellationToken: cancellationToken);
+        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName: "Global", cancellationToken);
+        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName: "Global", cancellationToken);
+
+        var response = await agent.RunAsync(new List<ChatMessage> { new(ChatRole.User, serialized) }, sessionId, userId, cancellationToken: cancellationToken);
 
         activity?.AddEvent(new ActivityEvent("LLMResponseReceived"));
 

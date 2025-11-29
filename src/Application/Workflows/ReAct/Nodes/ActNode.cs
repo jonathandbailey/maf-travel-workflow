@@ -14,9 +14,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
     IMessageHandler<UserResponse>
 {
     private Activity? _activity;
-    
-    private List<ChatMessage> _messages = [];
-
+ 
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
@@ -24,12 +22,8 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
 
         var userId = await context.ReadStateAsync<Guid>("UserId", scopeName:"Global", cancellationToken);
         var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName:"Global", cancellationToken);
-
-        _messages.Add(request.Message);
     
-        var response = await agent.RunAsync(_messages, cancellationToken: cancellationToken);
-
-        _messages.Add(response.Messages.First());
+        var response = await agent.RunAsync(new List<ChatMessage> { request.Message }, sessionId, userId, cancellationToken);
 
         TraceAgentRequestSent(response);
 
@@ -74,17 +68,6 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
         activity?.SetTag("react.user.response_message", userResponse.Message);
 
         await context.SendMessageAsync(new ActObservation(userResponse.Message), cancellationToken: cancellationToken);
-    }
-
-    protected override ValueTask OnCheckpointingAsync(IWorkflowContext context, CancellationToken cancellationToken = new CancellationToken())
-    {
-        return context.QueueStateUpdateAsync("act-node-messages", _messages, cancellationToken: cancellationToken);
-    }
-
-    protected override async ValueTask OnCheckpointRestoredAsync(IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
-    {
-        _messages = (await context.ReadStateAsync<List<ChatMessage>>("act-node-messages", cancellationToken: cancellationToken))!;
     }
 
     private void TraceActRequest(ActRequest request)
