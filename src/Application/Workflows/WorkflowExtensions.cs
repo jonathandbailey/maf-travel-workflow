@@ -5,6 +5,27 @@ namespace Application.Workflows;
 
 public static class WorkflowExtensions
 {
+
+    public static async Task<Guid> UserId(this IWorkflowContext context)
+    {
+       return await context.ReadStateAsync<Guid>(WorkflowConstants.UserId, scopeName: WorkflowConstants.ScopeGlobal);
+    }
+
+    public static async Task UserId(this IWorkflowContext context, Guid userId)
+    {
+        await context.QueueStateUpdateAsync(WorkflowConstants.UserId, userId, scopeName: WorkflowConstants.ScopeGlobal);
+    }
+
+    public static async Task<Guid> SessionId(this IWorkflowContext context)
+    {
+        return await context.ReadStateAsync<Guid>(WorkflowConstants.SessionId, scopeName: WorkflowConstants.ScopeGlobal);
+    }
+
+    public static async Task SessionId(this IWorkflowContext context, Guid sessionId)
+    {
+        await context.QueueStateUpdateAsync(WorkflowConstants.SessionId, sessionId, scopeName: WorkflowConstants.ScopeGlobal);
+    }
+
     public static async Task<Checkpointed<StreamingRun>> CreateStreamingRun<T>(this Workflow workflow, T message, WorkflowState state, CheckpointManager checkpointManager, CheckpointInfo? checkpointInfo) where T : notnull
     {
         switch (state)

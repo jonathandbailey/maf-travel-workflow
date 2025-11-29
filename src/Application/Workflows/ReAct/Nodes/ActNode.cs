@@ -20,8 +20,8 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
     {
         TraceActRequest(request);
 
-        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName:"Global", cancellationToken);
-        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName:"Global", cancellationToken);
+        var userId = await context.UserId();
+        var sessionId = await context.SessionId();
     
         var response = await agent.RunAsync(new List<ChatMessage> { request.Message }, sessionId, userId, cancellationToken);
 

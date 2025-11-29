@@ -8,23 +8,23 @@ using System.Diagnostics;
 
 namespace Application.Workflows.ReAct.Nodes;
 
-public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNode") , IMessageHandler<TravelWorkflowRequestDto, ActRequest>,
+public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName) , IMessageHandler<TravelWorkflowRequestDto, ActRequest>,
     IMessageHandler<ActObservation, ActRequest>
 {
-    
+    private Activity? _activity;
     public async ValueTask<ActRequest> HandleAsync(TravelWorkflowRequestDto requestDto, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Start("ReasonHandleRequest");
+        Trace(requestDto);
 
-        activity?.SetTag("react.node", "reason_node");
+        await context.SessionId(requestDto.SessionId);
+        await context.UserId(requestDto.UserId);
 
-        activity?.SetTag("react.input.message", requestDto.Message.Text);
+        var response = await Process(requestDto.Message, cancellationToken, context);
 
-        await context.QueueStateUpdateAsync("SessionId", requestDto.SessionId, scopeName:"Global", cancellationToken);
-        await context.QueueStateUpdateAsync("UserId", requestDto.UserId, scopeName:"Global", cancellationToken);
+        TraceEnd();
 
-        return await Process(requestDto.Message, activity, cancellationToken, context);
+        return response;
     }
 
     public async ValueTask<ActRequest> HandleAsync(ActObservation actObservation, IWorkflowContext context,
@@ -38,26 +38,40 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>("ReasonNo
 
         var message = new ChatMessage(ChatRole.User, actObservation.Message);
 
-        return await Process(message, activity, cancellationToken, context);
+        return await Process(message, cancellationToken, context);
     }
 
-    private async Task<ActRequest> Process(ChatMessage message, Activity? activity, CancellationToken cancellationToken, IWorkflowContext context)
+    private async Task<ActRequest> Process(ChatMessage message, CancellationToken cancellationToken, IWorkflowContext context)
     {
-        activity?.AddEvent(new ActivityEvent("LLMRequestSent"));
+        _activity?.AddEvent(new ActivityEvent("LLMRequestSent"));
 
         var userId = await context.ReadStateAsync<Guid>("UserId", scopeName: "Global", cancellationToken);
         var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName: "Global", cancellationToken);
 
         var response = await agent.RunAsync(new List<ChatMessage> { message }, sessionId, userId, cancellationToken);
 
-        activity?.AddEvent(new ActivityEvent("LLMResponseReceived"));
+        _activity?.AddEvent(new ActivityEvent("LLMResponseReceived"));
 
-        activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
-        activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
-        activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
+        _activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
+        _activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
+        _activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
 
-        activity?.SetTag("react.output.message", response.Messages.First().Text);
+        _activity?.SetTag("react.output.message", response.Messages.First().Text);
 
         return new ActRequest(response.Messages.First());
+    }
+
+    private void Trace(TravelWorkflowRequestDto requestDto)
+    {
+        _activity = Telemetry.Start("ReasonHandleRequest");
+
+        _activity?.SetTag("react.node", "reason_node");
+
+        _activity?.SetTag("react.input.message", requestDto.Message.Text);
+    }
+
+    private void TraceEnd()
+    {
+        _activity?.Dispose();
     }
 }
