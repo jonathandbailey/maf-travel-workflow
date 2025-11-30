@@ -1,4 +1,5 @@
 ﻿using Application.Infrastructure;
+using Application.Observability;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 
@@ -12,6 +13,8 @@ public class Agent(AIAgent agent, IAgentThreadRepository repository, AgentTypes 
         Guid userId,
         CancellationToken cancellationToken = default)
     {
+        using var activity = Telemetry.Start("Agent");
+
         AgentThread? thread;
         
         if (!await repository.ExistsAsync(userId, sessionId, type.ToString()))
@@ -26,6 +29,11 @@ public class Agent(AIAgent agent, IAgentThreadRepository repository, AgentTypes 
         }
 
         var response =  await agent.RunAsync(messages, thread, cancellationToken: cancellationToken);
+
+
+        activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
+        activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
+        activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
 
         var threadState = thread.Serialize();
 

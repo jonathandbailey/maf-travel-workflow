@@ -20,7 +20,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
         await context.SessionId(requestDto.SessionId);
         await context.UserId(requestDto.UserId);
 
-        var response = await Process(requestDto.Message, cancellationToken, context);
+        var response = await Process(requestDto.Message, context, cancellationToken);
 
         TraceEnd();
 
@@ -38,20 +38,16 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
 
         var message = new ChatMessage(ChatRole.User, actObservation.Message);
 
-        return await Process(message, cancellationToken, context);
+        return await Process(message, context, cancellationToken);
     }
 
-    private async Task<ActRequest> Process(ChatMessage message, CancellationToken cancellationToken, IWorkflowContext context)
+    private async Task<ActRequest> Process(ChatMessage message, IWorkflowContext context, CancellationToken cancellationToken)
     {
-        var userId = await context.ReadStateAsync<Guid>("UserId", scopeName: "Global", cancellationToken);
-        var sessionId = await context.ReadStateAsync<Guid>("SessionId", scopeName: "Global", cancellationToken);
+        var userId = await context.UserId();
+        var sessionId = await context.SessionId();
 
         var response = await agent.RunAsync(new List<ChatMessage> { message }, sessionId, userId, cancellationToken);
-   
-        _activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
-        _activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
-        _activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
-
+  
         _activity?.SetTag("react.output.message", response.Messages.First().Text);
 
         return new ActRequest(response.Messages.First());

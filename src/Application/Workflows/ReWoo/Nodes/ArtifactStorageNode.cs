@@ -1,5 +1,6 @@
 ﻿using Application.Infrastructure;
 using Application.Observability;
+using Application.Workflows.Events;
 using Application.Workflows.ReWoo.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
@@ -23,5 +24,7 @@ public class ArtifactStorageNode(IArtifactRepository artifactRepository) :
         var sessionId = await context.SessionId();
 
         await artifactRepository.SaveAsync(sessionId, userId, message.Content, message.Key);
+
+        await context.AddEventAsync(new ArtifactStatusEvent($"{message.Key} - Created."), cancellationToken);
     }
 }

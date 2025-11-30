@@ -6,6 +6,7 @@ using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Diagnostics;
+using Application.Workflows.Events;
 using Microsoft.Agents.AI;
 
 namespace Application.Workflows.ReAct.Nodes;
@@ -13,6 +14,8 @@ namespace Application.Workflows.ReAct.Nodes;
 public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstants.ActNodeName), IMessageHandler<ActRequest>, 
     IMessageHandler<UserResponse>
 {
+    private const string NoJsonReturnedByAgent = "Agent/LLM did not return formnatted JSON for routing/actions.";
+    
     private Activity? _activity;
  
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
@@ -29,7 +32,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
 
         if (!JsonOutputParser.HasJson(response.Text))
         {
-            await context.AddEventAsync(new WorkflowErrorEvent("Invalid JSON response", "Act Node"), cancellationToken);
+            await context.AddEventAsync(new TravelWorkflowErrorEvent(NoJsonReturnedByAgent,response.Text, WorkflowConstants.ActNodeName), cancellationToken);
             return;
         }
         
@@ -81,10 +84,6 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
 
     private void TraceAgentRequestSent(AgentRunResponse response)
     {
-        _activity?.SetTag("llm.input_tokens", response.Usage?.InputTokenCount ?? 0);
-        _activity?.SetTag("llm.output_tokens", response.Usage?.OutputTokenCount ?? 0);
-        _activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
-
         _activity?.SetTag("react.output.message", response.Messages.First().Text);
     }
 
@@ -94,15 +93,3 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
     }
 }
 
-
-
-internal sealed class ReasonActWorkflowCompleteEvent(string message) : WorkflowEvent(message)
-{
-    public string Message { get; } = message;
-}
-
-public sealed class WorkflowErrorEvent(string message, string nodeName) : WorkflowEvent(message)
-{
-    public string Message { get; } = message;
-    public string NodeName { get; } = nodeName;
-}

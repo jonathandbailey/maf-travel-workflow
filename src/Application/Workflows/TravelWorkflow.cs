@@ -1,4 +1,6 @@
-﻿using Application.Observability;
+﻿using System.Text;
+using Application.Observability;
+using Application.Workflows.Events;
 using Application.Workflows.ReAct.Dto;
 using Application.Workflows.ReAct.Nodes;
 using Microsoft.Agents.AI.Workflows;
@@ -7,6 +9,8 @@ namespace Application.Workflows;
 
 public class TravelWorkflow(Workflow workflow, CheckpointManager checkpointManager, CheckpointInfo? checkpointInfo, WorkflowState state)
 {
+    private List<ArtifactStatusEvent> _artifactStatusEvents = [];
+    
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
     public CheckpointInfo? CheckpointInfo { get; private set; } = checkpointInfo;
@@ -41,6 +45,11 @@ public class TravelWorkflow(Workflow workflow, CheckpointManager checkpointManag
                 }
             }
 
+            if (evt is ArtifactStatusEvent artifactStatusEvent)
+            {
+                _artifactStatusEvents.Add(artifactStatusEvent);
+            }
+
             if (evt is ReasonActWorkflowCompleteEvent reasonActWorkflowCompleteEvent)
             {
                 return new WorkflowResponse(WorkflowState.Completed, reasonActWorkflowCompleteEvent.Message);
@@ -70,7 +79,14 @@ public class TravelWorkflow(Workflow workflow, CheckpointManager checkpointManag
             }
         }
 
-        return new WorkflowResponse(WorkflowState.Completed, string.Empty);
+        var stringBuilder = new StringBuilder();
+
+        foreach (var statusEvent in _artifactStatusEvents)
+        {
+            stringBuilder.AppendLine(statusEvent.Status);
+        }
+
+        return new WorkflowResponse(WorkflowState.Completed, stringBuilder.ToString());
     }
 }
 
