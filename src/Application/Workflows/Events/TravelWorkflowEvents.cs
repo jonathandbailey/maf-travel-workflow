@@ -11,9 +11,22 @@ public sealed class TravelWorkflowErrorEvent(string description, string message,
     public Exception? Exception { get; } = exception;
 }
 
-public sealed class ArtifactStatusEvent(string status) : WorkflowEvent
+public sealed class ArtifactStatusEvent(string key, ArtifactStatus status) : WorkflowEvent
 {
-    public string Status { get; } = status;
+    private string Key { get; } = key;
+
+    private ArtifactStatus Status { get; } = status;
+
+    public override string ToString()
+    {
+        return $"{Key}:{Status}";
+    }
+}
+
+public enum ArtifactStatus
+{
+    Created,
+    Error
 }
 
 public sealed class ReasonActWorkflowCompleteEvent(string message) : WorkflowEvent(message)

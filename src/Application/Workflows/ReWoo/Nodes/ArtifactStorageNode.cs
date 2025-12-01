@@ -11,20 +11,30 @@ public class ArtifactStorageNode(IArtifactRepository artifactRepository) :
     ReflectingExecutor<ArtifactStorageNode>(WorkflowConstants.ArtifactStorageNodeName), 
     IMessageHandler<ArtifactStorageDto>
 {
+    private const string ArtifactStorageNodeError = "Artifact Storage Node has failed to execute.";
+
     public async ValueTask HandleAsync(ArtifactStorageDto message, IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Start("ArtifactStorageHandleRequest");
+        using var activity = Telemetry.Start($"{WorkflowConstants.ArtifactStorageNodeName}.handleRequest");
 
-        activity?.SetTag("re-woo.node", "artifact_storage_node");
+        activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ArtifactStorageNodeName);
 
-        activity?.SetTag("re-woo.input.message", message.Content);
+        WorkflowTelemetryTags.SetInputPreview(activity, message.Content);
 
-        var userId = await context.UserId();
-        var sessionId = await context.SessionId();
+        try
+        {
+            var userId = await context.UserId();
+            var sessionId = await context.SessionId();
 
-        await artifactRepository.SaveAsync(sessionId, userId, message.Content, message.Key);
+            await artifactRepository.SaveAsync(sessionId, userId, message.Content, message.Key);
 
-        await context.AddEventAsync(new ArtifactStatusEvent($"{message.Key} - Created."), cancellationToken);
+            await context.AddEventAsync(new ArtifactStatusEvent(message.Key, ArtifactStatus.Created), cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            await context.AddEventAsync(new TravelWorkflowErrorEvent(ArtifactStorageNodeError, message.Key, WorkflowConstants.ArtifactStorageNodeName, exception), cancellationToken);
+            await context.AddEventAsync(new ArtifactStatusEvent(message.Key, ArtifactStatus.Error), cancellationToken);
+        }
     }
 }

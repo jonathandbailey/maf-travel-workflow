@@ -94,7 +94,7 @@ public class TravelWorkflow(
 
         foreach (var statusEvent in _artifactStatusEvents)
         {
-            stringBuilder.AppendLine(statusEvent.Status);
+            stringBuilder.AppendLine(statusEvent.ToString());
         }
 
         return new WorkflowResponse(WorkflowState.Completed, stringBuilder.ToString());
