@@ -20,14 +20,14 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
 
         activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ActNodeName);
 
-        WorkflowTelemetryTags.SetPreview(activity, request.Message.Text);
+        WorkflowTelemetryTags.SetInputPreview(activity, request.Message.Text);
 
         var userId = await context.UserId();
         var sessionId = await context.SessionId();
     
         var response = await agent.RunAsync(request.Message, sessionId, userId, cancellationToken);
 
-        WorkflowTelemetryTags.SetPreview(activity, response.Text);
+        WorkflowTelemetryTags.SetInputPreview(activity, response.Text);
 
         if (!JsonOutputParser.HasJson(response.Text))
         {

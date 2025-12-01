@@ -4,22 +4,22 @@ namespace Application.Observability;
 
 public static class WorkflowTelemetryTags
 {
-    public const string Prefix = "workflow";
+    private const string Prefix = "workflow";
 
     public const string Node = Prefix + ".node";
     public const string ArtifactKey = Prefix + ".artifact_key";
 
-    public const string InputPreview = Prefix + ".input.preview";
-    public const string InputLength = Prefix + ".input.length";
-    public const string InputTruncated = Prefix + ".input.truncated";
+    private const string InputPreview = Prefix + ".input.preview";
+    private const string InputLength = Prefix + ".input.length";
+    private const string InputTruncated = Prefix + ".input.truncated";
 
-    public const string OutputPreview = Prefix + ".output.preview";
-    public const string OutputLength = Prefix + ".output.length";
-    public const string OutputTruncated = Prefix + ".output.truncated";
+    private const string OutputPreview = Prefix + ".output.preview";
+    private const string OutputLength = Prefix + ".output.length";
+    private const string OutputTruncated = Prefix + ".output.truncated";
 
     private const int DefaultPreviewLength = 200;
 
-    public static void SetPreview(Activity? activity, string? value, int maxPreviewLength = DefaultPreviewLength)
+    public static void SetInputPreview(Activity? activity, string? value, int maxPreviewLength = DefaultPreviewLength)
     {
         if (activity == null) return;
 
@@ -39,5 +39,27 @@ public static class WorkflowTelemetryTags
 
         activity.SetTag(InputPreview, preview);
         activity.SetTag(InputTruncated, truncated);
+    }
+
+    public static void SetOutputPreview(Activity? activity, string? value, int maxPreviewLength = DefaultPreviewLength)
+    {
+        if (activity == null) return;
+
+        if (value == null)
+        {
+            activity.SetTag(OutputPreview, string.Empty);
+            activity.SetTag(OutputLength, 0);
+            activity.SetTag(OutputTruncated, false);
+            return;
+        }
+
+        activity.SetTag(OutputLength, value.Length);
+
+        var truncated = value.Length > maxPreviewLength;
+
+        var preview = truncated ? value.Substring(0, maxPreviewLength) : value;
+
+        activity.SetTag(OutputPreview, preview);
+        activity.SetTag(OutputTruncated, truncated);
     }
 }

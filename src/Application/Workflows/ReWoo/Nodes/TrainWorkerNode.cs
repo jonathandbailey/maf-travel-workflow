@@ -18,7 +18,7 @@ public class TrainWorkerNode(IAgent agent) : ReflectingExecutor<TrainWorkerNode>
 
         activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.TrainWorkerNodeName);
 
-        WorkflowTelemetryTags.SetPreview(activity, JsonSerializer.Serialize(message));
+        WorkflowTelemetryTags.SetInputPreview(activity, JsonSerializer.Serialize(message));
 
         var serialized = JsonSerializer.Serialize(message);
     
@@ -33,7 +33,7 @@ public class TrainWorkerNode(IAgent agent) : ReflectingExecutor<TrainWorkerNode>
 
         var responseMessage = response.Messages.First();
 
-        WorkflowTelemetryTags.SetPreview(activity, responseMessage.Text);
+        WorkflowTelemetryTags.SetInputPreview(activity, responseMessage.Text);
 
         activity?.SetTag(WorkflowTelemetryTags.ArtifactKey, message.ArtifactKey);
 

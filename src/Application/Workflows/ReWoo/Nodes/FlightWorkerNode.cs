@@ -5,7 +5,6 @@ using Application.Workflows.ReWoo.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
-using System.Diagnostics;
 using System.Text.Json;
 
 namespace Application.Workflows.ReWoo.Nodes;
@@ -16,17 +15,19 @@ public class FlightWorkerNode(IAgent agent) :
 {
     private const string FlightWorkerNodeError = "Flight Worker Node has failed to execute.";
 
-    private Activity? _activity;
-    
     public async ValueTask HandleAsync(OrchestratorWorkerTaskDto message, IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = default)
     {
-        Trace(message);
+        using var activity = Telemetry.Start($"{WorkflowConstants.FlightWorkerNodeName}.handleRequest");
+
+        activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.FlightWorkerNodeName);
 
         try
         {
             var serialized = JsonSerializer.Serialize(message);
-    
+
+            WorkflowTelemetryTags.SetInputPreview(activity, serialized);
+
             var userId = await context.UserId();
             var sessionId = await context.SessionId();
 
@@ -34,9 +35,9 @@ public class FlightWorkerNode(IAgent agent) :
     
             var responseMessage = response.Messages.First();
 
-            WorkflowTelemetryTags.SetPreview(_activity, responseMessage.Text);
+            WorkflowTelemetryTags.SetInputPreview(activity, responseMessage.Text);
 
-            _activity?.SetTag(WorkflowTelemetryTags.ArtifactKey, message.ArtifactKey);
+            activity?.SetTag(WorkflowTelemetryTags.ArtifactKey, message.ArtifactKey);
 
             await context.SendMessageAsync(new ArtifactStorageDto(message.ArtifactKey, responseMessage.Text), cancellationToken: cancellationToken);
         }
@@ -44,21 +45,5 @@ public class FlightWorkerNode(IAgent agent) :
         {
             await context.AddEventAsync(new TravelWorkflowErrorEvent(FlightWorkerNodeError, message.ArtifactKey, WorkflowConstants.FlightWorkerNodeName,exception), cancellationToken);
         }
-
-        TraceEnd();
-    }
-
-    private void Trace(OrchestratorWorkerTaskDto message)
-    {
-        _activity = Telemetry.Start($"{WorkflowConstants.FlightWorkerNodeName}.handleRequest");
-
-        _activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.FlightWorkerNodeName);
-
-        WorkflowTelemetryTags.SetPreview(_activity, JsonSerializer.Serialize(message));
-    }
-
-    private void TraceEnd()
-    {
-        _activity?.Dispose();
     }
 }

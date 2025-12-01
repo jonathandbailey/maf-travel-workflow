@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using Application.Agents;
+﻿using Application.Agents;
 using Application.Observability;
+using Application.Workflows.Events;
 using Application.Workflows.ReWoo.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
@@ -9,44 +9,39 @@ using System.Text.Json;
 
 namespace Application.Workflows.ReWoo.Nodes;
 
-public class HotelWorkerNode(IAgent agent) : ReflectingExecutor<HotelWorkerNode>(WorkflowConstants.HotelWorkerNodeName), IMessageHandler<OrchestratorWorkerTaskDto>
+public class HotelWorkerNode(IAgent agent) : 
+    ReflectingExecutor<HotelWorkerNode>(WorkflowConstants.HotelWorkerNodeName), 
+    IMessageHandler<OrchestratorWorkerTaskDto>
 {
-    private Activity? _activity;
-    
+    private const string HotelWorkerNodeError = "Hotel Worker Node has failed to execute.";
+
     public async ValueTask HandleAsync(OrchestratorWorkerTaskDto message, IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = default)
     {
-        Trace(message);
+        using var activity = Telemetry.Start($"{WorkflowConstants.HotelWorkerNodeName}.handleRequest");
+        
+        activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.HotelWorkerNodeName);
+
+        try
+        {
+            var serialized = JsonSerializer.Serialize(message);
+
+            WorkflowTelemetryTags.SetInputPreview(activity, serialized);
   
-        var serialized = JsonSerializer.Serialize(message);
+            var userId = await context.UserId();
+            var sessionId = await context.SessionId();
 
-        _activity?.SetTag("re-woo.input.message", serialized);
+            var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), sessionId, userId, cancellationToken: cancellationToken);
+   
+            activity?.SetTag("re-woo.output.message", response.Text);
 
-        var userId = await context.UserId();
-        var sessionId = await context.SessionId();
+            WorkflowTelemetryTags.SetOutputPreview(activity, response.Text);
 
-        var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), sessionId, userId, cancellationToken: cancellationToken);
-    
-        var responseMessage = response.Messages.First();
-
-        _activity?.SetTag("re-woo.output.message", response.Messages.First().Text);
-
-        await context.SendMessageAsync(new ArtifactStorageDto(message.ArtifactKey, responseMessage.Text), cancellationToken: cancellationToken);
-
-        TraceEnd();
-    }
-
-    private void Trace(OrchestratorWorkerTaskDto message)
-    { 
-        _activity = Telemetry.Start($"{WorkflowConstants.HotelWorkerNodeName}.handleRequest");
-
-        _activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.HotelWorkerNodeName);
-
-        _activity?.SetTag("re-woo.input.message", message);
-    }
-
-    private void TraceEnd()
-    {
-        _activity?.Dispose();
+            await context.SendMessageAsync(new ArtifactStorageDto(message.ArtifactKey, response.Text), cancellationToken: cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            await context.AddEventAsync(new TravelWorkflowErrorEvent(HotelWorkerNodeError, message.ArtifactKey, WorkflowConstants.HotelWorkerNodeName, exception), cancellationToken);
+        }
     }
 }

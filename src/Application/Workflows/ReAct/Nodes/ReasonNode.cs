@@ -58,6 +58,6 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
         if (activity == null) return;
 
         activity.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ReasonNodeName);
-        WorkflowTelemetryTags.SetPreview(activity, preview);
+        WorkflowTelemetryTags.SetInputPreview(activity, preview);
     }
 }
