@@ -66,7 +66,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
         switch (routeAction.Route)
         {
             case "ask_user":
-                await context.SendMessageAsync(new UserRequest(cleanedResponse), cancellationToken: cancellationToken);
+                await context.SendMessageAsync(new ActUserRequest(cleanedResponse), cancellationToken: cancellationToken);
                 break;
             case "complete":
                 await context.AddEventAsync(new ReasonActWorkflowCompleteEvent(cleanedResponse), cancellationToken);

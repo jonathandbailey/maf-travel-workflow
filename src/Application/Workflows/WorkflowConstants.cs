@@ -21,4 +21,5 @@ public static class WorkflowConstants
     public const string SessionId = "SessionId";
 
     public const string ScopeGlobal = "Global";
+    public const string UserNode = "UserNode";
 }

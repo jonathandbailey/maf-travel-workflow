@@ -1,5 +1,6 @@
 ﻿using Application.Agents;
 using Application.Observability;
+using Application.Workflows.Events;
 using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
@@ -12,12 +13,16 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
     IMessageHandler<TravelWorkflowRequestDto, ActRequest>,
     IMessageHandler<ActObservation, ActRequest>
 {
+    private const string StatusThinking = "Thinking...";
+
     public async ValueTask<ActRequest> HandleAsync(
         TravelWorkflowRequestDto requestDto, 
         IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
         using var activity = Telemetry.Start($"{WorkflowConstants.ReasonNodeName}.handleRequest");
+
+        await context.AddEventAsync(new WorkflowStatusEvent(StatusThinking), cancellationToken);
 
         Annotate(activity, requestDto.Message.Text);
 
@@ -33,6 +38,8 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
         CancellationToken cancellationToken = default)
     {
         using var activity = Telemetry.Start($"{WorkflowConstants.ReasonNodeName}.observe");
+
+        await context.AddEventAsync(new WorkflowStatusEvent(StatusThinking), cancellationToken);
 
         Annotate(activity, actObservation.Message);
   

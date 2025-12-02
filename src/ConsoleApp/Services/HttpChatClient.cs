@@ -62,6 +62,11 @@ namespace ConsoleApp.Services
                 }
             });
 
+            _hubConnection.On<UserResponseDto>("status", (message) =>
+            {
+                Console.WriteLine($"{message.Message}");
+            });
+
             await _hubConnection.StartAsync();
         }
 

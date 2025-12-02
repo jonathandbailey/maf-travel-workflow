@@ -14,6 +14,8 @@ public class HotelWorkerNode(IAgent agent) :
     IMessageHandler<OrchestratorWorkerTaskDto>
 {
     private const string HotelWorkerNodeError = "Hotel Worker Node has failed to execute.";
+    private const string StatusFindingHotels = "Finding Hotels...";
+    private const string StatusHotelsFound = "Hotels Found...";
 
     public async ValueTask HandleAsync(OrchestratorWorkerTaskDto message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
@@ -31,9 +33,13 @@ public class HotelWorkerNode(IAgent agent) :
             var userId = await context.UserId();
             var sessionId = await context.SessionId();
 
+            await context.AddEventAsync(new WorkflowStatusEvent(StatusFindingHotels), cancellationToken);
+
             var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), sessionId, userId, cancellationToken: cancellationToken);
        
             WorkflowTelemetryTags.SetOutputPreview(activity, response.Text);
+
+            await context.AddEventAsync(new WorkflowStatusEvent(StatusHotelsFound), cancellationToken);
 
             await context.SendMessageAsync(new ArtifactStorageDto(message.ArtifactKey, response.Text), cancellationToken: cancellationToken);
         }

@@ -4,7 +4,6 @@ using Application.Workflows.Events;
 using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Text;
 
 namespace Application.Workflows;
@@ -69,11 +68,14 @@ public class TravelWorkflow(
                 return new WorkflowResponse(WorkflowState.Error, "Travel Request has failed.");
             }
 
-            if (evt is ConversationStreamingEvent { Data: not null } streamingEvent)
+            if (evt is ConversationStreamingEvent streamingEvent)
             {
-                var messageString = streamingEvent.Data?.ToString() ?? string.Empty;
+                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), streamingEvent.Content);
+            }
 
-                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), messageString);
+            if (evt is WorkflowStatusEvent statusEvent)
+            {
+                await userStreamingService.Status(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), statusEvent.Status);
             }
 
             if (evt is RequestInfoEvent requestInfoEvent)

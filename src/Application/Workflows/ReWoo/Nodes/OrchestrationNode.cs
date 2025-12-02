@@ -12,6 +12,7 @@ namespace Application.Workflows.ReWoo.Nodes;
 public class OrchestrationNode(IAgent agent) : ReflectingExecutor<OrchestrationNode>(WorkflowConstants.OrchestrationNodeName), IMessageHandler<OrchestrationRequest>
 {
     private const string OrchestrationNodeError = "Orchestration Node has failed to execute.";
+    private const string StatusBuildingTravelPlan = "Building Travel Plan...";
 
 
     public async ValueTask HandleAsync(OrchestrationRequest message, IWorkflowContext context,
@@ -25,6 +26,8 @@ public class OrchestrationNode(IAgent agent) : ReflectingExecutor<OrchestrationN
 
         try
         {
+            await context.AddEventAsync(new WorkflowStatusEvent(StatusBuildingTravelPlan), cancellationToken);
+
             var userId = await context.UserId();
             var sessionId = await context.SessionId();
 

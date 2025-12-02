@@ -34,4 +34,12 @@ public sealed class ReasonActWorkflowCompleteEvent(string message) : WorkflowEve
     public string Message { get; } = message;
 }
 
-public class ConversationStreamingEvent(string message) : WorkflowEvent(message) { }
+public class ConversationStreamingEvent(string message) : WorkflowEvent(message)
+{
+    public string Content { get; } = message;
+}
+
+public class WorkflowStatusEvent(string message) : WorkflowEvent(message)
+{
+    public string Status { get; } = message;
+}

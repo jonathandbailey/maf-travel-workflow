@@ -4,6 +4,7 @@ using Application.Workflows.ReAct.Dto;
 using Application.Workflows.ReAct.Nodes;
 using Application.Workflows.ReWoo.Dto;
 using Application.Workflows.ReWoo.Nodes;
+using Application.Workflows.Users;
 using Microsoft.Agents.AI.Workflows;
 
 namespace Application.Workflows;
@@ -36,10 +37,13 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
 
+        var userNode = new UserNode();
+
         var builder = new WorkflowBuilder(reasonNode);
 
         builder.AddEdge(reasonNode, actNode);
-        builder.AddEdge(actNode, requestPort);
+        builder.AddEdge(actNode, userNode);
+        builder.AddEdge(userNode, requestPort);
         builder.AddEdge(requestPort, reasonNode);
         builder.AddEdge(actNode, reasonNode);
         builder.AddEdge(actNode, orchestrationNode);
