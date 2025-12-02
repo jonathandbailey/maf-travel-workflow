@@ -21,7 +21,8 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
         { AgentTypes.Orchestration, "Orchestration-Agent" },
         { AgentTypes.FlightWorker, "Flight-Agent" },
         { AgentTypes.HotelWorker, "Hotel-Agent" },
-        { AgentTypes.TrainWorker, "Train-Agent" }
+        { AgentTypes.TrainWorker, "Train-Agent" },
+        { AgentTypes.User , "User-Agent"}
     };
 
     private readonly Dictionary<AgentTypes, ChatOptions> _agentChatOptions = new()
@@ -31,7 +32,8 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
         { AgentTypes.Act, new ChatOptions() },
         { AgentTypes.Orchestration, new ChatOptions() },
         { AgentTypes.HotelWorker, new ChatOptions() },
-        { AgentTypes.TrainWorker, new ChatOptions() }
+        { AgentTypes.TrainWorker, new ChatOptions() },
+        { AgentTypes.User, new ChatOptions() }
     };
     public async Task<IAgent> Create(AgentTypes agentType)
     {
@@ -87,5 +89,6 @@ public enum AgentTypes
     Orchestration,
     FlightWorker,
     HotelWorker,
-    TrainWorker
+    TrainWorker,
+    User
 }

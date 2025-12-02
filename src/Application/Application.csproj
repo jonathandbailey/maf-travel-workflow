@@ -40,6 +40,9 @@
     <None Update="Agents\Templates\Train-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Agents\Templates\User-Agent.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

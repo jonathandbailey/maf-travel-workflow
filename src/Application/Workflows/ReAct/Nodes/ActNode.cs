@@ -25,16 +25,10 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
 
         var userId = await context.UserId();
         var sessionId = await context.SessionId();
-    
-        var stringBuilder = new StringBuilder();
+   
+        var update = await agent.RunAsync(request.Message, sessionId, userId, cancellationToken: cancellationToken);
 
-        await foreach (var update in agent.RunStreamingAsync(request.Message, sessionId, userId, cancellationToken: cancellationToken))
-        {
-            stringBuilder.Append(update.Text);
-            await context.AddEventAsync(new ConversationStreamingEvent(update.Text), cancellationToken);
-        }
-
-        var response = stringBuilder.ToString();
+        var response = update.Text;
 
         WorkflowTelemetryTags.SetInputPreview(activity, response);
 

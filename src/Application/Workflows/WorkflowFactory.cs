@@ -25,6 +25,8 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 
         var trainAgent = await agentFactory.Create(AgentTypes.TrainWorker);
 
+        var userAgent = await agentFactory.Create(AgentTypes.User);
+
         var requestPort = RequestPort.Create<UserRequest, ActObservation>("user-input");
 
         var reasonNode = new ReasonNode(reasonAgent);
@@ -37,7 +39,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
 
-        var userNode = new UserNode();
+        var userNode = new UserNode(userAgent);
 
         var builder = new WorkflowBuilder(reasonNode);
 

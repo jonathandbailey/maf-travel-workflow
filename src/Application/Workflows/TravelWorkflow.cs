@@ -70,7 +70,7 @@ public class TravelWorkflow(
 
             if (evt is ConversationStreamingEvent streamingEvent)
             {
-                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), streamingEvent.Content);
+                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), streamingEvent.Content, streamingEvent.EndOfStream);
             }
 
             if (evt is WorkflowStatusEvent statusEvent)
