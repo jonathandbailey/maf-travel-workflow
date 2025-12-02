@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using Application.Interfaces;
 using Application.Observability;
 using Application.Workflows.Events;
 using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Text;
 
 namespace Application.Workflows;
 
@@ -12,6 +14,7 @@ public class TravelWorkflow(
     CheckpointManager checkpointManager,
     CheckpointInfo? checkpointInfo,
     WorkflowState state,
+    IUserStreamingService userStreamingService,
     ILogger logger)
 {
     private readonly List<ArtifactStatusEvent> _artifactStatusEvents = [];
@@ -64,6 +67,13 @@ public class TravelWorkflow(
             {
                 logger.LogError(travelWorkflowErrorEvent.Exception, "Travel Workflow Error");
                 return new WorkflowResponse(WorkflowState.Error, "Travel Request has failed.");
+            }
+
+            if (evt is ConversationStreamingEvent { Data: not null } streamingEvent)
+            {
+                var messageString = streamingEvent.Data?.ToString() ?? string.Empty;
+
+                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), messageString);
             }
 
             if (evt is RequestInfoEvent requestInfoEvent)

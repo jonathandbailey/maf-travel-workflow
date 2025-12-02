@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using ConsoleApp.Dto;
 using ConsoleApp.Settings;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
 
 namespace ConsoleApp.Services
@@ -13,7 +14,9 @@ namespace ConsoleApp.Services
         private const string LocalException = "An unknown error has occurred. Server Error Details are not available at this time. Local Exception : {0}";
 
         private readonly ChatClientSetting _settings = settings.Value;
-       
+
+        private HubConnection? _hubConnection;
+
 
         public async Task<UserResponseDto> Send(UserRequestDto userRequest)
         {
@@ -42,7 +45,25 @@ namespace ConsoleApp.Services
             }
         }
 
-        
+        public async Task InitializeStreamingConnectionAsync()
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(_settings.BaseUrl + _settings.HubUrl)
+                .WithAutomaticReconnect()
+                .Build();
+
+            _hubConnection.On<UserResponseDto>(_settings.PromptChannel, (message) =>
+            {
+                Console.Write($"{message.Message}");
+
+                if (message.IsEndOfStream)
+                {
+                    Console.WriteLine();
+                }
+            });
+
+            await _hubConnection.StartAsync();
+        }
 
         private static UserResponseDto CreateUserResponse(string message, UserRequestDto userRequest, bool hasError)
         {
@@ -54,5 +75,6 @@ namespace ConsoleApp.Services
     public interface IChatClient
     {
         Task<UserResponseDto> Send(UserRequestDto userRequest);
+        Task InitializeStreamingConnectionAsync();
     }
 }

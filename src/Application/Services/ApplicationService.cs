@@ -1,4 +1,5 @@
 ﻿using Application.Infrastructure;
+using Application.Interfaces;
 using Application.Workflows;
 using Application.Workflows.ReAct.Dto;
 using Microsoft.Extensions.AI;
@@ -7,7 +8,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
-public class ApplicationService(IWorkflowFactory workflowFactory, IWorkflowRepository workflowRepository, ICheckpointRepository repository, ILogger<ApplicationService> logger)
+public class ApplicationService(
+    IWorkflowFactory workflowFactory, 
+    IWorkflowRepository workflowRepository, 
+    ICheckpointRepository repository, 
+    IUserStreamingService userStreamingService,
+    ILogger<ApplicationService> logger)
     : IApplicationService
 {
     public async Task<ConversationResponse> Execute(ConversationRequest request)
@@ -18,7 +24,7 @@ public class ApplicationService(IWorkflowFactory workflowFactory, IWorkflowRepos
 
         var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, request.UserId, request.SessionId));
 
-        var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, logger);
+        var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, userStreamingService, logger);
 
         var response = await travelWorkflow.Execute(
             new TravelWorkflowRequestDto(

@@ -3,6 +3,7 @@ using Application.Observability;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Application.Agents;
 
@@ -28,6 +29,24 @@ public class Agent(AIAgent agent, IAgentThreadRepository repository, AgentTypes 
         await repository.SaveAsync(userId, sessionId, new AgentState(threadState), type.ToString());
 
         return response;
+    }
+
+    public async IAsyncEnumerable<AgentRunResponseUpdate> RunStreamingAsync(
+        ChatMessage message,
+        Guid sessionId,
+        Guid userId,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var thread = await LoadAsync(userId, sessionId, type);
+
+        await foreach (var update in agent.RunStreamingAsync(message, thread, cancellationToken: cancellationToken))
+        {
+           yield return update;
+        }
+
+        var threadState = thread.Serialize();
+
+        await repository.SaveAsync(userId, sessionId, new AgentState(threadState), type.ToString());
     }
 
     public async Task<AgentRunResponse> RunAsync(
@@ -81,6 +100,12 @@ public interface IAgent
     Task<AgentRunResponse> RunAsync(IEnumerable<ChatMessage> messages, Guid sessionId, Guid userId, CancellationToken cancellationToken = default);
 
     Task<AgentRunResponse> RunAsync(
+        ChatMessage message,
+        Guid sessionId,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<AgentRunResponseUpdate> RunStreamingAsync(
         ChatMessage message,
         Guid sessionId,
         Guid userId,

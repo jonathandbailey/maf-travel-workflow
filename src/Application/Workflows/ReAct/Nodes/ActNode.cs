@@ -1,10 +1,11 @@
 ﻿using Application.Agents;
 using Application.Observability;
+using Application.Workflows.Events;
 using Application.Workflows.ReAct.Dto;
 using Application.Workflows.ReWoo.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
-using Application.Workflows.Events;
+using System.Text;
 
 namespace Application.Workflows.ReAct.Nodes;
 
@@ -25,13 +26,21 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
         var userId = await context.UserId();
         var sessionId = await context.SessionId();
     
-        var response = await agent.RunAsync(request.Message, sessionId, userId, cancellationToken);
+        var stringBuilder = new StringBuilder();
 
-        WorkflowTelemetryTags.SetInputPreview(activity, response.Text);
-
-        if (!JsonOutputParser.HasJson(response.Text))
+        await foreach (var update in agent.RunStreamingAsync(request.Message, sessionId, userId, cancellationToken: cancellationToken))
         {
-            await context.AddEventAsync(new TravelWorkflowErrorEvent(NoJsonReturnedByAgent,response.Text, WorkflowConstants.ActNodeName), cancellationToken);
+            stringBuilder.Append(update.Text);
+            await context.AddEventAsync(new ConversationStreamingEvent(update.Text), cancellationToken);
+        }
+
+        var response = stringBuilder.ToString();
+
+        WorkflowTelemetryTags.SetInputPreview(activity, response);
+
+        if (!JsonOutputParser.HasJson(response))
+        {
+            await context.AddEventAsync(new TravelWorkflowErrorEvent(NoJsonReturnedByAgent,response, WorkflowConstants.ActNodeName), cancellationToken);
             return;
         }
         
@@ -39,17 +48,17 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
         
         try
         {
-            routeAction = JsonOutputParser.Parse<RouteAction>(response.Text);
+            routeAction = JsonOutputParser.Parse<RouteAction>(response);
         }
         catch (Exception ex)
         {
             await context.AddEventAsync(
-                new TravelWorkflowErrorEvent(AgentJsonParseFailed, response.Text, WorkflowConstants.ActNodeName, ex),
+                new TravelWorkflowErrorEvent(AgentJsonParseFailed, response, WorkflowConstants.ActNodeName, ex),
                 cancellationToken);
             return;
         }
 
-        var cleanedResponse = JsonOutputParser.Remove(response.Text);
+        var cleanedResponse = JsonOutputParser.Remove(response);
 
         activity?.SetTag("workflow.route.message", cleanedResponse);
         activity?.SetTag("workflow.route", routeAction.Route);
@@ -64,7 +73,7 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
                 break;
             case "orchestrate":
             {
-                var extractedJson = JsonOutputParser.ExtractJson(response.Text);
+                var extractedJson = JsonOutputParser.ExtractJson(response);
 
                 await context.SendMessageAsync(new OrchestrationRequest(extractedJson), cancellationToken: cancellationToken);
                 break;

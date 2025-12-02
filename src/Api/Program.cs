@@ -1,10 +1,16 @@
 using Api;
+using Api.Extensions;
 using Api.Hub;
+using Api.Settings;
 using Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.Services.Configure<HubSettings>(options => builder.Configuration.GetSection("HubSettings").Bind(options));
+
+builder.Services.AddApiServices();
 
 builder.Services.AddApplicationServices(builder.Configuration);
 
