@@ -70,12 +70,12 @@ public class TravelWorkflow(
 
             if (evt is ConversationStreamingEvent streamingEvent)
             {
-                await userStreamingService.Stream(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), streamingEvent.Content, streamingEvent.EndOfStream, streamingEvent.ExchangeId);
+                await userStreamingService.Stream(requestDto.UserId, streamingEvent.Content, streamingEvent.EndOfStream, requestDto.RequestId);
             }
 
             if (evt is WorkflowStatusEvent statusEvent)
             {
-                await userStreamingService.Status(Guid.Parse("B4C361C4-460C-4B1D-8DC7-34D5F3595AD1"), statusEvent.Status);
+                await userStreamingService.Status(requestDto.UserId, statusEvent.Status);
             }
 
             if (evt is RequestInfoEvent requestInfoEvent)
