@@ -5,7 +5,6 @@ using Application.Workflows.ReAct.Dto;
 using Application.Workflows.ReWoo.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
-using System.Text;
 
 namespace Application.Workflows.ReAct.Nodes;
 
@@ -14,9 +13,13 @@ public class ActNode(IAgent agent) : ReflectingExecutor<ActNode>(WorkflowConstan
     private const string NoJsonReturnedByAgent = "Agent/LLM did not return formnatted JSON for routing/actions";
     private const string AgentJsonParseFailed = "Agent JSON parse failed";
 
+    private const string StatusExecuting = "Executing...";
+
     public async ValueTask HandleAsync(ActRequest request, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
+        await context.AddEventAsync(new WorkflowStatusEvent(StatusExecuting), cancellationToken);
+
         using var activity = Telemetry.Start($"{WorkflowConstants.ActNodeName}.handleRequest");
 
         activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ActNodeName);

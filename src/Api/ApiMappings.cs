@@ -13,6 +13,7 @@ public static class ApiMappings
 {
     private const string ApiConversationsRoot = "api";
     private const string GetFlightPlanPath = "plans/{sessionId}/flights";
+    private const string GetHotelPlanPath = "plans/{sessionId}/hotels";
 
     public static WebApplication MapApi(this WebApplication app)
     {
@@ -20,6 +21,7 @@ public static class ApiMappings
 
         api.MapPost("/conversations", ConversationExchange);
         api.MapGet(GetFlightPlanPath, GetFlightPlan);
+        api.MapGet(GetHotelPlanPath, GetHotelPlan);
 
         return app;
     }
@@ -42,5 +44,15 @@ public static class ApiMappings
     {
         var flightPlan = await service.GetFlightPlanAsync(sessionId, context.User.Id());
         return TypedResults.Ok(flightPlan);
+    }
+
+    private static async Task<Ok<HotelSearchResultDto>> GetHotelPlan(
+        Guid sessionId,
+        IArtifactRepository service,
+        HttpContext context
+        )
+    {
+        var hotelPlan = await service.GetHotelPlanAsync(sessionId, context.User.Id());
+        return TypedResults.Ok(hotelPlan);
     }
 }

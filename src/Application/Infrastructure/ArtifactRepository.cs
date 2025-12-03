@@ -35,6 +35,19 @@ public class ArtifactRepository(IAzureStorageRepository repository, IOptions<Azu
         return flightPlan ?? throw new InvalidOperationException($"Failed to deserialize flight plan from blob: {filename}");
     }
 
+    public async Task<HotelSearchResultDto> GetHotelPlanAsync(Guid sessionId, Guid userId)
+    {
+        var filename = GetCheckpointFileName(sessionId, userId, "hotels");
+
+        var response = await repository.DownloadTextBlobAsync(filename, settings.Value.ContainerName);
+
+        var hotelPlan = JsonSerializer.Deserialize<HotelSearchResultDto>(response, SerializerOptions);
+
+        return hotelPlan ?? throw new InvalidOperationException($"Failed to deserialize hotel plan from blob: {filename}");
+    }
+
+
+
     private static string GetCheckpointFileName(Guid sessionId, Guid userId, string name)
     {
         return $"{userId}/{sessionId}/artifacts/{name}.json";
@@ -45,4 +58,5 @@ public interface IArtifactRepository
 {
     Task SaveAsync(Guid sessionId, Guid userId, string artifact, string name);
     Task<FlightSearchResultDto> GetFlightPlanAsync(Guid sessionId, Guid userId);
+    Task<HotelSearchResultDto> GetHotelPlanAsync(Guid sessionId, Guid userId);
 }

@@ -10,6 +10,7 @@ Inputs:
 - Origin: {{origin}}
 - Destination: {{destination}}
 - Depart Date: {{depart_date}}
+- Return Date: {{return_date}}
 
 Output Requirements:
 - Produce at least 3 distinct flight options.

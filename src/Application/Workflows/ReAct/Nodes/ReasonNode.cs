@@ -13,7 +13,7 @@ public class ReasonNode(IAgent agent) : ReflectingExecutor<ReasonNode>(WorkflowC
     IMessageHandler<TravelWorkflowRequestDto, ActRequest>,
     IMessageHandler<ActObservation, ActRequest>
 {
-    private const string StatusThinking = "Thinking...";
+    private const string StatusThinking = "Evaluating Travel Requirements...";
 
     public async ValueTask<ActRequest> HandleAsync(
         TravelWorkflowRequestDto requestDto, 

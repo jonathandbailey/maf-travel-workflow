@@ -30,7 +30,7 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
         { AgentTypes.Reason, new ChatOptions() },
         { AgentTypes.Act, new ChatOptions() },
         { AgentTypes.Orchestration, new ChatOptions() },
-        { AgentTypes.HotelWorker, new ChatOptions() },
+        { AgentTypes.HotelWorker, CreateHotelChatOptions() },
         { AgentTypes.TrainWorker, new ChatOptions() },
         { AgentTypes.User, new ChatOptions() }
     };
@@ -70,6 +70,21 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentThr
                 schema: schema,
                 schemaName: "FlightPlan",
                 schemaDescription: "User Flight Options for their vacation.")
+        };
+
+        return chatOptions;
+    }
+
+    private static ChatOptions CreateHotelChatOptions()
+    {
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(HotelSearchResultDto));
+
+        ChatOptions chatOptions = new()
+        {
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: schema,
+                schemaName: "HotelPlan",
+                schemaDescription: "User Hotel Options for their vacation.")
         };
 
         return chatOptions;
