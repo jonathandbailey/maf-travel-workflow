@@ -25,7 +25,7 @@ public class UserNode(IAgent agent) : ReflectingExecutor<UserNode>(WorkflowConst
     }
 
     public async ValueTask HandleAsync(UserResponse message, IWorkflowContext context,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = default)
     {
         await context.SendMessageAsync(new ActObservation(message.Message), cancellationToken: cancellationToken);
     }
