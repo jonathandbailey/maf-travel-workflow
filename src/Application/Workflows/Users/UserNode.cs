@@ -16,10 +16,10 @@ public class UserNode(IAgent agent) : ReflectingExecutor<UserNode>(WorkflowConst
     {
         await foreach (var update in agent.RunStreamingAsync(new ChatMessage(ChatRole.User, actUserRequest.Message), cancellationToken: cancellationToken))
         {
-            await context.AddEventAsync(new ConversationStreamingEvent(update.Text, false), cancellationToken);
+            await context.AddEventAsync(new UserStreamingEvent(update.Text), cancellationToken);
         }
 
-        await context.AddEventAsync(new ConversationStreamingEvent(string.Empty, true), cancellationToken);
+        await context.AddEventAsync(new UserStreamingCompleteEvent(), cancellationToken);
 
         await context.SendMessageAsync(new UserRequest(actUserRequest.Message), cancellationToken: cancellationToken);
     }
