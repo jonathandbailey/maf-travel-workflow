@@ -37,11 +37,14 @@ Follow these steps IN SEQUENCE. Return immediately after completing the first ma
 - Extracts and structures new travel details from the Observation
 
 ### Example:
+Observation : 'I want to go to Berlin on the 23.04.2025'
+
 {
-  "thought": "User provided destination 'Berlin', updating travel plan.",
+  "thought": "User provided destination 'Berlin' and departure date '23.04.2025', updating travel plan.",
   "nextAction": "UpdateTravelPlan",
   "travelPlanUpdate": {
-    "destination": "Berlin"
+    "destination": "Berlin",
+    "startDate": "23.04.2025"
   },
   "status": "Updated travel plan with destination"
 }

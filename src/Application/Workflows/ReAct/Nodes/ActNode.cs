@@ -12,9 +12,6 @@ namespace Application.Workflows.ReAct.Nodes;
 
 public class ActNode(IAgent agent, ITravelPlanService travelPlanService) : ReflectingExecutor<ActNode>(WorkflowConstants.ActNodeName), IMessageHandler<ActRequest>
 {
-    private const string NoJsonReturnedByAgent = "Agent/LLM did not return formnatted JSON for routing/actions";
-    private const string AgentJsonParseFailed = "Agent JSON parse failed";
-
     private const string StatusExecuting = "Executing...";
 
     public async ValueTask HandleAsync(ActRequest message, IWorkflowContext context,
