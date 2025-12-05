@@ -12,6 +12,6 @@ public class AgentCapabilityNode() : ReflectingExecutor<AgentCapabilityNode>("")
     {
         const string response = "{\"capabilities\": [\"flight_search\", \"hotel_search\"], \"required_inputs\" : [\"origin\", \"destination\", \"depart_date\", \"return_date\"]}";
 
-        await context.SendMessageAsync(new ActObservation(response), cancellationToken: cancellationToken);
+        await context.SendMessageAsync(new ActObservation(string.Empty, string.Empty), cancellationToken: cancellationToken);
     }
 }

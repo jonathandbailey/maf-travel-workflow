@@ -26,9 +26,9 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
 
         await context.AddEventAsync(new WorkflowStatusEvent(StatusThinking), cancellationToken);
  
-        var message = await Create(actObservation.Message, context, actObservation);
+        var message = await Create(context, actObservation);
 
-        var input = JsonSerializer.Serialize(actObservation);
+        var input = JsonSerializer.Serialize(message.Text);
 
         WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, input);
 
@@ -37,14 +37,14 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
         return actRequest;
     }
 
-    private async Task<ChatMessage> Create(string content, IWorkflowContext context, ActObservation observation)
+    private async Task<ChatMessage> Create(IWorkflowContext context, ActObservation observation)
     {
 
         var travelPlanSummary = await travelPlanService.GetSummary();
 
         var serialized = JsonSerializer.Serialize(observation);
 
-        var template = $"TravelPlanSummary :{travelPlanSummary}\nObservation :{serialized}";
+        var template = $"Observation :{serialized}\nTravelPlanSummary :{travelPlanSummary}";
 
         return new ChatMessage(ChatRole.User, template);
     }

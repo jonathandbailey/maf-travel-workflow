@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Models;
+using Application.Workflows.ReAct.Dto;
 
 namespace Application.Services;
 
@@ -13,6 +14,7 @@ public interface ITravelPlanService
     Task<bool> ExistsAsync();
     Task<TravelPlan> LoadAsync();
     Task<string> GetSummary();
+    Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate);
 }
 
 public class TravelPlanService(IAzureStorageRepository repository, ISessionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
@@ -39,6 +41,23 @@ public class TravelPlanService(IAzureStorageRepository repository, ISessionConte
             throw new JsonException("Could not serialize the Travel Plan Summary");
 
         return serialized;
+    }
+
+    public async Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate)
+    {
+        var travelPlan = await LoadAsync();
+
+        if (messageTravelPlanUpdate.Origin != null)
+            travelPlan.Origin = messageTravelPlanUpdate.Origin;
+
+        if (messageTravelPlanUpdate.Destination != null)
+            travelPlan.Destination = messageTravelPlanUpdate.Destination;
+        if (messageTravelPlanUpdate.StartDate != null)
+            travelPlan.StartDate = messageTravelPlanUpdate.StartDate;
+        if (messageTravelPlanUpdate.EndDate != null)
+            travelPlan.EndDate = messageTravelPlanUpdate.EndDate;
+
+        await SaveAsync(travelPlan);
     }
 
     public async Task SaveAsync(TravelPlan state)

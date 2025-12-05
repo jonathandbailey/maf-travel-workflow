@@ -1,13 +1,8 @@
 ﻿namespace Application.Workflows.ReAct.Dto;
 
-public class ActObservation(string message)
+public class ActObservation(string observation, string resultType)
 {
-    public string Message { get; init; } = message;
+    public string Observation { get;  } = observation;
 
-    public string Observation { get; set; } = string.Empty;
-
-    public string ResultType { get; set; } = string.Empty;
- 
-   
+    public string ResultType { get;  } = resultType;
 }
-

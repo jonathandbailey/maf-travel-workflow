@@ -31,7 +31,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var requestPort = RequestPort.Create<UserRequest, UserResponse>("user-input");
 
         var reasonNode = new ReasonNode(reasonAgent, travelPlanService);
-        var actNode = new ActNode(actAgent);
+        var actNode = new ActNode(actAgent, travelPlanService);
         var orchestrationNode = new OrchestrationNode(orchestrationAgent);
 
         var flightWorkerNode = new FlightWorkerNode(flightAgent);
