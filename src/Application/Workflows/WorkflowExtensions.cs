@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Application.Workflows.ReAct.Dto;
+using Application.Workflows.Dto;
 using Microsoft.Agents.AI.Workflows;
 
 namespace Application.Workflows;

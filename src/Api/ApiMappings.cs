@@ -3,7 +3,7 @@ using Api.Extensions;
 using Application.Infrastructure;
 using Application.Services;
 using Application.Users;
-using Application.Workflows.ReAct.Dto;
+using Application.Workflows.Dto;
 using Application.Workflows.ReWoo.Dto;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

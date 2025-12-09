@@ -1,4 +1,4 @@
-﻿namespace Application.Workflows.ReAct.Dto;
+﻿namespace Application.Workflows.Dto;
 
 public sealed record ConversationRequest(Guid SessionId, Guid UserId, string Message, Guid ExchangeId);
 

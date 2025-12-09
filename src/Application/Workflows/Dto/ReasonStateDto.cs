@@ -1,4 +1,4 @@
-﻿namespace Application.Workflows.ReAct.Dto;
+﻿namespace Application.Workflows.Dto;
 
 using System.Collections.Generic;
 

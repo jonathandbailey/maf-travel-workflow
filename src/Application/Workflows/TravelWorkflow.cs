@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces;
 using Application.Observability;
+using Application.Workflows.Dto;
 using Application.Workflows.Events;
-using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
 using System.Text;

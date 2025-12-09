@@ -1,15 +1,15 @@
 ﻿using Application.Agents;
 using Application.Observability;
 using Application.Workflows.Events;
-using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Diagnostics;
 using System.Text.Json;
 using Application.Services;
+using Application.Workflows.Dto;
 
-namespace Application.Workflows.ReAct.Nodes;
+namespace Application.Workflows.Nodes;
 
 public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName),
    

@@ -1,13 +1,13 @@
 ﻿using Application.Observability;
 using Application.Services;
 using Application.Workflows.Events;
-using Application.Workflows.ReAct.Dto;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using System.Text.Json;
 using Application.Workflows.ReWoo.Dto;
+using Application.Workflows.Dto;
 
-namespace Application.Workflows.ReAct.Nodes;
+namespace Application.Workflows.Nodes;
 
 public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<ActNode>(WorkflowConstants.ActNodeName), IMessageHandler<ActRequest>
 {

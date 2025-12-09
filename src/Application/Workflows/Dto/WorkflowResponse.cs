@@ -1,4 +1,4 @@
-﻿namespace Application.Workflows.ReAct.Dto;
+﻿namespace Application.Workflows.Dto;
 
 public class WorkflowResponse(WorkflowState state, string message)
 {

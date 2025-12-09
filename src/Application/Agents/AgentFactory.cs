@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 using OpenAI;
 using Application.Workflows.ReWoo.Dto;
 using Application.Services;
-using Application.Workflows.ReAct.Dto;
+using Application.Workflows.Dto;
 
 namespace Application.Agents;
 

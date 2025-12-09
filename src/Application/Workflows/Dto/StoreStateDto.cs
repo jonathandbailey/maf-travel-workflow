@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Agents.AI.Workflows;
 
-namespace Application.Workflows.ReAct.Dto;
+namespace Application.Workflows.Dto;
 
 public class StoreStateDto(CheckpointInfo checkpointInfo, JsonElement jsonElement)
 {

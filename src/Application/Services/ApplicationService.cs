@@ -2,10 +2,10 @@
 using Application.Interfaces;
 using Application.Models;
 using Application.Workflows;
-using Application.Workflows.ReAct.Dto;
 using Microsoft.Extensions.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
+using Application.Workflows.Dto;
 
 namespace Application.Services;
 

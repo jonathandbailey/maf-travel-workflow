@@ -2,7 +2,7 @@
 using Microsoft.Agents.AI.Workflows.Checkpointing;
 using System.Text.Json;
 using Application.Infrastructure;
-using Application.Workflows.ReAct.Dto;
+using Application.Workflows.Dto;
 
 namespace Application.Workflows;
 
