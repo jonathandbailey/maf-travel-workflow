@@ -14,9 +14,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
     public async Task<Workflow> Create()
     {
         var reasonAgent = await agentFactory.Create(AgentTypes.Reason);
-
-        var actAgent = await agentFactory.Create(AgentTypes.Act);
-    
+      
         var flightAgent = await agentFactory.Create(AgentTypes.FlightWorker);
 
         var hotelAgent = await agentFactory.Create(AgentTypes.HotelWorker);
