@@ -6,9 +6,10 @@ import streamingService from "../services/streaming.service";
 
 interface UseChatResponseHandlerProps {
     setActiveExchange: React.Dispatch<React.SetStateAction<UIExchange | null>>;
+    setExchanges: React.Dispatch<React.SetStateAction<UIExchange[]>>;
 }
 
-export const useChatResponseHandler = ({ setActiveExchange }: UseChatResponseHandlerProps) => {
+export const useChatResponseHandler = ({ setActiveExchange, setExchanges }: UseChatResponseHandlerProps) => {
     useEffect(() => {
         const handleUserResponse = (response: ChatResponseDto) => {
             console.log('Chat response received:', response);
@@ -22,13 +23,35 @@ export const useChatResponseHandler = ({ setActiveExchange }: UseChatResponseHan
                         prev.assistant.text + (response.message || ''),
                         false
                     );
-                    return {
+                    const updatedExchange = {
                         ...prev,
                         assistant: updatedAssistant
                     };
+
+                    // Check if it's the end of stream
+                    if (response.isEndOfStream) {
+                        // Add the exchange to the list of exchanges if it doesn't already exist
+                        console.log('Finalizing exchange:', updatedExchange);
+                        setExchanges(prevExchanges => {
+                            const existingIndex = prevExchanges.findIndex(ex => ex.assistant.id === updatedExchange.assistant.id);
+                            if (existingIndex >= 0) {
+                                // Update existing exchange
+                                const newExchanges = [...prevExchanges];
+                                newExchanges[existingIndex] = updatedExchange;
+                                return newExchanges;
+                            } else {
+                                // Add new exchange
+                                return [...prevExchanges, updatedExchange];
+                            }
+                        });
+                    }
+
+                    return updatedExchange;
                 }
                 return prev;
             });
+
+
         };
 
         streamingService.on("user", handleUserResponse);
@@ -36,5 +59,5 @@ export const useChatResponseHandler = ({ setActiveExchange }: UseChatResponseHan
         return () => {
             streamingService.off("user", handleUserResponse);
         };
-    }, [setActiveExchange]);
+    }, [setActiveExchange, setExchanges]);
 };

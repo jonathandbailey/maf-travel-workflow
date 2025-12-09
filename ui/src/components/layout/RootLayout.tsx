@@ -1,5 +1,5 @@
 import ChatInput from "../chat/ChatInput"
-import { Flex, Splitter, Tabs, Timeline, Layout } from "antd"
+import { Flex, Splitter, Tabs, Timeline, Layout, Spin } from "antd"
 import type { TabsProps } from "antd";
 import { useState } from "react";
 import type { UIExchange } from "../../types/ui/UIExchange";
@@ -27,7 +27,7 @@ const RootLayout = () => {
     // Debug status items changes
     console.log('Current statusItems:', statusItems);
 
-    useChatResponseHandler({ setActiveExchange });
+    useChatResponseHandler({ setActiveExchange, setExchanges });
     useStatusUpdateHandler({ setStatusItems });
     // useExchangeStatusUpdateHandler({ setExchanges });
     useArtifactHandler({ sessionId, setTabs, setActiveKey });
@@ -55,72 +55,79 @@ const RootLayout = () => {
 
     return <>
 
-        <Layout>
+        <Layout className={styles.layout}>
             <Header className={styles.header}></Header>
-            <Layout>
-                <Content className={styles.contentArea}>
-                    <div className={styles.container}>
-                        <Flex vertical className={styles.layout}>
-                            <Tabs
-                                items={tabs}
-                                activeKey={activeKey}
-                                onChange={setActiveKey}
-                                tabPlacement="top"
-                            />
-                            {activeExchange && (
-                                <div>
-                                    <Flex justify="flex-end" className={styles.userMessageContainer}>
-                                        <UserMessage message={activeExchange?.user} />
-                                    </Flex>
-                                    <AssistantMessage message={activeExchange?.assistant} />
-                                </div>
-                            )}
 
-                            <div className={styles.chatInputContainer}>
-                                <ChatInput onEnter={handlePrompt} />
+            <Layout>
+                <Content className={styles.content}>
+                    <div className={styles.mainArea}>
+                        Main Area
+                    </div>
+                    <div className={styles.chatInputContainer}>
+                        <Flex vertical>
+                            <div>
+                                {activeExchange?.assistant.text}
                             </div>
+                            {activeExchange?.assistant.isLoading && (
+                                <Flex align="center" gap="small" className={styles["assistant-spin-left"]}>
+                                    <Spin size="small" />
+                                    {activeExchange?.assistant.statusMessage && (
+                                        <span style={{ fontSize: '14px', color: '#666' }}>
+                                            {activeExchange.assistant.statusMessage}
+                                        </span>
+                                    )}
+                                </Flex>
+                            )}
+                            <ChatInput onEnter={handlePrompt} />
                         </Flex>
+
                     </div>
                 </Content>
-                <Sider className={styles.statusSidebar} width={300} >
-                    <div className={styles.container}>
-                        <Tabs>
-                            <Tabs.TabPane tab="Chat" key="chat">
-                                <Flex vertical className={styles.layout}>
-                                    <div className={styles.content}>
-                                        {exchanges.map((exchange, idx) => (
-                                            <div key={idx}>
-                                                <Flex justify="flex-end" className={styles.userMessageContainer}>
-                                                    <UserMessage message={exchange.user} />
-                                                </Flex>
-                                                <AssistantMessage message={exchange.assistant} />
-                                            </div>
-                                        ))}
+                <Sider className={styles.statusSidebar} width={350}>
+                    <Tabs type="card"
+                        items={[
+                            {
+                                label: 'Status',
+                                key: 'status',
+                                children: (
+                                    <div className={styles.statusContainer}>
+                                        <Timeline>
+                                            {statusItems.map((status, index) => (
+                                                <Timeline.Item key={index} >
+                                                    {status.message}
+                                                </Timeline.Item>
+                                            ))}
+                                        </Timeline>
                                     </div>
 
+                                )
+                            },
+                            {
+                                label: 'Chat',
+                                key: 'chat',
+                                children: (
+                                    <Flex vertical className={styles.layout}>
+                                        <div className={styles.content}>
+                                            {exchanges.map((exchange, idx) => (
+                                                <div key={idx}>
+                                                    <Flex justify="flex-end" className={styles.userMessageContainer}>
+                                                        <UserMessage message={exchange.user} />
+                                                    </Flex>
+                                                    <AssistantMessage message={exchange.assistant} />
+                                                </div>
+                                            ))}
+                                        </div>
 
-                                </Flex>
-                            </Tabs.TabPane>
-                            <Tabs.TabPane tab="Status" key="status">
-                                <Timeline>
-                                    {statusItems.map((status, index) => (
-                                        <Timeline.Item key={index} >
-                                            {status.message}
-                                        </Timeline.Item>
-                                    ))}
-                                </Timeline>
-                            </Tabs.TabPane>
-                        </Tabs>
 
-                    </div>
+                                    </Flex>
+
+                                )
+                            }
+                        ]}
+                    />
                 </Sider>
             </Layout>
-
-
         </Layout>
-
-
-
 
     </>
 
