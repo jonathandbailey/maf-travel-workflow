@@ -61,11 +61,17 @@ const RootLayout = () => {
             <Header className={styles.header}></Header>
 
             <Layout>
-                <Content className={styles.content}>
-                    <div>
-                        <TravelPlan travelPlan={travelPlan} />
+                <Content style={{ background: "white" }} >
+
+
+                    <div style={{ padding: "24px" }}>
+                        <Flex justify="center" align="start" style={{ minHeight: 'auto', flex: 'none' }}>
+                            <TravelPlan travelPlan={travelPlan} />
+                        </Flex>
                     </div>
-                    <div className={styles.mainArea}>
+
+
+                    <div >
                         <Tabs items={
                             tabs
                         } activeKey={activeKey
