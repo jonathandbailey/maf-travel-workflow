@@ -67,45 +67,48 @@ const RootLayout = () => {
 
             </Header>
 
-            <Layout>
-                <Content style={{ background: "white" }} >
-
-
-                    <div style={{ padding: "24px" }}>
-                        <Flex justify="center" align="start" style={{ height: '100px', flex: 'none' }}>
-                            <TravelPlan travelPlan={travelPlan} />
-                        </Flex>
-                    </div>
-
-                    {tabs && tabs.length > 0 && (
-                        <div style={{ padding: "24px", flex: 1, height: `calc(100vh - 400px)` }} >
-                            <Tabs
-                                items={tabs}
-                                type="card"
-                                activeKey={activeKey}
-                                onChange={setActiveKey}
-                            />
+            <Layout style={{ height: "calc(100vh - 64px)" }}>
+                <Content style={{ background: "white", height: "100%", display: "flex", flexDirection: "column" }} >
+                    <Flex vertical align="center" style={{ height: "100%", flex: 1, minHeight: 0 }}>
+                        <div style={{ padding: "24px", flexShrink: 0 }}>
+                            <Flex justify="center" align="start">
+                                <TravelPlan travelPlan={travelPlan} />
+                            </Flex>
                         </div>
-                    )}
-                    <div className={styles.chatInputContainer}>
-                        <Flex vertical>
-                            <div>
-                                {activeExchange?.assistant.text}
-                            </div>
-                            {activeExchange?.assistant.isLoading && (
-                                <Flex align="center" gap="small" className={styles["assistant-spin-left"]}>
-                                    <Spin size="small" />
-                                    {activeExchange?.assistant.statusMessage && (
-                                        <span style={{ fontSize: '14px', color: '#666' }}>
-                                            {activeExchange.assistant.statusMessage}
-                                        </span>
-                                    )}
-                                </Flex>
-                            )}
-                            <ChatInput onEnter={handlePrompt} />
-                        </Flex>
 
-                    </div>
+                        {tabs && tabs.length > 0 && (
+                            <div style={{ padding: "24px" }} >
+                                <Tabs
+                                    items={tabs}
+                                    type="card"
+                                    activeKey={activeKey}
+                                    onChange={setActiveKey}
+                                />
+                            </div>
+                        )}
+                        <div className={styles.chatInputContainer} style={{ flex: 1, display: "flex" }}>
+                            <Flex vertical style={{ height: "100%" }}>
+                                <div style={{ flex: 1 }}>
+                                    {activeExchange?.assistant.text}
+                                </div>
+                                {activeExchange?.assistant.isLoading && (
+                                    <Flex align="center" gap="small" className={styles["assistant-spin-left"]}>
+                                        <Spin size="small" />
+                                        {activeExchange?.assistant.statusMessage && (
+                                            <span style={{ fontSize: '14px', color: '#666' }}>
+                                                {activeExchange.assistant.statusMessage}
+                                            </span>
+                                        )}
+                                    </Flex>
+                                )}
+                                <ChatInput onEnter={handlePrompt} />
+                            </Flex>
+
+                        </div>
+                    </Flex>
+
+
+
                 </Content>
                 <Sider className={styles.statusSidebar} width={350}>
                     <Tabs type="card"

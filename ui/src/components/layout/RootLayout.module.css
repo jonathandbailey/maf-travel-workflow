@@ -21,7 +21,7 @@
 }
 
 .layout {
-    height: calc(100vh - 160px);
+    height: 100vh;
     background: #fff;
 }
 
