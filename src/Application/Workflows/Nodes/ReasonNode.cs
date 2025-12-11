@@ -13,12 +13,12 @@ namespace Application.Workflows.Nodes;
 
 public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName),
    
-    IMessageHandler<ActObservation, ActRequest>
+    IMessageHandler<ReasoningInputDto, ReasoningOutputDto>
 {
     private const string StatusThinking = "Evaluating Travel Requirements...";
 
-    public async ValueTask<ActRequest> HandleAsync(
-        ActObservation actObservation, 
+    public async ValueTask<ReasoningOutputDto> HandleAsync(
+        ReasoningInputDto actObservation, 
         IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
@@ -37,7 +37,7 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
         return actRequest;
     }
 
-    private async Task<ChatMessage> Create(IWorkflowContext context, ActObservation observation)
+    private async Task<ChatMessage> Create(IWorkflowContext context, ReasoningInputDto observation)
     {
 
         var travelPlanSummary = await travelPlanService.GetSummary();
@@ -49,7 +49,7 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
         return new ChatMessage(ChatRole.User, template);
     }
 
-    private async Task<ActRequest> RunReasoningAsync(ChatMessage message, IWorkflowContext context, Activity? activity,
+    private async Task<ReasoningOutputDto> RunReasoningAsync(ChatMessage message, IWorkflowContext context, Activity? activity,
         CancellationToken cancellationToken)
     {
         try
@@ -58,7 +58,7 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
 
             WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.OutputNodePreview, response.Text);
 
-            var actRequest = response.Deserialize<ActRequest>(JsonSerializerOptions.Web);
+            var actRequest = response.Deserialize<ReasoningOutputDto>(JsonSerializerOptions.Web);
 
             await context.AddEventAsync(new WorkflowStatusEvent(actRequest.Status), cancellationToken);
 

@@ -8,11 +8,11 @@ using Application.Workflows.Dto;
 
 namespace Application.Workflows.Nodes;
 
-public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<ActNode>(WorkflowConstants.ActNodeName), IMessageHandler<ActRequest>
+public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<ActNode>(WorkflowConstants.ActNodeName), IMessageHandler<ReasoningOutputDto>
 {
     private const string StatusExecuting = "Executing...";
 
-    public async ValueTask HandleAsync(ActRequest message, IWorkflowContext context,
+    public async ValueTask HandleAsync(ReasoningOutputDto message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
         await context.AddEventAsync(new WorkflowStatusEvent(StatusExecuting), cancellationToken);
@@ -44,7 +44,7 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
         }
     }
 
-    private async Task UpdateTravelPlan(ActRequest message, IWorkflowContext context,
+    private async Task UpdateTravelPlan(ReasoningOutputDto message, IWorkflowContext context,
         CancellationToken cancellationToken)
     {
         await travelPlanService.UpdateAsync(message.TravelPlanUpdate!);

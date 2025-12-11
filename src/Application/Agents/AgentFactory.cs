@@ -20,7 +20,6 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.Orchestration, "Orchestration-Agent" },
         { AgentTypes.FlightWorker, "Flight-Agent" },
         { AgentTypes.HotelWorker, "Hotel-Agent" },
-        { AgentTypes.TrainWorker, "Train-Agent" },
         { AgentTypes.User , "User-Agent"},
         { AgentTypes.Parser , "Parser-Agent"}
     };
@@ -32,7 +31,6 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.Act, new ChatOptions() },
         { AgentTypes.Orchestration, new ChatOptions() },
         { AgentTypes.HotelWorker, CreateHotelChatOptions() },
-        { AgentTypes.TrainWorker, new ChatOptions() },
         { AgentTypes.User, new ChatOptions() },
         { AgentTypes.Parser, CreateParserChatOptions() }
     };
@@ -64,7 +62,7 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
 
     private static ChatOptions CreateReasonChatOptions()
     {
-        var schema = AIJsonUtilities.CreateJsonSchema(typeof(ActRequest));
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(ReasoningOutputDto));
 
         ChatOptions chatOptions = new()
         {

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Application.Agents.Repository;
+﻿namespace Application.Agents.Repository;
 
 public class AgentTemplateRepository : IAgentTemplateRepository
 {

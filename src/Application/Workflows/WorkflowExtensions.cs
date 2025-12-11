@@ -1,29 +1,10 @@
-﻿using System.Text.Json;
-using Application.Workflows.Dto;
+﻿using Application.Workflows.Dto;
 using Microsoft.Agents.AI.Workflows;
 
 namespace Application.Workflows;
 
 public static class WorkflowExtensions
 {
-    public static async Task<string> ReasonState(this IWorkflowContext context)
-    {
-        var fileContent = await context.ReadStateAsync<string>("ReasonState", scopeName: "ReasonNode");
-
-        if (string.IsNullOrEmpty(fileContent))
-        {
-            return JsonSerializer.Serialize(new ReasonState());
-        }
-
-        return fileContent;
-    }
-
-    public static async Task ReasonState(this IWorkflowContext context, string reasonState)
-    {
-        await context.QueueStateUpdateAsync<string>("ReasonState", reasonState, scopeName: "ReasonNode");
-
-    }
-
     public static async Task<Checkpointed<StreamingRun>> CreateStreamingRun<T>(this Workflow workflow, T message, WorkflowState state, CheckpointManager checkpointManager, CheckpointInfo? checkpointInfo) where T : notnull
     {
         switch (state)

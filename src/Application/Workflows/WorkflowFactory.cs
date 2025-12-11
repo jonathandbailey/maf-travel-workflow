@@ -17,8 +17,6 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 
         var hotelAgent = await agentFactory.Create(AgentTypes.HotelWorker);
 
-        var trainAgent = await agentFactory.Create(AgentTypes.TrainWorker);
-
         var userAgent = await agentFactory.Create(AgentTypes.User);
 
         var parserAgent = await agentFactory.Create(AgentTypes.Parser);
@@ -30,7 +28,6 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
      
         var flightWorkerNode = new FlightWorkerNode(flightAgent);
         var hotelWorkerNode = new HotelWorkerNode(hotelAgent);
-        var trainWorkerNode = new TrainWorkerNode(trainAgent);
 
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
 
@@ -51,11 +48,9 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         
         builder.AddEdge(actNode, flightWorkerNode);
         builder.AddEdge(actNode, hotelWorkerNode);
-        builder.AddEdge(actNode, trainWorkerNode);
 
         builder.AddEdge(flightWorkerNode, artifactStorageNode);
         builder.AddEdge(hotelWorkerNode, artifactStorageNode);
-        builder.AddEdge(trainWorkerNode, artifactStorageNode);
 
         return builder.Build();
     }

@@ -31,16 +31,10 @@
     <None Update="Agents\Templates\Hotel-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Agents\Templates\Orchestration-Agent.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Agents\Templates\Parser-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Agents\Templates\Reason-Agent.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Agents\Templates\Train-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Agents\Templates\User-Agent.md">

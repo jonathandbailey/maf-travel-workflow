@@ -11,8 +11,8 @@ namespace Application.Workflows.Nodes;
 
 public class UserNode(IAgent agent, IAgent parsingAgent) : ReflectingExecutor<UserNode>(WorkflowConstants.UserNodeName), 
     IMessageHandler<RequestUserInput>, 
-    IMessageHandler<UserResponse, ActObservation>,
-    IMessageHandler<UserInput, ActObservation>
+    IMessageHandler<UserResponse, ReasoningInputDto>,
+    IMessageHandler<UserInput, ReasoningInputDto>
 {
     public async ValueTask HandleAsync(RequestUserInput requestUserInput, IWorkflowContext context,
         CancellationToken cancellationToken = default)
@@ -37,13 +37,13 @@ public class UserNode(IAgent agent, IAgent parsingAgent) : ReflectingExecutor<Us
         await context.SendMessageAsync(new UserRequest(stringBuilder.ToString()), cancellationToken: cancellationToken);
     }
 
-    public async ValueTask<ActObservation> HandleAsync(UserResponse message, IWorkflowContext context,
+    public async ValueTask<ReasoningInputDto> HandleAsync(UserResponse message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
         return await HandleAsync(new UserInput(message.Message), context, cancellationToken);
     }
 
-    public async ValueTask<ActObservation> HandleAsync(UserInput message, IWorkflowContext context,
+    public async ValueTask<ReasoningInputDto> HandleAsync(UserInput message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
         using var activity = Telemetry.Start($"{WorkflowConstants.ParserNodeName}.observe");
@@ -54,6 +54,6 @@ public class UserNode(IAgent agent, IAgent parsingAgent) : ReflectingExecutor<Us
 
         WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.OutputNodePreview, response.Text);
 
-        return new ActObservation(response.Text, "UserInput");
+        return new ReasoningInputDto(response.Text, "UserInput");
     }
 }
