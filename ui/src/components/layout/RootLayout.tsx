@@ -18,9 +18,12 @@ import type { TravelPlanDto } from "../../types/dto/travel-plan.dto";
 import AgentFeedback from "../chat/AgentFeedback";
 import AgentStatus from "../chat/AgentStatus";
 
+import { FaPlaneUp } from "react-icons/fa6";
+import Welcome from "./Welcome";
+
 const { Header, Sider, Content } = Layout;
 
-const { Text } = Typography;
+const { Title } = Typography;
 
 const RootLayout = () => {
     const [sessionId] = useState<string>(crypto.randomUUID());
@@ -64,8 +67,10 @@ const RootLayout = () => {
 
         <Layout className={styles.layout}>
             <Header className={styles.header}>
+
                 <Flex justify="start" align="center" style={{ height: "100%" }}>
-                    <Text style={{ color: "black", fontSize: "24px" }}>Travel Agent</Text>
+                    <FaPlaneUp style={{ width: "32px", height: "32px" }} />
+                    <Title level={3} style={{ marginLeft: "18px", marginBottom: 0, marginTop: 0 }}>Travel Planner</Title>
                 </Flex>
 
             </Header>
@@ -79,7 +84,7 @@ const RootLayout = () => {
                             </Flex>
                         </div>
 
-
+                        {exchanges.length === 0 && <Welcome />}
                         <div style={{ padding: "24px" }} >
                             <Tabs
                                 items={tabs}
