@@ -21,8 +21,8 @@ const ChatInput = ({ onEnter }: ChatInputProps) => {
 
                 width: "100%",
                 minWidth: 700,
-                marginBottom: 48,
-                marginTop: 48,
+                marginBottom: 0,
+                marginTop: 0,
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
             }}
         >

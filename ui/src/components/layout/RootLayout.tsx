@@ -15,6 +15,7 @@ import { useTravelPlanUpdateHandler } from "../../hooks/useExchangeStatusUpdateH
 import { useArtifactHandler } from "../../hooks/useArtifactHandler";
 import TravelPlan from "../travel/plan/TravelPlan";
 import type { TravelPlanDto } from "../../types/dto/travel-plan.dto";
+import AgentFeedback from "../chat/AgentFeedback";
 
 const { Header, Sider, Content } = Layout;
 
@@ -28,11 +29,12 @@ const RootLayout = () => {
     const [tabs, setTabs] = useState<TabsProps['items']>([]);
     const [activeKey, setActiveKey] = useState<string>();
     const [travelPlan, setTravelPlan] = useState<TravelPlanDto | null>(null);
+    const [activeStatus, setActiveStatus] = useState<Status | null>(null);
 
     // Debug status items changes
 
     useChatResponseHandler({ setActiveExchange, setExchanges });
-    useStatusUpdateHandler({ setStatusItems });
+    useStatusUpdateHandler({ setStatusItems, setActiveStatus });
     useTravelPlanUpdateHandler({ sessionId, setTravelPlan });
     useArtifactHandler({ sessionId, setTabs, setActiveKey });
 
@@ -87,19 +89,8 @@ const RootLayout = () => {
                         </div>
                         <div className={styles.chatInputContainer}>
                             <Flex vertical>
-                                <div>
-                                    {activeExchange?.assistant.text}
-                                </div>
-                                {activeExchange?.assistant.isLoading && (
-                                    <Flex align="center" gap="small" className={styles["assistant-spin-left"]}>
-                                        <Spin size="small" />
-                                        {activeExchange?.assistant.statusMessage && (
-                                            <span style={{ fontSize: '14px', color: '#666' }}>
-                                                {activeExchange.assistant.statusMessage}
-                                            </span>
-                                        )}
-                                    </Flex>
-                                )}
+                                {activeExchange && <AgentFeedback message={activeExchange} status={activeStatus} />}
+
                                 <ChatInput onEnter={handlePrompt} />
                             </Flex>
 
