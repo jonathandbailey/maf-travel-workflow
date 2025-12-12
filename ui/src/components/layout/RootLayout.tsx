@@ -16,6 +16,7 @@ import { useArtifactHandler } from "../../hooks/useArtifactHandler";
 import TravelPlan from "../travel/plan/TravelPlan";
 import type { TravelPlanDto } from "../../types/dto/travel-plan.dto";
 import AgentFeedback from "../chat/AgentFeedback";
+import AgentStatus from "../chat/AgentStatus";
 
 const { Header, Sider, Content } = Layout;
 
@@ -34,7 +35,7 @@ const RootLayout = () => {
     // Debug status items changes
 
     useChatResponseHandler({ setActiveExchange, setExchanges });
-    useStatusUpdateHandler({ setStatusItems, setActiveStatus });
+    useStatusUpdateHandler({ setStatusItems, setActiveStatus, setActiveExchange });
     useTravelPlanUpdateHandler({ sessionId, setTravelPlan });
     useArtifactHandler({ sessionId, setTabs, setActiveKey });
 
@@ -103,22 +104,7 @@ const RootLayout = () => {
                 <Sider className={styles.statusSidebar} width={350}>
                     <Tabs type="card"
                         items={[
-                            {
-                                label: 'Status',
-                                key: 'status',
-                                children: (
-                                    <div className={styles.statusContainer}>
-                                        <Timeline>
-                                            {statusItems.map((status, index) => (
-                                                <Timeline.Item key={index} >
-                                                    {status.message}
-                                                </Timeline.Item>
-                                            ))}
-                                        </Timeline>
-                                    </div>
 
-                                )
-                            },
                             {
                                 label: 'Chat',
                                 key: 'chat',
@@ -131,6 +117,7 @@ const RootLayout = () => {
                                                         <UserMessage message={exchange.user} />
                                                     </Flex>
                                                     <AssistantMessage message={exchange.assistant} />
+                                                    <AgentStatus statusItems={exchange.status || []} />
                                                 </div>
                                             ))}
                                         </div>

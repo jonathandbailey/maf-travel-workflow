@@ -61,7 +61,8 @@ export class UIFactory {
         return {
             id: options?.id ?? crypto.randomUUID(),
             user: userMessage,
-            assistant: assistantMessage
+            assistant: assistantMessage,
+            status: []
         };
     }
 

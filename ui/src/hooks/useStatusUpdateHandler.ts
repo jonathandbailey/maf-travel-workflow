@@ -1,14 +1,16 @@
 import { useEffect } from "react";
 import type { ChatResponseDto } from "../types/dto/chat-response.dto";
 import type { Status } from "../types/ui/Status";
+import type { UIExchange } from "../types/ui/UIExchange";
 import streamingService from "../services/streaming.service";
 
 interface UseStatusUpdateHandlerProps {
     setStatusItems: React.Dispatch<React.SetStateAction<Status[]>>;
     setActiveStatus: React.Dispatch<React.SetStateAction<Status | null>>;
+    setActiveExchange: React.Dispatch<React.SetStateAction<UIExchange | null>>;
 }
 
-export const useStatusUpdateHandler = ({ setStatusItems, setActiveStatus }: UseStatusUpdateHandlerProps) => {
+export const useStatusUpdateHandler = ({ setStatusItems, setActiveStatus, setActiveExchange }: UseStatusUpdateHandlerProps) => {
     useEffect(() => {
         const handleStatusUpdate = (response: ChatResponseDto) => {
             if (!response) return;
@@ -25,6 +27,19 @@ export const useStatusUpdateHandler = ({ setStatusItems, setActiveStatus }: UseS
 
             // Update the active status to the most recent one
             setActiveStatus(newStatus);
+
+            // Add the status to the activeExchange collection
+            setActiveExchange(prev => {
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+                    status: [
+                        ...prev.status,
+                        newStatus
+                    ]
+                };
+            });
         };
 
         streamingService.on("status", handleStatusUpdate);
@@ -32,5 +47,5 @@ export const useStatusUpdateHandler = ({ setStatusItems, setActiveStatus }: UseS
         return () => {
             streamingService.off("status", handleStatusUpdate);
         };
-    }, [setStatusItems, setActiveStatus]);
+    }, [setStatusItems, setActiveStatus, setActiveExchange]);
 };
