@@ -5,20 +5,26 @@ import streamingService from "../services/streaming.service";
 
 interface UseStatusUpdateHandlerProps {
     setStatusItems: React.Dispatch<React.SetStateAction<Status[]>>;
+    setActiveStatus: React.Dispatch<React.SetStateAction<Status | null>>;
 }
 
-export const useStatusUpdateHandler = ({ setStatusItems }: UseStatusUpdateHandlerProps) => {
+export const useStatusUpdateHandler = ({ setStatusItems, setActiveStatus }: UseStatusUpdateHandlerProps) => {
     useEffect(() => {
         const handleStatusUpdate = (response: ChatResponseDto) => {
             if (!response) return;
 
+            const newStatus = { message: response.message || '' };
+
             setStatusItems(prev => {
                 const newItems = [
                     ...prev,
-                    { message: response.message || '' }
+                    newStatus
                 ];
                 return newItems;
             });
+
+            // Update the active status to the most recent one
+            setActiveStatus(newStatus);
         };
 
         streamingService.on("status", handleStatusUpdate);
@@ -26,5 +32,5 @@ export const useStatusUpdateHandler = ({ setStatusItems }: UseStatusUpdateHandle
         return () => {
             streamingService.off("status", handleStatusUpdate);
         };
-    }, [setStatusItems]);
+    }, [setStatusItems, setActiveStatus]);
 };

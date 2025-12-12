@@ -1,11 +1,13 @@
 import { Flex, Spin } from "antd";
 import type { UIExchange } from "../../types/ui/UIExchange";
+import type { Status } from "../../types/ui/Status";
 
 interface AgentFeedbackProps {
     message: UIExchange;
+    status?: Status | null;
 }
 
-const AgentFeedback = ({ message }: AgentFeedbackProps) => {
+const AgentFeedback = ({ message, status }: AgentFeedbackProps) => {
     return (
         <> <Flex vertical>
             <div>
@@ -14,9 +16,9 @@ const AgentFeedback = ({ message }: AgentFeedbackProps) => {
             {message?.assistant.isLoading && (
                 <Flex align="center" gap="small" >
                     <Spin size="small" />
-                    {message?.assistant.statusMessage && (
+                    {status?.message && (
                         <span style={{ fontSize: '14px', color: '#666' }}>
-                            {message.assistant.statusMessage}
+                            {status.message}
                         </span>
                     )}
                 </Flex>

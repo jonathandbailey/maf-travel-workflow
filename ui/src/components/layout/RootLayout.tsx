@@ -29,11 +29,12 @@ const RootLayout = () => {
     const [tabs, setTabs] = useState<TabsProps['items']>([]);
     const [activeKey, setActiveKey] = useState<string>();
     const [travelPlan, setTravelPlan] = useState<TravelPlanDto | null>(null);
+    const [activeStatus, setActiveStatus] = useState<Status | null>(null);
 
     // Debug status items changes
 
     useChatResponseHandler({ setActiveExchange, setExchanges });
-    useStatusUpdateHandler({ setStatusItems });
+    useStatusUpdateHandler({ setStatusItems, setActiveStatus });
     useTravelPlanUpdateHandler({ sessionId, setTravelPlan });
     useArtifactHandler({ sessionId, setTabs, setActiveKey });
 
@@ -88,7 +89,7 @@ const RootLayout = () => {
                         </div>
                         <div className={styles.chatInputContainer}>
                             <Flex vertical>
-                                {activeExchange && <AgentFeedback message={activeExchange} />}
+                                {activeExchange && <AgentFeedback message={activeExchange} status={activeStatus} />}
 
                                 <ChatInput onEnter={handlePrompt} />
                             </Flex>
