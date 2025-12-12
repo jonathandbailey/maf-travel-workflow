@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Application.Agents;
 
-public class Agent(AIAgent agent, IAgentMemoryService memory, AgentTypes type) : IAgent
+public class Agent(AIAgent agent, IAgentMemoryService memory, AgentMemoryTypes type) : IAgent
 {
     private const string AgentTelemetryName = "Agent";
     public async Task<AgentRunResponse> RunAsync(
@@ -71,7 +71,7 @@ public class Agent(AIAgent agent, IAgentMemoryService memory, AgentTypes type) :
         activity?.SetTag("llm.total_tokens", response.Usage?.TotalTokenCount ?? 0);
     }
 
-    private async Task<AgentThread> LoadAsync(AgentTypes agentType)
+    private async Task<AgentThread> LoadAsync(AgentMemoryTypes agentType)
     {
         AgentThread? thread;
 

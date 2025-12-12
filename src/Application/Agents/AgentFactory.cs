@@ -34,6 +34,20 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.User, new ChatOptions() },
         { AgentTypes.Parser, CreateParserChatOptions() }
     };
+
+    private readonly Dictionary<AgentTypes, AgentMemoryTypes> _agentMemoryTypes = new()
+    {
+        { AgentTypes.Reason, AgentMemoryTypes.Reason },
+        { AgentTypes.Act, AgentMemoryTypes.Act },
+        { AgentTypes.Orchestration, AgentMemoryTypes.Orchestration },
+        { AgentTypes.FlightWorker, AgentMemoryTypes.FlightWorker },
+        { AgentTypes.HotelWorker, AgentMemoryTypes.HotelWorker },
+        { AgentTypes.User , AgentMemoryTypes.UserShared},
+        { AgentTypes.Parser , AgentMemoryTypes.UserShared}
+    };
+
+
+
     public async Task<IAgent> Create(AgentTypes agentType)
     {
         if (_agentTemplates.TryGetValue(agentType, out var templateName))
@@ -57,7 +71,7 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
             ChatOptions = _agentChatOptions[type]
         });
 
-        return new Agent(reasonAgent, agentMemoryService, type);
+        return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[type]);
     }
 
     private static ChatOptions CreateReasonChatOptions()
@@ -133,7 +147,18 @@ public enum AgentTypes
     Orchestration,
     FlightWorker,
     HotelWorker,
-    TrainWorker,
     User,
     Parser
+}
+
+public enum AgentMemoryTypes
+{
+    Reason,
+    Act,
+    Orchestration,
+    FlightWorker,
+    HotelWorker,
+    User,
+    Parser,
+    UserShared
 }
