@@ -26,7 +26,28 @@ Based on the provided inputs, you choose from the below actions :
 
 ### Output Example Format
 {
-	"FlightOptions" :[
+	"FlightOptions" :{
+		"ArtifactKey" : "Flights",
+		"Results" :[
+			"Airline" :"Example Air",
+			"FlightNumber" :"EA123",
+			"Departure" :{ "Airport" : "Example Airport", "DateTime":"2023-10-01T10:00:00Z"},
+			"Arrival" : { "Airport" : "Example Destination Airport", "DateTime":"2023-10-01T14:00:00Z"},
+			"Duration" : "2hrs 20 minutes",
+			"Price" : {"Currency" : "USD", "Amount" : 350.00}
+			]
+	},
+	"Action" : "FlightOptionsCreated",
+	"Status" : "Success"
+}
+
+# Select User Flight
+## Instructions :
+- Based on the input select the correct flight
+
+- ### Output Example Format
+{
+	"FlightOptions" :{
 		"ArtifactKey" : "Flights",
 		"Results" :[
 			"Airline" :"Example Air",
@@ -37,8 +58,9 @@ Based on the provided inputs, you choose from the below actions :
 			"Price" : {"Currency" : "USD", "Amount" : 350.00}
 		]
 	},
-	"Action" : "FlightOptionsCreated",
+	"Action" : "FlightOptionsSelected",
 	"Status" : "Success"
 }
+
 
 Begin.

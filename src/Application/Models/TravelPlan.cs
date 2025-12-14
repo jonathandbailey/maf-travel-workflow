@@ -41,6 +41,7 @@ public enum FlightOptionsStatus
 public enum UserFlightOptionsStatus
 {
     Selected,
+    UserChoiceRequired,
     NotSelected
 }
 

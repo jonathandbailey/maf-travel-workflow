@@ -8,7 +8,12 @@ public class CreateFlightOptions(TravelPlan travelPlan, ReasoningOutputDto messa
     public TravelPlan TravelPlan => travelPlan;
 }
 
-public class FlightOptionsCreated(){}
+public class FlightOptionsCreated(FlightOptionsStatus flightOptionsStatus, UserFlightOptionsStatus userFlightOptionStatus)
+{
+    public FlightOptionsStatus FlightOptionsStatus { get;  } = flightOptionsStatus;
+
+    public UserFlightOptionsStatus UserFlightOptionStatus { get; } = userFlightOptionStatus;
+}
 
 public class CreatePlanRequestDto(TravelPlan travelPlan)
 {

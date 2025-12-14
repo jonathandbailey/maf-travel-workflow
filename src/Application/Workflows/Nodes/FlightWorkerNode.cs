@@ -7,10 +7,12 @@ using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Application.Interfaces;
+using Application.Models;
 
 namespace Application.Workflows.Nodes;
 
-public class FlightWorkerNode(IAgent agent) : 
+public class FlightWorkerNode(IAgent agent, IArtifactRepository artifactRepository) : 
     ReflectingExecutor<FlightWorkerNode>(WorkflowConstants.FlightWorkerNodeName), 
    
     IMessageHandler<CreateFlightOptions>
@@ -38,6 +40,11 @@ public class FlightWorkerNode(IAgent agent) :
 
             WorkflowTelemetryTags.SetInputPreview(activity, serialized);
 
+            if (await artifactRepository.FlightsExistsAsync())
+            {
+                var flights = await artifactRepository.GetFlightPlanAsync();
+            }
+
             var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), cancellationToken: cancellationToken);
 
             var responseMessage = response.Messages.First();
@@ -46,16 +53,25 @@ public class FlightWorkerNode(IAgent agent) :
 
             activity?.SetTag(WorkflowTelemetryTags.ArtifactKey, "flights");
 
-            var flightOptions = JsonSerializer.Deserialize<FlightActionResultDto>(responseMessage.Text, SerializerOptions);
+            var flightOptions = response.Deserialize<FlightActionResultDto>(JsonSerializerOptions.Web);
 
             if (flightOptions == null)
                 throw new JsonException("Failed to deserialize flight options in Flight Worker Node");
 
             var payload = JsonSerializer.Serialize(flightOptions.FlightOptions, SerializerOptions);
 
-            await context.SendMessageAsync(new ArtifactStorageDto("flights", payload), cancellationToken: cancellationToken);
+            if (flightOptions.Action == "FlightOptionsCreated")
+            {
+                await context.SendMessageAsync(new ArtifactStorageDto("flights", payload), cancellationToken: cancellationToken);
 
-            await context.SendMessageAsync(new FlightOptionsCreated(), cancellationToken: cancellationToken);
+                await context.SendMessageAsync(new FlightOptionsCreated(FlightOptionsStatus.Created, UserFlightOptionsStatus.UserChoiceRequired), cancellationToken: cancellationToken);
+            }
+
+            if (flightOptions.Action == "FlightOptionsSelected")
+            {
+                await context.SendMessageAsync(new FlightOptionsCreated(FlightOptionsStatus.Created, UserFlightOptionsStatus.Selected), cancellationToken: cancellationToken);
+            }
+
         }
         catch (Exception exception)
         {

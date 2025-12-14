@@ -54,11 +54,14 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
     {
         var plan = await travelPlanService.LoadAsync();
 
-        plan.FlightOptionsStatus = FlightOptionsStatus.Created;
+        plan.FlightOptionsStatus = message.FlightOptionsStatus;
+        plan.UserFlightOptionStatus = message.UserFlightOptionStatus;
 
         await travelPlanService.SaveAsync(plan);
 
-        await context.SendMessageAsync(new ReasoningInputDto("Flight Options Created and sent to User", "WorkerInput"), cancellationToken: cancellationToken);
+        var output = $"Flight Options : {message.FlightOptionsStatus}, User Flight Option Status: {message.UserFlightOptionStatus}";
+
+        await context.SendMessageAsync(new ReasoningInputDto(output, "FlightWorkerInput"), cancellationToken: cancellationToken);
     }
 }
 

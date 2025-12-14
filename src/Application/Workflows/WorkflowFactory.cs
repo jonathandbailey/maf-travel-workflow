@@ -26,7 +26,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var reasonNode = new ReasonNode(reasonAgent, travelPlanService);
         var actNode = new ActNode(travelPlanService);
      
-        var flightWorkerNode = new FlightWorkerNode(flightAgent);
+        var flightWorkerNode = new FlightWorkerNode(flightAgent, artifactRepository);
         var hotelWorkerNode = new HotelWorkerNode(hotelAgent);
 
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);

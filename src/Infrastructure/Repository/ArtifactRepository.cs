@@ -38,6 +38,14 @@ public class ArtifactRepository(IAzureStorageRepository repository, ISessionCont
         return flightPlan ?? throw new InvalidOperationException($"Failed to deserialize flight plan from blob: {filename}");
     }
 
+    public async Task<bool> FlightsExistsAsync()
+    {
+        var filename = GetArtifactFileName("flights");
+        var exists = await repository.BlobExists(filename, settings.Value.ContainerName);
+        
+        return exists;
+    }
+
     public async Task<HotelSearchResultDto> GetHotelPlanAsync()
     {
         var filename = GetArtifactFileName("hotels");
