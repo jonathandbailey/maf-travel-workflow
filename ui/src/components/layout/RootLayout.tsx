@@ -38,7 +38,7 @@ const RootLayout = () => {
     const [travelPlan, setTravelPlan] = useState<TravelPlanDto | null>(null);
     const [activeStatus, setActiveStatus] = useState<Status | null>(null);
 
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
 
     // Debug status items changes
 
