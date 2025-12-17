@@ -1,6 +1,7 @@
 ﻿using Application.Agents;
 using Application.Interfaces;
 using Application.Models;
+using Application.Models.Flights;
 using Application.Observability;
 using Application.Services;
 using Application.Workflows.Dto;

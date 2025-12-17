@@ -6,6 +6,7 @@ using Application.Interfaces;
 using Application.Models;
 using Application.Workflows.Dto;
 using Infrastructure.Settings;
+using Application.Models.Flights;
 
 namespace Application.Services;
 

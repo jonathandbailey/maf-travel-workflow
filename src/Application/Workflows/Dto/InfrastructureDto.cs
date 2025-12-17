@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Application.Models.Flights;
 
 namespace Application.Workflows.Dto;
 
