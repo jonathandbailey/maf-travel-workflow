@@ -5,7 +5,6 @@ using Application.Workflows.Events;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using System.Text.Json;
-using Application.Models;
 
 namespace Application.Workflows.Nodes;
 
@@ -16,7 +15,7 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
     public async ValueTask HandleAsync(ReasoningOutputDto message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Start($"{WorkflowConstants.ActNodeName}.handleRequest");
+        using var activity = Telemetry.Start($"{WorkflowConstants.ActNodeName}{WorkflowConstants.HandleRequest}");
 
         activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ActNodeName);
     
@@ -26,29 +25,26 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
 
         if(message.TravelPlanUpdate != null)
         {
-            await UpdateTravelPlan(message, context, cancellationToken);
+            await travelPlanService.UpdateAsync(message.TravelPlanUpdate!);
+
+            await context.AddEventAsync(new TravelPlanUpdatedEvent(), cancellationToken);
         }
 
         switch (message.NextAction)
         {
-            case "AskUser":
+            case NextAction.RequestInformation:
                 await context.SendMessageAsync(new RequestUserInput(serialized), cancellationToken: cancellationToken);
                 break;
-            case "HandleFlightOptions":
+            case NextAction.FlightAgent:
                 var plan = await travelPlanService.LoadAsync();
                 await context.SendMessageAsync(new CreateFlightOptions(plan, message), cancellationToken: cancellationToken);
                 break;
+            case NextAction.Error:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(message),"Unknown NextAction");
         }
     }
-
-    private async Task UpdateTravelPlan(ReasoningOutputDto message, IWorkflowContext context,
-        CancellationToken cancellationToken)
-    {
-        await travelPlanService.UpdateAsync(message.TravelPlanUpdate!);
-
-        await context.AddEventAsync(new TravelPlanUpdatedEvent(), cancellationToken);
-    }
-
     public async ValueTask<ReasoningInputDto> HandleAsync(FlightOptionsCreated message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {

@@ -15,7 +15,7 @@ public class ReasoningOutputDto
 {
     public string Thought { get; set; } = string.Empty;
 
-    public string NextAction { get; set; } = string.Empty;
+    public NextAction NextAction { get; set; } 
 
     public string Status { get; set; } = string.Empty;
 
@@ -27,6 +27,13 @@ public class ReasoningOutputDto
     {
 
     }
+}
+
+public enum NextAction
+{
+    RequestInformation,
+    FlightAgent,
+    Error
 }
 
 public class ReasoningInputDto(string observation, string resultType)

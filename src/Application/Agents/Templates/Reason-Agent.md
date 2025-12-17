@@ -20,8 +20,8 @@ Where:
 
 # ACTIONS
 
-## AskUser
-- Requests missing critical information from the user
+## RequestInformation
+- Requests missing critical information
 
 ### Example:
 
@@ -40,7 +40,7 @@ TravelPlanSummary :{"Origin":"Not_Set","Destination":"Not_Set","StartDate":"Not_
 ### Output
 {
   "thought": "User provided destination 'Berlin' and departure date '23.04.2025', updating travel plan.Destination is known but origin and dates are missing.",
-  "nextAction": "AskUser",
+  "nextAction": "RequestInformation",
   "userInput": {
     "question": "Where are you flying from, and what are your travel dates?",
     "requiredInputs": ["origin", "endDate"]
@@ -52,13 +52,13 @@ TravelPlanSummary :{"Origin":"Not_Set","Destination":"Not_Set","StartDate":"Not_
   "status": "Requesting missing travel details from user"
 }
 
-## HandleFlightOptions
+## FlightAgent
 - Flight options based on known travel details and options
 
 ### Example - Create Flights Options:
 {
   "thought": "User has provided all necessary travel details, create flight options",
-  "nextAction": "HandleFlightOptions",
+  "nextAction": "FlightAgent",
   "status": "Creating flight options"
 }
 

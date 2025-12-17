@@ -20,6 +20,7 @@ public interface ITravelPlanService
     Task<TravelPlan> AddFlightSearchOption(FlightOptionSearch option);
     Task<TravelPlan> SelectFlightOption(FlightOption flightOption);
     Task<FlightSearchResultDto> GetFlightOptionsAsync();
+    Task CreateTravelPlan();
 }
 
 public class TravelPlanService(IAzureStorageRepository repository, ISessionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
@@ -31,7 +32,10 @@ public class TravelPlanService(IAzureStorageRepository repository, ISessionConte
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
+        Converters = { new JsonStringEnumConverter() },
+        PropertyNameCaseInsensitive = false,
+        AllowTrailingCommas = false,
+        ReadCommentHandling = JsonCommentHandling.Disallow
     };
 
     public async Task<TravelPlan> AddFlightSearchOption(FlightOptionSearch option)
@@ -83,20 +87,19 @@ public class TravelPlanService(IAzureStorageRepository repository, ISessionConte
     {
         var travelPlan = await LoadAsync();
 
-        if (travelPlan.TravelPlanStatus == TravelPlanStatus.NotStarted)
-        {
-            travelPlan.TravelPlanStatus = TravelPlanStatus.InProgress;
-        }
+        travelPlan.InProgress();
 
-        if (messageTravelPlanUpdate.Origin != null)
-            travelPlan.Origin = messageTravelPlanUpdate.Origin;
+        if (!string.IsNullOrEmpty(messageTravelPlanUpdate.Origin))
+            travelPlan.SetOrigin(messageTravelPlanUpdate.Origin);
 
-        if (messageTravelPlanUpdate.Destination != null)
-            travelPlan.Destination = messageTravelPlanUpdate.Destination;
-        if (messageTravelPlanUpdate.StartDate != null)
-            travelPlan.StartDate = messageTravelPlanUpdate.StartDate;
-        if (messageTravelPlanUpdate.EndDate != null)
-            travelPlan.EndDate = messageTravelPlanUpdate.EndDate;
+        if (!string.IsNullOrEmpty(messageTravelPlanUpdate.Destination))
+            travelPlan.SetDestination(messageTravelPlanUpdate.Destination);
+
+        if (messageTravelPlanUpdate.StartDate.HasValue)
+            travelPlan.SetStartDate(messageTravelPlanUpdate.StartDate.Value);
+
+        if (messageTravelPlanUpdate.EndDate.HasValue)
+            travelPlan.SetEndDate(messageTravelPlanUpdate.EndDate.Value);
 
         await SaveAsync(travelPlan);
     }
@@ -112,6 +115,16 @@ public class TravelPlanService(IAzureStorageRepository repository, ISessionConte
             ApplicationJsonContentType);
     }
 
+    public async Task CreateTravelPlan()
+    {
+        if (!await repository.BlobExists(GetStorageFileName(), settings.Value.ContainerName))
+        {
+            var travelPlan = new TravelPlan();
+
+            await SaveAsync(travelPlan);
+        }
+    }
+
     public async Task<bool> ExistsAsync()
     {
         return await repository.BlobExists(GetStorageFileName(), settings.Value.ContainerName);
@@ -125,7 +138,6 @@ public class TravelPlanService(IAzureStorageRepository repository, ISessionConte
 
         if (stateDto == null)
             throw new JsonException($"Failed to deserialize Travel Plan for session.");
-
 
         return stateDto;
     }

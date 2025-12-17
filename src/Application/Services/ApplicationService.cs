@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces;
-using Application.Models;
 using Application.Workflows;
 using Microsoft.Extensions.AI;
 using Microsoft.Agents.AI.Workflows;
@@ -23,12 +22,7 @@ public class ApplicationService(
         
         var state = await workflowRepository.LoadAsync(request.UserId, request.SessionId);
 
-        if (!await travelPlanService.ExistsAsync())
-        {
-            var travelPlan = new TravelPlan();
-
-            await travelPlanService.SaveAsync(travelPlan);
-        }
+        await travelPlanService.CreateTravelPlan();
 
         var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, request.UserId, request.SessionId));
 
