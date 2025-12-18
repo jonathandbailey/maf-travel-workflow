@@ -1,10 +1,10 @@
 import ChatInput from "../../features/chat/components/ChatInput"
 import { Flex, Layout } from "antd"
 import { useState } from "react";
-import type { UIExchange } from "../../types/ui/UIExchange";
+import type { Exchange } from "../../features/chat/domain/Exchange";
 import { ChatService } from "../../features/chat/api/chat.api";
 import styles from './RootLayout.module.css';
-import type { Status } from "../../types/ui/Status";
+import type { Status } from "../../features/chat/domain/Status";
 import TravelPlan from "../../features/travel-planning/components/plan/TravelPlan";
 
 import Welcome from "../../features/dashboard/components/Welcome";
@@ -24,8 +24,8 @@ const { Header, Sider, Content } = Layout;
 
 const RootLayout = () => {
     const [sessionId] = useState<string>(crypto.randomUUID());
-    const [exchanges, setExchanges] = useState<UIExchange[]>([]);
-    const [activeExchange, setActiveExchange] = useState<UIExchange | null>(null);
+    const [exchanges, setExchanges] = useState<Exchange[]>([]);
+    const [activeExchange, setActiveExchange] = useState<Exchange | null>(null);
     const [travelPlan, setTravelPlan] = useState<TravelPlanDto | null>(null);
     const [activeStatus, setActiveStatus] = useState<Status | null>(null);
 

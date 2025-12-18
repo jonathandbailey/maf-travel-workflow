@@ -1,5 +1,5 @@
-import type { UIExchange } from "../../../types/ui/UIExchange";
-import type { UIMessage } from "../../../types/ui/UIMessage";
+import type { Exchange } from "../domain/Exchange";
+import type { Message } from "../domain/Message";
 
 
 export class UIFactory {
@@ -16,7 +16,7 @@ export class UIFactory {
             errorMessage?: string;
             statusMessage?: string;
         }
-    ): UIMessage {
+    ): Message {
         return {
             id: options?.id ?? crypto.randomUUID(),
             text,
@@ -31,14 +31,14 @@ export class UIFactory {
     /**
      * Creates a new user message
      */
-    static createUserMessage(text: string, id?: string): UIMessage {
+    static createUserMessage(text: string, id?: string): Message {
         return this.createUIMessage(text, 'user', { id });
     }
 
     /**
      * Creates a new assistant message in loading state
      */
-    static createAssistantMessage(id?: string): UIMessage {
+    static createAssistantMessage(id?: string): Message {
         return this.createUIMessage('', 'assistant', {
             id,
             isLoading: true
@@ -55,7 +55,7 @@ export class UIFactory {
             userMessageId?: string;
             assistantMessageId?: string;
         }
-    ): UIExchange {
+    ): Exchange {
         const userMessage = this.createUserMessage(userText, options?.userMessageId);
         const assistantMessage = this.createAssistantMessage(options?.assistantMessageId);
 
@@ -71,10 +71,10 @@ export class UIFactory {
      * Updates an assistant message with new text and loading state
      */
     static updateAssistantMessage(
-        message: UIMessage,
+        message: Message,
         text: string,
         isLoading: boolean = false
-    ): UIMessage {
+    ): Message {
         return {
             ...message,
             text,

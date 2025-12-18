@@ -1,5 +1,5 @@
 import { Flex, Timeline, Typography } from "antd";
-import type { Status } from "../../../types/ui/Status";
+import type { Status } from "../domain/Status";
 
 interface AgentStatusProps {
     statusItems: Status[];

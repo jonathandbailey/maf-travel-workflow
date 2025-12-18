@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import type { Status } from "../../../types/ui/Status";
-import type { UIExchange } from "../../../types/ui/UIExchange";
-import streamingService from "../../../app/services/streaming.service";
+import type { Status } from "../domain/Status";
+import type { Exchange } from "../domain/Exchange";
+import streamingService from "../../../app/api/streaming.api";
 import type { ChatResponseDto } from "../api/chat.dto";
 
 interface UseStatusUpdateHandlerProps {
     setActiveStatus: React.Dispatch<React.SetStateAction<Status | null>>;
-    setActiveExchange: React.Dispatch<React.SetStateAction<UIExchange | null>>;
+    setActiveExchange: React.Dispatch<React.SetStateAction<Exchange | null>>;
 }
 
 export const useStatusUpdateHandler = ({ setActiveStatus, setActiveExchange }: UseStatusUpdateHandlerProps) => {

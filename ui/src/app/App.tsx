@@ -1,6 +1,6 @@
 import './App.css'
-import RootLayout from './app/layout/RootLayout'
-import streamingService from './app/services/streaming.service';
+import RootLayout from './layout/RootLayout'
+import streamingService from './api/streaming.api';
 import { useEffect } from 'react';
 
 function App() {

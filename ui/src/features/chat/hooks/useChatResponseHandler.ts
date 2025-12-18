@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import type { UIExchange } from "../../../types/ui/UIExchange";
-import streamingService from "../../../app/services/streaming.service";
+import type { Exchange } from "../domain/Exchange";
+import streamingService from "../../../app/api/streaming.api";
 import { UIFactory } from "../factories/UIFactory";
 import type { ChatResponseDto } from "../api/chat.dto";
 
 
 interface UseChatResponseHandlerProps {
-    setActiveExchange: React.Dispatch<React.SetStateAction<UIExchange | null>>;
-    setExchanges: React.Dispatch<React.SetStateAction<UIExchange[]>>;
+    setActiveExchange: React.Dispatch<React.SetStateAction<Exchange | null>>;
+    setExchanges: React.Dispatch<React.SetStateAction<Exchange[]>>;
 }
 
 export const useChatResponseHandler = ({ setActiveExchange, setExchanges }: UseChatResponseHandlerProps) => {

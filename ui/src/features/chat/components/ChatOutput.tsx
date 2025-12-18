@@ -1,12 +1,12 @@
 import { Divider, Flex, Tabs } from "antd";
-import type { UIExchange } from "../../../types/ui/UIExchange";
+import type { Exchange } from "../domain/Exchange";
 import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
 import AgentStatus from "./AgentStatus";
 
 
 interface ChatOutputProps {
-    exchanges: UIExchange[];
+    exchanges: Exchange[];
 }
 
 const ChatOutput = ({ exchanges }: ChatOutputProps) => {

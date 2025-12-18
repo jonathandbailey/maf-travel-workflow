@@ -1,10 +1,10 @@
 import { Flex } from "antd";
 import AssistantMessage from "./AssistantMessage";
 import UserMessage from "./UserMessage";
-import type { UIConversationThread } from "../../../types/ui/UIConversationThread";
+import type { ConversationThread } from "../domain/ConversationThread";
 
 interface ConversationThreadProps {
-    thread: UIConversationThread;
+    thread: ConversationThread;
 }
 
 const ExchangeMessages = ({ thread }: ConversationThreadProps) => {

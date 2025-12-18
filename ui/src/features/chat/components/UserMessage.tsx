@@ -1,8 +1,8 @@
 import { Card } from "antd";
-import type { UIMessage } from "../../../types/ui/UIMessage";
+import type { Message } from "../domain/Message";
 
 interface UserMessageProps {
-    message: UIMessage;
+    message: Message;
 }
 
 const UserMessage = ({ message }: UserMessageProps) => {

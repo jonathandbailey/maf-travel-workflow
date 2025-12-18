@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { TabsProps } from "antd";
-import streamingService from "../../../app/services/streaming.service";
+import streamingService from "../../../app/api/streaming.api";
 import FlightList from "../components/flights/FlightList";
 import HotelList from "../components/hotels/HotelList";
 import { TravelService } from "../api/travel.api";
