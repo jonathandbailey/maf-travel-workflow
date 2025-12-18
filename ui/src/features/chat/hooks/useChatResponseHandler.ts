@@ -31,14 +31,14 @@ export const useChatResponseHandler = ({ setActiveExchange }: UseChatResponseHan
                         assistant: updatedAssistant
                     };
 
+
+
                     return updatedExchange;
                 }
                 return prev;
             });
 
-            if (response.isEndOfStream && updatedExchange) {
-                addExchange(updatedExchange);
-            }
+
         };
 
         streamingService.on("user", handleUserResponse);
