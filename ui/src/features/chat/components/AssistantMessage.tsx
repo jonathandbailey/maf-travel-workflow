@@ -1,7 +1,7 @@
 import { Alert, Card, Flex, Spin } from "antd";
 import Markdown from "react-markdown";
-import type { UIMessage } from "../../types/ui/UIMessage";
 import styles from "./AssistantMessage.module.css";
+import type { UIMessage } from "../../../types/ui/UIMessage";
 
 interface AssistantMessageProps {
     message: UIMessage

@@ -1,5 +1,6 @@
-import type { UIMessage } from '../types/ui/UIMessage';
-import type { UIExchange } from '../types/ui/UIExchange';
+import type { UIExchange } from "../../../types/ui/UIExchange";
+import type { UIMessage } from "../../../types/ui/UIMessage";
+
 
 export class UIFactory {
     /**

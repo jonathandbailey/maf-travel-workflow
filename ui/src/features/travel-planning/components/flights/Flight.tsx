@@ -1,6 +1,6 @@
 
 import { Card } from "antd";
-import type { FlightOptionDto } from "../../../types/dto/flight.dto";
+import type { FlightOptionDto } from "../../../../types/dto/flight.dto";
 
 interface FlightProps {
     flight: FlightOptionDto;

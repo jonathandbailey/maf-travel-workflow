@@ -1,5 +1,5 @@
 import { Card } from "antd";
-import type { UIMessage } from "../../types/ui/UIMessage";
+import type { UIMessage } from "../../../types/ui/UIMessage";
 
 interface UserMessageProps {
     message: UIMessage;

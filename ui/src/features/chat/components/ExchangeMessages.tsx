@@ -1,13 +1,13 @@
 import { Flex } from "antd";
-import type { UIConversationThread } from "../../types/ui/UIConversationThread";
 import AssistantMessage from "./AssistantMessage";
 import UserMessage from "./UserMessage";
+import type { UIConversationThread } from "../../../types/ui/UIConversationThread";
 
 interface ConversationThreadProps {
     thread: UIConversationThread;
 }
 
-const Exchange = ({ thread }: ConversationThreadProps) => {
+const ExchangeMessages = ({ thread }: ConversationThreadProps) => {
     return (
         <>
             {thread.exchanges.map((exchange, idx) => (
@@ -26,4 +26,4 @@ const Exchange = ({ thread }: ConversationThreadProps) => {
         </>);
 }
 
-export default Exchange;
+export default ExchangeMessages;

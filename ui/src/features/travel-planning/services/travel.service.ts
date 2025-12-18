@@ -1,6 +1,4 @@
 import apiClient from "../../../api/client/api-client";
-import type { ChatRequestDto } from "../../../types/dto/chat-request.dto";
-import type { ChatResponseDto } from "../../../types/dto/chat-response.dto";
 import type { FlightSearchResultDto } from "../../../types/dto/flight.dto";
 import type { HotelSearchResultDto } from "../../../types/dto/hotel.dto";
 import type { TravelPlanDto } from "../../../types/dto/travel-plan.dto";

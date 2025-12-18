@@ -1,7 +1,7 @@
 import { Card, Flex, Spin } from "antd";
-import type { UIExchange } from "../../types/ui/UIExchange";
-import type { Status } from "../../types/ui/Status";
 import { OpenAIOutlined } from "@ant-design/icons";
+import type { UIExchange } from "../../../types/ui/UIExchange";
+import type { Status } from "../../../types/ui/Status";
 
 interface AgentFeedbackProps {
     message: UIExchange;
