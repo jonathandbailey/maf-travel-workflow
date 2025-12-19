@@ -1,14 +1,17 @@
 import { Card, Flex, Spin } from "antd";
 import { OpenAIOutlined } from "@ant-design/icons";
 import type { Exchange } from "../domain/Exchange";
-import type { Status } from "../domain/Status";
+import { useStatusStore } from "../stores/status.store";
 
 interface AgentFeedbackProps {
     message: Exchange;
-    status?: Status | null;
+
 }
 
-const AgentFeedback = ({ message, status }: AgentFeedbackProps) => {
+const AgentFeedback = ({ message }: AgentFeedbackProps) => {
+
+    const { activeStatus } = useStatusStore();
+
     return (
         <> <Flex vertical>
             <div style={{ marginBottom: "96px", marginLeft: "24px", height: "32px" }} >
@@ -28,9 +31,9 @@ const AgentFeedback = ({ message, status }: AgentFeedbackProps) => {
             {message?.assistant.isLoading && (
                 <Flex align="center" gap="small" style={{ padding: "16px" }}>
                     <Spin size="small" />
-                    {status?.message && (
+                    {activeStatus?.message && (
                         <span style={{ fontSize: '14px', color: '#666' }}>
-                            {status.message}
+                            {activeStatus.message}
                         </span>
                     )}
                 </Flex>

@@ -1,15 +1,15 @@
 import { useEffect } from "react";
 import type { Status } from "../domain/Status";
-import type { Exchange } from "../domain/Exchange";
 import streamingService from "../../../app/api/streaming.api";
 import type { ChatResponseDto } from "../api/chat.dto";
+import { useStatusStore } from "../stores/status.store";
 
-interface UseStatusUpdateHandlerProps {
-    setActiveStatus: React.Dispatch<React.SetStateAction<Status | null>>;
-    setActiveExchange: React.Dispatch<React.SetStateAction<Exchange | null>>;
-}
 
-export const useStatusUpdateHandler = ({ setActiveStatus, setActiveExchange }: UseStatusUpdateHandlerProps) => {
+
+export const useStatusUpdateHandler = () => {
+
+    const { addStatus } = useStatusStore();
+
     useEffect(() => {
         const handleStatusUpdate = (response: ChatResponseDto) => {
             if (!response) return;
@@ -20,19 +20,8 @@ export const useStatusUpdateHandler = ({ setActiveStatus, setActiveExchange }: U
                 source: response.source || ''
             };
 
-            setActiveStatus(newStatus);
+            addStatus(newStatus);
 
-            setActiveExchange(prev => {
-                if (!prev) return prev;
-
-                return {
-                    ...prev,
-                    status: [
-                        ...prev.status,
-                        newStatus
-                    ]
-                };
-            });
         };
 
         streamingService.on("status", handleStatusUpdate);
@@ -40,5 +29,5 @@ export const useStatusUpdateHandler = ({ setActiveStatus, setActiveExchange }: U
         return () => {
             streamingService.off("status", handleStatusUpdate);
         };
-    }, [setActiveStatus, setActiveExchange]);
+    }, [addStatus]);
 };

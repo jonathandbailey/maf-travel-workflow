@@ -3,11 +3,13 @@ import UserMessage from "./UserMessage";
 import AssistantMessage from "./AssistantMessage";
 import AgentStatus from "./AgentStatus";
 import { useExchangesStore } from "../stores/exchanges.store";
+import { useStatusStore } from "../stores/status.store";
 
 
 const ChatOutput = () => {
 
     const { exchanges } = useExchangesStore();
+    const { statuses } = useStatusStore();
 
     return (
         <>
@@ -31,6 +33,16 @@ const ChatOutput = () => {
                                             <Divider />
                                         </div>
                                     ))}
+                                </div>
+                            )
+                        },
+                        {
+                            label: 'Status',
+                            key: 'status',
+                            children: (
+                                <div>
+                                    <AgentStatus statusItems={statuses} />
+
                                 </div>
                             )
                         }

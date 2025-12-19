@@ -16,9 +16,8 @@ interface ChatProps {
 const Chat = ({ sessionId }: ChatProps) => {
 
     const [activeExchange, setActiveExchange] = useState<Exchange | null>(null);
-    const [activeStatus, setActiveStatus] = useState<Status | null>(null);
 
-    useStatusUpdateHandler({ setActiveStatus, setActiveExchange });
+    useStatusUpdateHandler();
     useChatResponseHandler({ setActiveExchange });
 
 
@@ -43,7 +42,7 @@ const Chat = ({ sessionId }: ChatProps) => {
 
     return (<>
         <Flex vertical>
-            {activeExchange && <AgentFeedback message={activeExchange} status={activeStatus} />}
+            {activeExchange && <AgentFeedback message={activeExchange} />}
 
             <ChatInput onEnter={handlePrompt} />
         </Flex>
