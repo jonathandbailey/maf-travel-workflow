@@ -88,6 +88,8 @@ public class FlightOptionDto
 public class FlightEndpointDto
 {
     public string Airport { get; set; }
+
+    public string AirportCode { get; set; }
     public DateTime Datetime { get; set; }
 }
 

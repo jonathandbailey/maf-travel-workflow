@@ -31,16 +31,16 @@ Based on the provided inputs, you choose from the below actions :
 		"DepartureFlightOptions" :[{
 			"Airline" :"Example Air",
 			"FlightNumber" :"EA123",
-			"Departure" :{ "Airport" : "Example Airport", "DateTime":"2023-10-01T10:00:00Z"},
-			"Arrival" : { "Airport" : "Example Destination Airport", "DateTime":"2023-10-01T14:00:00Z"},
+			"Departure" :{ "Airport" : "Example Airport", "AirportCode": "EXA", "DateTime":"2023-10-01T10:00:00Z"},
+			"Arrival" : { "Airport" : "Example Destination Airport", "AirportCode": "EXD", "DateTime":"2023-10-01T14:00:00Z"},
 			"Duration" : "2hrs 20 minutes",
 			"Price" : {"Currency" : "USD", "Amount" : 350.00}
 		}],
 		"ReturnFlightOptions" :[{
 			"Airline" :"Example Air",
 			"FlightNumber" :"EA123",
-			"Departure" :{ "Airport" : "Example Airport", "DateTime":"2023-10-01T10:00:00Z"},
-			"Arrival" : { "Airport" : "Example Destination Airport", "DateTime":"2023-10-01T14:00:00Z"},
+			"Departure" :{ "Airport" : "Example Airport", "AirportCode": "EXA", "DateTime":"2023-10-01T10:00:00Z"},
+			"Arrival" : { "Airport" : "Example Destination Airport", "AirportCode": "EXD", "DateTime":"2023-10-01T14:00:00Z"},
 			"Duration" : "2hrs 20 minutes",
 			"Price" : {"Currency" : "USD", "Amount" : 350.00}
 		}]
@@ -60,16 +60,16 @@ Based on the provided inputs, you choose from the below actions :
 		"DepartureFlightOptions" :[{
 			"Airline" :"Example Air",
 			"FlightNumber" :"EA123",
-			"Departure" :{ "Airport" : "Example Airport", "DateTime":"2023-10-01T10:00:00Z"},
-			"Arrival" : { "Airport" : "Example Destination Airport", "DateTime":"2023-10-01T14:00:00Z"},
+			"Departure" :{ "Airport" : "Example Airport", "AirportCode": "EXA", "DateTime":"2023-10-01T10:00:00Z"},
+			"Arrival" : { "Airport" : "Example Destination Airport", "AirportCode": "EXD", "DateTime":"2023-10-01T14:00:00Z"},
 			"Duration" : "2hrs 20 minutes",
 			"Price" : {"Currency" : "USD", "Amount" : 350.00}
 		}],
 		"ReturnFlightOptions" :[{
 			"Airline" :"Example Air",
 			"FlightNumber" :"EA123",
-			"Departure" :{ "Airport" : "Example Airport", "DateTime":"2023-10-01T10:00:00Z"},
-			"Arrival" : { "Airport" : "Example Destination Airport", "DateTime":"2023-10-01T14:00:00Z"},
+			"Departure" :{ "Airport" : "Example Airport", "AirportCode": "EXA", "DateTime":"2023-10-01T10:00:00Z"},
+			"Arrival" : { "Airport" : "Example Destination Airport", "AirportCode": "EXD", "DateTime":"2023-10-01T14:00:00Z"},
 			"Duration" : "2hrs 20 minutes",
 			"Price" : {"Currency" : "USD", "Amount" : 350.00}
 		}]

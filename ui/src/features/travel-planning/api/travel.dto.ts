@@ -23,6 +23,7 @@ export interface FlightOptionDto {
 
 export interface FlightEndpointDto {
     airport: string;
+    airportCode: string;
     datetime: string;
 }
 
