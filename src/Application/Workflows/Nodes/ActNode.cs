@@ -33,7 +33,7 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
         switch (message.NextAction)
         {
             case NextAction.RequestInformation:
-                await context.SendMessageAsync(new RequestUserInput(serialized), cancellationToken: cancellationToken);
+                await context.SendMessageAsync(new UserRequest(serialized), cancellationToken: cancellationToken);
                 break;
             case NextAction.FlightAgent:
                 var plan = await travelPlanService.LoadAsync();

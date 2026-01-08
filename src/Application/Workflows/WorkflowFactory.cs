@@ -16,11 +16,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var flightAgent = await agentFactory.Create(AgentTypes.FlightWorker);
 
         var hotelAgent = await agentFactory.Create(AgentTypes.HotelWorker);
-
-        var userAgent = await agentFactory.Create(AgentTypes.User);
-
-        var parserAgent = await agentFactory.Create(AgentTypes.Parser);
-
+      
         var requestPort = RequestPort.Create<UserRequest, ReasoningInputDto>("user-input");
 
         var reasonNode = new ReasonNode(reasonAgent, travelPlanService);
@@ -30,15 +26,12 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var hotelWorkerNode = new HotelWorkerNode(hotelAgent);
 
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
-
-        var userNode = new UserNode(userAgent);
      
         var builder = new WorkflowBuilder(reasonNode);
 
         builder.AddEdge(reasonNode, actNode);
-        builder.AddEdge(actNode, userNode);
+        builder.AddEdge(actNode, requestPort);
 
-        builder.AddEdge(userNode, requestPort);
         builder.AddEdge(requestPort, reasonNode);
         
         builder.AddEdge(actNode, reasonNode);

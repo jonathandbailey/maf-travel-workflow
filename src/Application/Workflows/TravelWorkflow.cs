@@ -74,16 +74,6 @@ public class TravelWorkflow(
                 return new WorkflowResponse(WorkflowState.Error, "Travel Request has failed.");
             }
 
-            if (evt is UserStreamingEvent streamingEvent)
-            {
-                await userStreamingService.Stream(requestDto.UserId, streamingEvent.Content, false, requestDto.RequestId);
-            }
-
-            if (evt is UserStreamingCompleteEvent)
-            {
-                await userStreamingService.Stream(requestDto.UserId, string.Empty, true, requestDto.RequestId);
-            }
-
             if (evt is TravelPlanUpdatedEvent)
             {
                 await userStreamingService.TravelPlan(requestDto.UserId);

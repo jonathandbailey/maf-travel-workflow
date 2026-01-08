@@ -1,4 +1,5 @@
 ﻿using Application.Agents;
+using Application.Dto;
 using Application.Interfaces;
 using Application.Workflows;
 using Application.Workflows.Dto;
@@ -42,6 +43,18 @@ public class ApplicationService(
                 request.ExchangeId
             ));
 
+        if (response.State == WorkflowState.WaitingForUserInput)
+        {
+            var userAgent = await agentFactory.Create(AgentTypes.User);
+
+            await foreach (var update in userAgent.RunStreamingAsync(new ChatMessage(ChatRole.Assistant, response.Message), CancellationToken.None))
+            {
+                await userStreamingService.Stream(request.UserId, update.Text, false, request.ExchangeId);
+            }
+
+            await userStreamingService.Stream(request.UserId, string.Empty, true, request.ExchangeId);
+        }
+        
         await workflowRepository.SaveAsync(request.UserId, request.SessionId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
 
         return new ConversationResponse(request.SessionId, request.UserId, response.Message, request.ExchangeId);
