@@ -7,7 +7,7 @@ using Infrastructure.Settings;
 
 namespace Application.Services;
 
-public class AgentMemoryService(IAzureStorageRepository repository, ISessionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : IAgentMemoryService
+public class AgentMemoryService(IAzureStorageRepository repository, IExecutionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : IAgentMemoryService
 {
     private const string ApplicationJsonContentType = "application/json";
 

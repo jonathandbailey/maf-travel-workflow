@@ -23,7 +23,7 @@ public interface ITravelPlanService
     Task CreateTravelPlan();
 }
 
-public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepository artifactRepository, ISessionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
+public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepository artifactRepository, IExecutionContextAccessor sessionContextAccessor, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
 {
     private const string ApplicationJsonContentType = "application/json";
 

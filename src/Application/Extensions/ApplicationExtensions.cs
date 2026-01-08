@@ -29,7 +29,7 @@ public static class ApplicationExtensions
       
         services.AddScoped<IWorkflowFactory, WorkflowFactory>();
     
-        services.AddScoped<ISessionContextAccessor, SessionContextAccessor>();
+        services.AddScoped<IExecutionContextAccessor, ExecutionContextAccessor>();
 
         services.AddScoped<ITravelPlanService, TravelPlanService>();
    

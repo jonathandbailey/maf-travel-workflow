@@ -4,7 +4,6 @@ using Application.Workflows.Dto;
 using Application.Workflows.Events;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
-using System.Text;
 using Application.Dto;
 
 namespace Application.Workflows;
@@ -17,8 +16,6 @@ public class TravelWorkflow(
     IUserStreamingService userStreamingService,
     ILogger logger)
 {
-    private readonly List<ArtifactStatusEvent> _artifactStatusEvents = [];
-    
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
     public CheckpointInfo? CheckpointInfo { get; private set; } = checkpointInfo;
@@ -56,14 +53,12 @@ public class TravelWorkflow(
 
             if (evt is ArtifactStatusEvent artifactStatusEvent)
             {
-                _artifactStatusEvents.Add(artifactStatusEvent);
-
-                await userStreamingService.Artifact(requestDto.UserId, artifactStatusEvent.Key);
+                await userStreamingService.Artifact(artifactStatusEvent.Key);
             }
 
             if (evt is ReasonActWorkflowCompleteEvent reasonActWorkflowCompleteEvent)
             {
-                await userStreamingService.Stream(requestDto.UserId, string.Empty, true, requestDto.RequestId);
+                await userStreamingService.Stream(string.Empty, true);
 
                 return new WorkflowResponse(WorkflowState.Completed, reasonActWorkflowCompleteEvent.Message);
             }
@@ -76,12 +71,12 @@ public class TravelWorkflow(
 
             if (evt is TravelPlanUpdatedEvent)
             {
-                await userStreamingService.TravelPlan(requestDto.UserId);
+                await userStreamingService.TravelPlan();
             }
 
             if (evt is WorkflowStatusEvent statusEvent)
             {
-                await userStreamingService.Status(requestDto.UserId, statusEvent.Status, requestDto.RequestId, statusEvent.Details, statusEvent.Source);
+                await userStreamingService.Status(statusEvent.Status, statusEvent.Details, statusEvent.Source);
             }
 
             if (evt is RequestInfoEvent requestInfoEvent)
@@ -108,16 +103,11 @@ public class TravelWorkflow(
             }
         }
 
-        var stringBuilder = new StringBuilder();
-
-        foreach (var statusEvent in _artifactStatusEvents)
-        {
-            stringBuilder.AppendLine(statusEvent.ToString());
-        }
+        
 
         State = WorkflowState.Completed;
 
-        return new WorkflowResponse(WorkflowState.Completed, stringBuilder.ToString());
+        return new WorkflowResponse(State, string.Empty);
     }
 }
 

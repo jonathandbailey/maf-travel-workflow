@@ -35,13 +35,7 @@ public class ApplicationService(
 
         var parsingResponse = await parsingAgent.RunAsync(new ChatMessage(ChatRole.User, request.Message), CancellationToken.None);
 
-        var response = await travelWorkflow.Execute(
-            new TravelWorkflowRequestDto(
-                new ChatMessage(ChatRole.User, parsingResponse.Text),
-                request.UserId,
-                request.SessionId,
-                request.ExchangeId
-            ));
+        var response = await travelWorkflow.Execute(new TravelWorkflowRequestDto(new ChatMessage(ChatRole.User, parsingResponse.Text)));
 
         if (response.State == WorkflowState.WaitingForUserInput)
         {
@@ -49,10 +43,10 @@ public class ApplicationService(
 
             await foreach (var update in userAgent.RunStreamingAsync(new ChatMessage(ChatRole.Assistant, response.Message), CancellationToken.None))
             {
-                await userStreamingService.Stream(request.UserId, update.Text, false, request.ExchangeId);
+                await userStreamingService.Stream(update.Text, false);
             }
 
-            await userStreamingService.Stream(request.UserId, string.Empty, true, request.ExchangeId);
+            await userStreamingService.Stream(string.Empty, true);
         }
         
         await workflowRepository.SaveAsync(request.UserId, request.SessionId, travelWorkflow.State, travelWorkflow.CheckpointInfo);

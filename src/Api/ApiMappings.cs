@@ -32,10 +32,10 @@ public static class ApiMappings
     private static async Task<Ok<ConversationResponseDto>> ConversationExchange(
         [FromBody] ConversationRequestDto requestDto, 
         IApplicationService service,
-        ISessionContextAccessor sessionContextAccessor,
+        IExecutionContextAccessor sessionContextAccessor,
         HttpContext context)
     {
-        sessionContextAccessor.Initialize(context.User.Id(), requestDto.SessionId);
+        sessionContextAccessor.Initialize(context.User.Id(), requestDto.SessionId, requestDto.ExchangeId);
         
         var response = await service.Execute(new ConversationRequest(requestDto.SessionId, context.User.Id(), requestDto.Message, requestDto.ExchangeId));
         
@@ -45,7 +45,7 @@ public static class ApiMappings
     private static async Task<Ok<TravelPlan>> GetTravelPlan(
         Guid sessionId, 
         ITravelPlanService service,
-        ISessionContextAccessor sessionContextAccessor,
+        IExecutionContextAccessor sessionContextAccessor,
         HttpContext context)
     {
         sessionContextAccessor.Initialize(context.User.Id(), sessionId);
@@ -57,7 +57,7 @@ public static class ApiMappings
     private static async Task<Ok<FlightSearchResultDto>> GetFlightPlan(
         Guid sessionId, 
         ITravelPlanService service,
-        ISessionContextAccessor sessionContextAccessor,
+        IExecutionContextAccessor sessionContextAccessor,
         HttpContext context)
     {
         sessionContextAccessor.Initialize(context.User.Id(), sessionId);
@@ -69,7 +69,7 @@ public static class ApiMappings
     private static async Task<Ok<HotelSearchResultDto>> GetHotelPlan(
         Guid sessionId,
         IArtifactRepository service,
-        ISessionContextAccessor sessionContextAccessor,
+        IExecutionContextAccessor sessionContextAccessor,
         HttpContext context)
     {
         sessionContextAccessor.Initialize(context.User.Id(), sessionId);
