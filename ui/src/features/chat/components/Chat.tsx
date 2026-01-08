@@ -6,7 +6,6 @@ import type { Exchange } from "../domain/Exchange";
 import { ChatService } from "../api/chat.api";
 import { UIFactory } from "../factories/UIFactory";
 import { useStatusUpdateHandler } from "../hooks/useStatusUpdateHandler";
-import { useChatResponseHandler } from "../hooks/useChatResponseHandler";
 
 interface ChatProps {
     sessionId: string;
