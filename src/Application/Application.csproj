@@ -25,6 +25,9 @@
     <None Update="Agents\Templates\Act-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Agents\Templates\Conversation-Agent.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Agents\Templates\Flight-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

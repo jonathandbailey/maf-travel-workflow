@@ -11,7 +11,10 @@ using Application.Workflows.Dto;
 
 namespace Application.Agents;
 
-public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMemoryService agentMemoryService, IOptions<LanguageModelSettings> settings) : IAgentFactory
+public class AgentFactory(
+    IAgentTemplateRepository templateRepository, 
+    IAgentMemoryService agentMemoryService, 
+    IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
     private readonly Dictionary<AgentTypes, string> _agentTemplates = new()
     {
@@ -21,7 +24,8 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.FlightWorker, "Flight-Agent" },
         { AgentTypes.HotelWorker, "Hotel-Agent" },
         { AgentTypes.User , "User-Agent"},
-        { AgentTypes.Parser , "Parser-Agent"}
+        { AgentTypes.Parser , "Parser-Agent"},
+        { AgentTypes.Conversation , "Conversation-Agent"}
     };
 
     private readonly Dictionary<AgentTypes, ChatOptions> _agentChatOptions = new()
@@ -32,7 +36,8 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.Orchestration, new ChatOptions() },
         { AgentTypes.HotelWorker, CreateHotelChatOptions() },
         { AgentTypes.User, new ChatOptions() },
-        { AgentTypes.Parser, CreateParserChatOptions() }
+        { AgentTypes.Parser, CreateParserChatOptions() },
+        { AgentTypes.Conversation, new ChatOptions() }
     };
 
     private readonly Dictionary<AgentTypes, AgentMemoryTypes> _agentMemoryTypes = new()
@@ -43,7 +48,8 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         { AgentTypes.FlightWorker, AgentMemoryTypes.FlightWorker },
         { AgentTypes.HotelWorker, AgentMemoryTypes.HotelWorker },
         { AgentTypes.User , AgentMemoryTypes.UserShared},
-        { AgentTypes.Parser , AgentMemoryTypes.UserShared}
+        { AgentTypes.Parser , AgentMemoryTypes.UserShared},
+        { AgentTypes.Conversation , AgentMemoryTypes.Conversation}
     };
 
 
@@ -69,9 +75,28 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
         {
             Instructions = template,
             ChatOptions = _agentChatOptions[type]
+            
         });
 
         return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[type]);
+    }
+
+    public async Task<IAgent> CreateConversationAgent()
+    {
+        var template = await templateRepository.Load("Conversation-Agent");
+
+        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
+                new ApiKeyCredential(settings.Value.ApiKey))
+            .GetChatClient(settings.Value.DeploymentName);
+
+        var reasonAgent = chatClient.CreateAIAgent(new ChatClientAgentOptions
+        {
+            Instructions = template,
+            ChatOptions = new ChatOptions()
+
+        });
+
+        return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[AgentTypes.Conversation]);
     }
 
     private static ChatOptions CreateReasonChatOptions()
@@ -138,6 +163,7 @@ public class AgentFactory(IAgentTemplateRepository templateRepository, IAgentMem
 public interface IAgentFactory
 {
     Task<IAgent> Create(AgentTypes agentType);
+    Task<IAgent> CreateConversationAgent();
 }
 
 public enum AgentTypes
@@ -148,7 +174,8 @@ public enum AgentTypes
     FlightWorker,
     HotelWorker,
     User,
-    Parser
+    Parser,
+    Conversation
 }
 
 public enum AgentMemoryTypes
@@ -160,5 +187,6 @@ public enum AgentMemoryTypes
     HotelWorker,
     User,
     Parser,
-    UserShared
+    UserShared,
+    Conversation
 }

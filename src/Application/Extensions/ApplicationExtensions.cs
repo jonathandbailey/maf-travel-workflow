@@ -32,6 +32,7 @@ public static class ApplicationExtensions
         services.AddScoped<IExecutionContextAccessor, ExecutionContextAccessor>();
 
         services.AddScoped<ITravelPlanService, TravelPlanService>();
+        services.AddScoped<ITravelWorkflowService, TravelWorkflowService>();
    
         services.AddAzureClients(azure =>
         {
