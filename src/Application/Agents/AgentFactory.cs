@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using Application.Agents.Repository;
+using Application.Dto;
 using Application.Settings;
 using Azure.AI.OpenAI;
 using Microsoft.Agents.AI;
@@ -81,7 +82,7 @@ public class AgentFactory(
         return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[type]);
     }
 
-    public async Task<IAgent> CreateConversationAgent()
+    public async Task<IAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService)
     {
         var template = await templateRepository.Load("Conversation-Agent");
 
@@ -93,7 +94,9 @@ public class AgentFactory(
         {
             Instructions = template,
             ChatOptions = new ChatOptions()
-
+            {
+                Tools = [AIFunctionFactory.Create((WorkflowRequest request) => travelWorkflowService.PlanVacation(request))]
+            },
         });
 
         return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[AgentTypes.Conversation]);
@@ -163,7 +166,7 @@ public class AgentFactory(
 public interface IAgentFactory
 {
     Task<IAgent> Create(AgentTypes agentType);
-    Task<IAgent> CreateConversationAgent();
+    Task<IAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService);
 }
 
 public enum AgentTypes

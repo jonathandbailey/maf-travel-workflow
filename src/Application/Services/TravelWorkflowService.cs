@@ -4,7 +4,10 @@ using Application.Users;
 using Application.Workflows;
 using Application.Workflows.Dto;
 using Microsoft.Agents.AI.Workflows;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.Text.Json;
 
 namespace Application.Services;
 
@@ -19,7 +22,8 @@ public class TravelWorkflowService(
     ILogger<TravelWorkflowService> logger,
     IWorkflowRepository workflowRepository) : ITravelWorkflowService
 {
-    public async Task<WorkflowResponse> PlanVacation(TravelWorkflowRequestDto request)
+    [Description("PlanVacation")]
+    public async Task<WorkflowResponse> PlanVacation(WorkflowRequest request)
     {
         var workflow = await workflowFactory.Create();
 
@@ -31,7 +35,9 @@ public class TravelWorkflowService(
 
         var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, userStreamingService, logger);
 
-        var response = await travelWorkflow.Execute(request);
+        var serializedRequest = JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true });
+
+        var response = await travelWorkflow.Execute(new TravelWorkflowRequestDto(new ChatMessage(ChatRole.User, serializedRequest)));
 
         await workflowRepository.SaveAsync(executionContext.Context.UserId, executionContext.Context.SessionId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
 
@@ -41,5 +47,5 @@ public class TravelWorkflowService(
 
 public interface ITravelWorkflowService
 {
-    Task<WorkflowResponse> PlanVacation(TravelWorkflowRequestDto request);
+    Task<WorkflowResponse> PlanVacation(WorkflowRequest request);
 }
