@@ -72,14 +72,17 @@ public class AgentFactory(
                 new ApiKeyCredential(settings.Value.ApiKey))
             .GetChatClient(settings.Value.DeploymentName);
 
-        var reasonAgent = chatClient.CreateAIAgent(new ChatClientAgentOptions
+        var clientChatOptions = new ChatClientAgentOptions
         {
             Instructions = template,
-            ChatOptions = _agentChatOptions[type]
-            
-        });
+            ChatOptions = _agentChatOptions[type],
+        };
 
-        return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[type]);
+        var agent = chatClient.AsIChatClient()
+            .AsBuilder()
+            .BuildAIAgent(options: clientChatOptions);
+
+        return new Agent(agent, agentMemoryService, _agentMemoryTypes[type]);
     }
 
     public async Task<IAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService)
@@ -90,16 +93,17 @@ public class AgentFactory(
                 new ApiKeyCredential(settings.Value.ApiKey))
             .GetChatClient(settings.Value.DeploymentName);
 
-        var reasonAgent = chatClient.CreateAIAgent(new ChatClientAgentOptions
+        var clientChatOptions = new ChatClientAgentOptions
         {
             Instructions = template,
-            ChatOptions = new ChatOptions()
-            {
-                Tools = [AIFunctionFactory.Create((WorkflowRequest request) => travelWorkflowService.PlanVacation(request))]
-            },
-        });
+            ChatOptions = new ChatOptions {Tools = [AIFunctionFactory.Create(travelWorkflowService.PlanVacation)] }
+        };
 
-        return new Agent(reasonAgent, agentMemoryService, _agentMemoryTypes[AgentTypes.Conversation]);
+        var agent = chatClient.AsIChatClient()
+            .AsBuilder()
+            .BuildAIAgent(options:clientChatOptions);
+
+        return new Agent(agent, agentMemoryService, _agentMemoryTypes[AgentTypes.Conversation]);
     }
 
     private static ChatOptions CreateReasonChatOptions()
