@@ -8,10 +8,11 @@ using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Agents.AI;
 
 namespace Application.Workflows.Nodes;
 
-public class FlightWorkerNode(IAgent agent, ITravelPlanService travelPlanService) : 
+public class FlightWorkerNode(AIAgent agent, ITravelPlanService travelPlanService) : 
     ReflectingExecutor<FlightWorkerNode>(WorkflowConstants.FlightWorkerNodeName), 
    
     IMessageHandler<CreateFlightOptions, AgentResponse>

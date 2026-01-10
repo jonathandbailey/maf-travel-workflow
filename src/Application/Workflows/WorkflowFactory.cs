@@ -12,8 +12,8 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
     public async Task<Workflow> Create()
     {
         var reasonAgent = await agentFactory.CreateReasonAgent();
-      
-        var flightAgent = await agentFactory.Create(AgentTypes.FlightWorker);
+
+        var flightAgent = await agentFactory.CreateFlightAgent();
       
         var requestPort = RequestPort.Create<UserRequest, ReasoningInputDto>("user-input");
 

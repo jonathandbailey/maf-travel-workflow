@@ -13,76 +13,44 @@ namespace Application.Agents;
 
 public class AgentFactory(
     IAgentTemplateRepository templateRepository, 
-    IAgentMemoryService agentMemoryService, 
     IAgentMemoryMiddleware agentMemoryMiddleware,
     IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
-    private readonly Dictionary<AgentTypes, string> _agentTemplates = new()
+ 
+    public async Task<AIAgent> CreateFlightAgent()
     {
-        { AgentTypes.Reason, "Reason-Agent" },
-        { AgentTypes.Act, "Act-Agent" },
-        { AgentTypes.Orchestration, "Orchestration-Agent" },
-        { AgentTypes.FlightWorker, "Flight-Agent" },
-        { AgentTypes.HotelWorker, "Hotel-Agent" },
-        { AgentTypes.User , "User-Agent"},
-        { AgentTypes.Parser , "Parser-Agent"},
-        { AgentTypes.Conversation , "Conversation-Agent"}
-    };
-
-    private readonly Dictionary<AgentTypes, ChatOptions> _agentChatOptions = new()
-    {
-        { AgentTypes.FlightWorker, CreateFlightChatOptions() },
-        { AgentTypes.Reason, CreateReasonChatOptions() },
-        { AgentTypes.Act, new ChatOptions() },
-        { AgentTypes.Orchestration, new ChatOptions() },
-        { AgentTypes.HotelWorker, CreateHotelChatOptions() },
-        { AgentTypes.User, new ChatOptions() },
-        { AgentTypes.Parser, CreateParserChatOptions() },
-        { AgentTypes.Conversation, new ChatOptions() }
-    };
-
-    private readonly Dictionary<AgentTypes, AgentMemoryTypes> _agentMemoryTypes = new()
-    {
-        { AgentTypes.Reason, AgentMemoryTypes.Reason },
-        { AgentTypes.Act, AgentMemoryTypes.Act },
-        { AgentTypes.Orchestration, AgentMemoryTypes.Orchestration },
-        { AgentTypes.FlightWorker, AgentMemoryTypes.FlightWorker },
-        { AgentTypes.HotelWorker, AgentMemoryTypes.HotelWorker },
-        { AgentTypes.User , AgentMemoryTypes.UserShared},
-        { AgentTypes.Parser , AgentMemoryTypes.UserShared},
-        { AgentTypes.Conversation , AgentMemoryTypes.Conversation}
-    };
-
-
-
-    public async Task<IAgent> Create(AgentTypes agentType)
-    {
-        if (_agentTemplates.TryGetValue(agentType, out var templateName))
-        {
-            return await Create(templateName, agentType);
-        }
-        throw new ArgumentException($"Agent type {agentType} is not recognized.");
-    }
-
-    private async Task<IAgent> Create(string templateName, AgentTypes type)
-    {
-        var template = await templateRepository.Load(templateName);
+        var template = await templateRepository.Load("Flight-Agent");
 
         var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
                 new ApiKeyCredential(settings.Value.ApiKey))
             .GetChatClient(settings.Value.DeploymentName);
+     
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(FlightActionResultDto));
+
+        ChatOptions chatOptions = new()
+        {
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: schema,
+                schemaName: "FlightPlan",
+                schemaDescription: "User Flight Options for their vacation.")
+        };
 
         var clientChatOptions = new ChatClientAgentOptions
         {
+            Name = "flight_agent",
             Instructions = template,
-            ChatOptions = _agentChatOptions[type],
+            ChatOptions = chatOptions
         };
 
         var agent = chatClient.AsIChatClient()
             .AsBuilder()
             .BuildAIAgent(options: clientChatOptions);
 
-        return new Agent(agent, agentMemoryService, _agentMemoryTypes[type]);
+        var middlewareAgent = agent.AsBuilder()
+            .Use(runFunc: agentMemoryMiddleware.RunAsync, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
+            .Build();
+
+        return middlewareAgent;
     }
 
     public async Task<AIAgent> CreateReasonAgent()
@@ -210,9 +178,9 @@ public class AgentFactory(
 
 public interface IAgentFactory
 {
-    Task<IAgent> Create(AgentTypes agentType);
     Task<AIAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService);
     Task<AIAgent> CreateReasonAgent();
+    Task<AIAgent> CreateFlightAgent();
 }
 
 public enum AgentTypes

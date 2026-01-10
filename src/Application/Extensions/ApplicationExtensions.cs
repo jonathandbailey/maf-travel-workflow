@@ -22,19 +22,22 @@ public static class ApplicationExtensions
 
         services.Configure<AzureStorageSeedSettings>((options) => configuration.GetSection("AzureStorageSeedSettings").Bind(options));
 
-        services.AddScoped<IAgentFactory, AgentFactory>();
-        services.AddScoped<IAgentTemplateRepository, AgentTemplateRepository>();
+        services.AddSingleton<IAgentFactory, AgentFactory>();
+        
+        services.AddSingleton<IAgentTemplateRepository, AgentTemplateRepository>();
         services.AddScoped<IApplicationService, ApplicationService>();
-        services.AddScoped<IAgentMemoryService, AgentMemoryService>();
+        
+        services.AddSingleton<IAgentMemoryService, AgentMemoryService>();
 
       
         services.AddScoped<IWorkflowFactory, WorkflowFactory>();
     
         services.AddSingleton<IExecutionContextAccessor, ExecutionContextAccessor>();
 
-        services.AddScoped<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
+        services.AddSingleton<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
 
         services.AddScoped<ITravelPlanService, TravelPlanService>();
+        
         services.AddScoped<ITravelWorkflowService, TravelWorkflowService>();
    
         services.AddAzureClients(azure =>
