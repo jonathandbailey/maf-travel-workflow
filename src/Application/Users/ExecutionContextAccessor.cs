@@ -2,25 +2,25 @@
 
 public class ExecutionContextAccessor : IExecutionContextAccessor
 {
-    private IExecutionContext? _context;
+    private static readonly AsyncLocal<IExecutionContext?> _context = new();
 
     public IExecutionContext Context =>
-        _context ?? throw new InvalidOperationException("SessionContext not initialized.");
+        _context.Value ?? throw new InvalidOperationException("SessionContext not initialized.");
 
     public void Initialize(Guid userId, Guid sessionId, Guid requestId)
     {
-        if (_context != null)
+        if (_context == null)
             throw new InvalidOperationException("SessionContext already initialized.");
 
-        _context = new ExecutionContext(userId, sessionId, requestId);
+        _context.Value = new ExecutionContext(userId, sessionId, requestId);
     }
 
     public void Initialize(Guid userId, Guid sessionId)
     {
-        if (_context != null)
+        if (_context == null)
             throw new InvalidOperationException("SessionContext already initialized.");
 
-        _context = new ExecutionContext(userId, sessionId, Guid.NewGuid());
+        _context.Value = new ExecutionContext(userId, sessionId, Guid.NewGuid());
     }
 }
 

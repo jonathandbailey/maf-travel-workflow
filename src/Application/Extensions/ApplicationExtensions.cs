@@ -30,7 +30,7 @@ public static class ApplicationExtensions
       
         services.AddScoped<IWorkflowFactory, WorkflowFactory>();
     
-        services.AddScoped<IExecutionContextAccessor, ExecutionContextAccessor>();
+        services.AddSingleton<IExecutionContextAccessor, ExecutionContextAccessor>();
 
         services.AddScoped<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
 

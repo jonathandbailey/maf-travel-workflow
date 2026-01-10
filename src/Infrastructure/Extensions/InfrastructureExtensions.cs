@@ -9,12 +9,12 @@ public static class InfrastructureExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
-        services.AddScoped<IAzureStorageRepository, AzureStorageRepository>();
-        services.AddScoped<ICheckpointRepository, CheckpointRepository>();
+        services.AddSingleton<IAzureStorageRepository, AzureStorageRepository>();
+        services.AddSingleton<ICheckpointRepository, CheckpointRepository>();
 
-        services.AddScoped<IArtifactRepository, ArtifactRepository>();
+        services.AddSingleton<IArtifactRepository, ArtifactRepository>();
 
-        services.AddScoped<IWorkflowRepository, WorkflowRepository>();
+        services.AddSingleton<IWorkflowRepository, WorkflowRepository>();
 
         services.AddHostedService<AzureStorageSeedService>();
 
