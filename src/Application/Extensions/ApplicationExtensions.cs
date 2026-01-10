@@ -25,20 +25,20 @@ public static class ApplicationExtensions
         services.AddSingleton<IAgentFactory, AgentFactory>();
         
         services.AddSingleton<IAgentTemplateRepository, AgentTemplateRepository>();
-        services.AddScoped<IApplicationService, ApplicationService>();
+        services.AddSingleton<IApplicationService, ApplicationService>();
         
         services.AddSingleton<IAgentMemoryService, AgentMemoryService>();
 
       
-        services.AddScoped<IWorkflowFactory, WorkflowFactory>();
+        services.AddSingleton<IWorkflowFactory, WorkflowFactory>();
     
         services.AddSingleton<IExecutionContextAccessor, ExecutionContextAccessor>();
 
         services.AddSingleton<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
 
-        services.AddScoped<ITravelPlanService, TravelPlanService>();
+        services.AddSingleton<ITravelPlanService, TravelPlanService>();
         
-        services.AddScoped<ITravelWorkflowService, TravelWorkflowService>();
+        services.AddSingleton<ITravelWorkflowService, TravelWorkflowService>();
    
         services.AddAzureClients(azure =>
         {

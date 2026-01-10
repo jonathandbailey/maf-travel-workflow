@@ -7,9 +7,9 @@ public static class ApiExtensions
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services)
     {
-        services.AddScoped<IUserConnectionManager, UserConnectionManager>();
-        services.AddScoped<IUserStreamingService, UserStreamingService>();
-        
+        services.AddSingleton<IUserConnectionManager, UserConnectionManager>();
+        services.AddSingleton<IUserStreamingService, UserStreamingService>();
+
         return services;
     }
 }
