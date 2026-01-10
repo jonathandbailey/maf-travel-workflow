@@ -32,13 +32,13 @@ public class AgentFactory(
             ResponseFormat = ChatResponseFormat.ForJsonSchema(
                 schema: schema,
                 schemaName: "FlightPlan",
-                schemaDescription: "User Flight Options for their vacation.")
+                schemaDescription: "User Flight Options for their vacation."),
+            Instructions = template
         };
 
         var clientChatOptions = new ChatClientAgentOptions
         {
             Name = "flight_agent",
-            Instructions = template,
             ChatOptions = chatOptions
         };
 
@@ -68,13 +68,14 @@ public class AgentFactory(
             ResponseFormat = ChatResponseFormat.ForJsonSchema(
                 schema: schema,
                 schemaName: "ReasoningActRequest",
-                schemaDescription: "Reasoning State for Act.")
+                schemaDescription: "Reasoning State for Act."),
+            Instructions = template
         };
       
         var clientChatOptions = new ChatClientAgentOptions
         {
             Name = "reason_agent",
-            Instructions = template,
+            
             ChatOptions = chatOptions
         };
 
@@ -100,8 +101,12 @@ public class AgentFactory(
         var clientChatOptions = new ChatClientAgentOptions
         {
             Name = "conversation_agent",
-            Instructions = template,
-            ChatOptions = new ChatOptions {Tools = [AIFunctionFactory.Create(travelWorkflowService.PlanVacation)] }
+           
+            ChatOptions = new ChatOptions
+            {
+                Tools = [AIFunctionFactory.Create(travelWorkflowService.PlanVacation)],
+                Instructions = template
+            }
         };
 
         var agent = chatClient.AsIChatClient()

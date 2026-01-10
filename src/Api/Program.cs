@@ -44,6 +44,8 @@ else
 
 app.MapHub<UserHub>("hub");
 
+await app.MapAgUiToAgent();
+
 app.UseCorsPolicyServiceDiscovery();
 
 
