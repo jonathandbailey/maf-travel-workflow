@@ -11,11 +11,9 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
 {
     public async Task<Workflow> Create()
     {
-        var reasonAgent = await agentFactory.Create(AgentTypes.Reason);
+        var reasonAgent = await agentFactory.CreateReasonAgent();
       
         var flightAgent = await agentFactory.Create(AgentTypes.FlightWorker);
-
-        var hotelAgent = await agentFactory.Create(AgentTypes.HotelWorker);
       
         var requestPort = RequestPort.Create<UserRequest, ReasoningInputDto>("user-input");
 
@@ -23,8 +21,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var actNode = new ActNode(travelPlanService);
      
         var flightWorkerNode = new FlightWorkerNode(flightAgent, travelPlanService);
-        var hotelWorkerNode = new HotelWorkerNode(hotelAgent);
-
+    
         var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
      
         var builder = new WorkflowBuilder(reasonNode);
@@ -37,12 +34,11 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         builder.AddEdge(actNode, reasonNode);
         
         builder.AddEdge(actNode, flightWorkerNode);
-        builder.AddEdge(actNode, hotelWorkerNode);
-
+ 
         builder.AddEdge(flightWorkerNode, artifactStorageNode);
+        
         builder.AddEdge(flightWorkerNode, actNode);
-        builder.AddEdge(hotelWorkerNode, artifactStorageNode);
-
+   
         return builder.Build();
     }
 }

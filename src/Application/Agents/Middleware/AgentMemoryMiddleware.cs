@@ -5,8 +5,28 @@ using Application.Services;
 
 namespace Application.Agents.Middleware;
 
+
 public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMiddleware
 {
+    public async Task<AgentRunResponse> RunAsync(
+        IEnumerable<ChatMessage> messages,
+        AgentThread? thread,
+        AgentRunOptions? options,
+        AIAgent innerAgent,
+        CancellationToken cancellationToken)
+    {
+        var memoryThread = await LoadAsync(innerAgent);
+
+        var response = await innerAgent.RunAsync(messages, memoryThread, options, cancellationToken);
+
+        var threadState = memoryThread.Serialize();
+
+        await memory.SaveAsync(new AgentState(threadState), innerAgent.Name!);
+
+
+        return response;
+    }
+
     public async IAsyncEnumerable<AgentRunResponseUpdate> RunStreamingAsync(
         IEnumerable<ChatMessage> messages,
         AgentThread? thread,
@@ -48,6 +68,13 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
 public interface IAgentMemoryMiddleware
 {
     IAsyncEnumerable<AgentRunResponseUpdate> RunStreamingAsync(
+        IEnumerable<ChatMessage> messages,
+        AgentThread? thread,
+        AgentRunOptions? options,
+        AIAgent innerAgent,
+        CancellationToken cancellationToken);
+
+    Task<AgentRunResponse> RunAsync(
         IEnumerable<ChatMessage> messages,
         AgentThread? thread,
         AgentRunOptions? options,

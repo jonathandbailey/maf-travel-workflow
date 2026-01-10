@@ -8,10 +8,11 @@ using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Agents.AI;
 
 namespace Application.Workflows.Nodes;
 
-public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName),
+public class ReasonNode(AIAgent agent, ITravelPlanService travelPlanService) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName),
    
     IMessageHandler<ReasoningInputDto, ReasoningOutputDto>
 {
@@ -42,7 +43,7 @@ public class ReasonNode(IAgent agent, ITravelPlanService travelPlanService) : Re
 
             WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, message.Text);
 
-            var response = await agent.RunAsync(message, cancellationToken);
+            var response = await agent.RunAsync(message, cancellationToken: cancellationToken);
 
             WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.OutputNodePreview, response.Text);
 

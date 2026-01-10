@@ -85,6 +85,42 @@ public class AgentFactory(
         return new Agent(agent, agentMemoryService, _agentMemoryTypes[type]);
     }
 
+    public async Task<AIAgent> CreateReasonAgent()
+    {
+        var template = await templateRepository.Load("Reason-Agent");
+
+        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
+                new ApiKeyCredential(settings.Value.ApiKey))
+            .GetChatClient(settings.Value.DeploymentName);
+
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(ReasoningOutputDto));
+
+        ChatOptions chatOptions = new()
+        {
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: schema,
+                schemaName: "ReasoningActRequest",
+                schemaDescription: "Reasoning State for Act.")
+        };
+      
+        var clientChatOptions = new ChatClientAgentOptions
+        {
+            Name = "reason_agent",
+            Instructions = template,
+            ChatOptions = chatOptions
+        };
+
+        var agent = chatClient.AsIChatClient()
+            .AsBuilder()
+            .BuildAIAgent(options: clientChatOptions);
+
+        var middlewareAgent = agent.AsBuilder()
+            .Use(runFunc: agentMemoryMiddleware.RunAsync, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
+            .Build();
+
+        return middlewareAgent;
+    }
+
     public async Task<AIAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService)
     {
         var template = await templateRepository.Load("Conversation-Agent");
@@ -176,6 +212,7 @@ public interface IAgentFactory
 {
     Task<IAgent> Create(AgentTypes agentType);
     Task<AIAgent> CreateConversationAgent(ITravelWorkflowService travelWorkflowService);
+    Task<AIAgent> CreateReasonAgent();
 }
 
 public enum AgentTypes
