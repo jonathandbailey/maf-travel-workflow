@@ -1,11 +1,13 @@
 import { Flex } from "antd";
 import AgentFeedback from "./AgentFeedback";
 import ChatInput from "./ChatInput";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Exchange } from "../domain/Exchange";
 import { ChatService } from "../api/chat.api";
 import { UIFactory } from "../factories/UIFactory";
 import { useStatusUpdateHandler } from "../hooks/useStatusUpdateHandler";
+import type { ChatResponseDto } from "../api/chat.dto";
+import streamingService from "../../../app/api/streaming.api";
 
 interface ChatProps {
     sessionId: string;
@@ -13,10 +15,34 @@ interface ChatProps {
 
 const Chat = ({ sessionId }: ChatProps) => {
 
-    const [activeExchange, setActiveExchange] = useState<Exchange | null>(null);
+    const [activeExchange, setActiveExchange] = useState<Exchange>(UIFactory.createUIExchange(""));
 
     useStatusUpdateHandler();
-    //useChatResponseHandler({ setActiveExchange });
+
+    const [currentStream, setCurrentStream] = useState('');
+    const streamTextRef = useRef('');
+
+    useEffect(() => {
+        const handleUserResponse = (response: ChatResponseDto) => {
+            if (!response) return;
+
+            console.log("Received streaming response:", response);
+            streamTextRef.current += response.message;
+            setCurrentStream(streamTextRef.current);
+        }
+
+        streamingService.on("user", handleUserResponse);
+
+        return () => {
+            streamingService.off("user", handleUserResponse);
+        };
+    }, []);
+
+    useEffect(() => {
+        // Reset stream when activeExchange changes
+        streamTextRef.current = '';
+        setCurrentStream('');
+    }, [activeExchange]);
 
 
     function handlePrompt(value: string): void {
@@ -40,7 +66,7 @@ const Chat = ({ sessionId }: ChatProps) => {
 
     return (<>
         <Flex vertical>
-            {activeExchange && <AgentFeedback message={activeExchange} />}
+            {activeExchange && <AgentFeedback message={activeExchange} currentStream={currentStream} />}
 
             <ChatInput onEnter={handlePrompt} />
         </Flex>

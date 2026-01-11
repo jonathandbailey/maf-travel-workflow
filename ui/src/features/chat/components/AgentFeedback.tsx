@@ -2,16 +2,14 @@ import { Card, Flex, Spin } from "antd";
 import { OpenAIOutlined } from "@ant-design/icons";
 import type { Exchange } from "../domain/Exchange";
 import { useStatusStore } from "../stores/status.store";
-import { useTokenStreaming } from "../hooks/useTokenStreaming";
 
 interface AgentFeedbackProps {
     message: Exchange;
+    currentStream?: string;
 }
 
-const AgentFeedback = ({ message }: AgentFeedbackProps) => {
-    const { currentStream } = useTokenStreaming(message, {
-        tokenIntervalMs: 50
-    });
+const AgentFeedback = ({ message, currentStream }: AgentFeedbackProps) => {
+
 
     const { activeStatus } = useStatusStore();
 
