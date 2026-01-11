@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ag-ui/client": "^0.0.42",
     "@ant-design/icons": "^6.1.0",
     "@microsoft/signalr": "^10.0.0",
     "antd": "^6.0.1",
