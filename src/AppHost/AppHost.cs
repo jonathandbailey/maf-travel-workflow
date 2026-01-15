@@ -16,4 +16,6 @@ var ui = builder.AddUiServices(api);
 
 api.WithReference(ui);
 
+builder.AddProject<Projects.Travel_Planning_Api>("travel-planning-api");
+
 builder.Build().Run();

@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents", "src\Agents\Agents
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workflows", "src\Workflows\Workflows.csproj", "{20851A03-9214-4F41-B30D-59C78BE2513D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Travel.Planning.Api", "src\Travel.Planning.Api\Travel.Planning.Api.csproj", "{75313478-ED5E-0F99-0ACF-C2FFE107497B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Travel", "Travel", "{2F775700-8AE2-452A-83D0-B25564841156}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,10 @@ Global
 		{20851A03-9214-4F41-B30D-59C78BE2513D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20851A03-9214-4F41-B30D-59C78BE2513D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20851A03-9214-4F41-B30D-59C78BE2513D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75313478-ED5E-0F99-0ACF-C2FFE107497B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75313478-ED5E-0F99-0ACF-C2FFE107497B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75313478-ED5E-0F99-0ACF-C2FFE107497B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75313478-ED5E-0F99-0ACF-C2FFE107497B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +74,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{BB9C41FD-1395-49AC-C085-55B269795333} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E3C0E21B-371B-ACD5-5FF0-77C353D89E20} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{75313478-ED5E-0F99-0ACF-C2FFE107497B} = {2F775700-8AE2-452A-83D0-B25564841156}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CECF4BFE-6870-4849-BFB1-EC0B46CF01E1}
