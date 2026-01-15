@@ -35,7 +35,7 @@ public class TravelWorkflowService(
 
         var serializedRequest = JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true });
 
-        var response = await travelWorkflow.Execute(new TravelWorkflowRequestDto(new ChatMessage(ChatRole.User, serializedRequest)));
+        var response = await travelWorkflow.Execute(new TravelWorkflowRequestDto(new ChatMessage(ChatRole.User, serializedRequest), request.Meta.ThreadId));
 
         await workflowRepository.SaveAsync(request.Meta.ThreadId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
 

@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using Agents.Dto;
+using Agents.Services;
 using Agents.Settings;
 using Azure.AI.OpenAI;
 using Infrastructure.Dto;
@@ -14,6 +15,7 @@ namespace Agents;
 public class AgentFactory(
     IAgentTemplateRepository templateRepository, 
     IAgentMemoryMiddleware agentMemoryMiddleware,
+    IA2AAgentServiceDiscovery agentServiceDiscovery,
     IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
  
@@ -90,7 +92,7 @@ public class AgentFactory(
         return middlewareAgent;
     }
 
-    public async Task<AIAgent> CreateConversationAgent(List<AITool> tools)
+    public async Task<UserAgent> CreateUserAgent(List<AITool> tools)
     {
         var template = await templateRepository.Load("Conversation-Agent");
 
@@ -117,46 +119,14 @@ public class AgentFactory(
             .Use(runFunc: null, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
             .Build();
 
-        return middlewareAgent;
+        return new UserAgent(agent, agentServiceDiscovery);
     }
-
-    public async Task<AIAgent> CreateConversationAgent(Delegate travelWorkflowService)
-    {
-        var template = await templateRepository.Load("Conversation-Agent");
-
-        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
-                new ApiKeyCredential(settings.Value.ApiKey))
-            .GetChatClient(settings.Value.DeploymentName);
-
-        var clientChatOptions = new ChatClientAgentOptions
-        {
-            Name = "conversation_agent",
-           
-            ChatOptions = new ChatOptions
-            {
-                Tools = [AIFunctionFactory.Create(travelWorkflowService)],
-                Instructions = template
-            }
-        };
-
-        var agent = chatClient.AsIChatClient()
-            .AsBuilder()
-            .BuildAIAgent(options:clientChatOptions);
-
-        var middlewareAgent = agent.AsBuilder()
-            .Use(runFunc: null, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
-            .Build();
-
-        return middlewareAgent;
-    }
- 
 }
 
 public interface IAgentFactory
 {
-    Task<AIAgent> CreateConversationAgent(Delegate travelWorkflowService);
     Task<AIAgent> CreateReasonAgent();
     Task<AIAgent> CreateFlightAgent();
-    Task<AIAgent> CreateConversationAgent(List<AITool> tools);
+    Task<UserAgent> CreateUserAgent(List<AITool> tools);
 }
 

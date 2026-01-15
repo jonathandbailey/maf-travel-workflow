@@ -31,6 +31,7 @@ public class ReasonNode(AIAgent agent, ITravelPlanService travelPlanService) : R
         CancellationToken cancellationToken = default)
     {
         using var activity = Telemetry.Start($"{WorkflowConstants.ReasonNodeName}{WorkflowConstants.Observe}");
+
             
         try
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Agents.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Workflows.Repository;
 using Workflows.Services;
 
@@ -12,7 +13,9 @@ public static class WorkflowExtensions
         services.AddSingleton<IWorkflowRepository, WorkflowRepository>();
         services.AddSingleton<ITravelPlanService, TravelPlanService>();
         services.AddSingleton<ICheckpointRepository, CheckpointRepository>();
-        
+
+        services.AddSingleton<IA2AAgentServiceDiscovery, A2AAgentServiceDiscovery>();
+
         return services;
     }
 }

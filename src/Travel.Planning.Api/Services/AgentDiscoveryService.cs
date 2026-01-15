@@ -13,7 +13,12 @@ public class AgentDiscoveryService : IAgentDiscoveryService
             Url = "https://localhost:7027/api/a2a/travel",
             Skills =
             [
-                new AgentSkill { Name = "Search Flights", Description = "Searches for your flights." }
+                new AgentSkill
+                {
+                    Name = "Travel_Planning", 
+                    Description = "Plan Trips",
+                    InputModes = ["{ 'userMessage':'I want to plan a trip to Paris?', 'intent':'plan_travel' }"]
+                }
             ],
             Version = "1.0"
         }

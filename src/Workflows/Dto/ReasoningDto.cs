@@ -19,6 +19,7 @@ public class ReasoningOutputDto
     public NextAction NextAction { get; set; } 
 
     public string Status { get; set; } = string.Empty;
+  
 
     public TravelPlanUpdateDto? TravelPlanUpdate { get; set; }
 

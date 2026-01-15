@@ -21,11 +21,14 @@ public class WorkflowService : IWorkflowService
 
     private async Task<A2AResponse> OnMessageReceived(MessageSendParams messageSendParams, CancellationToken cancellationToken)
     {
+        var messageText = messageSendParams.Message.Parts.OfType<TextPart>().First().Text;
+
         var workflowRequest = new WorkflowRequest
         {
             Meta =
             {
-                ThreadId = messageSendParams.Message.ContextId!
+                ThreadId = messageSendParams.Message.ContextId!,
+                RawUserMessage = messageText
             }
         };
 

@@ -1,4 +1,5 @@
 ﻿using Agents;
+using Agents.Services;
 using Application.Services;
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 
@@ -14,7 +15,7 @@ public static class AgUiExtensions
 
         var agentFactory = app.Services.GetRequiredService<IAgentFactory>();
     
-        var agent = await agentFactory.CreateConversationAgent(discovery.GetTools());
+        var agent = await agentFactory.CreateUserAgent(discovery.GetTools());
 
         app.MapAGUI("ag-ui", agent);
         

@@ -1,6 +1,7 @@
 ﻿using Agents;
 using Agents.Middleware;
 using Agents.Repository;
+using Agents.Services;
 using Application.Services;
 using Application.Users;
 using Infrastructure.Settings;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Workflows;
 using Workflows.Repository;
 using Workflows.Services;
+using AgentMemoryService = Application.Services.AgentMemoryService;
+using IAgentMemoryService = Application.Services.IAgentMemoryService;
 
 
 namespace Application.Extensions;
