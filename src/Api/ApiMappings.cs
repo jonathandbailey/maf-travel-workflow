@@ -1,10 +1,6 @@
-﻿using Api.Dto;
-using Api.Extensions;
-using Application.Models;
-using Application.Services;
+﻿using Api.Extensions;
 using Application.Users;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Workflows.Dto;
 using Workflows.Models;
 using Workflows.Services;
@@ -21,24 +17,10 @@ public static class ApiMappings
     {
         var api = app.MapGroup(ApiConversationsRoot);
 
-        api.MapPost("/conversations", ConversationExchange);
         api.MapGet(GetFlightPlanPath, GetFlightPlan);
         api.MapGet(GetTravelPlanPath, GetTravelPlan);
 
         return app;
-    }
-
-    private static async Task<Ok<ConversationResponseDto>> ConversationExchange(
-        [FromBody] ConversationRequestDto requestDto, 
-        IApplicationService service,
-        IExecutionContextAccessor sessionContextAccessor,
-        HttpContext context)
-    {
-        sessionContextAccessor.Initialize(context.User.Id(), requestDto.SessionId, requestDto.ExchangeId);
-        
-        var response = await service.Execute(new ConversationRequest(requestDto.SessionId, context.User.Id(), requestDto.Message, requestDto.ExchangeId));
-        
-        return TypedResults.Ok(new ConversationResponseDto(response.Message, response.SessionId, response.ExchangeId));
     }
 
     private static async Task<Ok<TravelPlan>> GetTravelPlan(

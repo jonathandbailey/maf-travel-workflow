@@ -24,7 +24,6 @@ public static class ApplicationExtensions
         services.AddSingleton<IAgentFactory, AgentFactory>();
         
         services.AddSingleton<IAgentTemplateRepository, AgentTemplateRepository>();
-        services.AddSingleton<IApplicationService, ApplicationService>();
         
         services.AddSingleton<IAgentMemoryService, AgentMemoryService>();
 
