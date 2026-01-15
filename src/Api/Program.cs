@@ -6,6 +6,7 @@ using Api.Middleware;
 using Api.Settings;
 using Application.Extensions;
 using Infrastructure.Extensions;
+using Workflows.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,8 @@ builder.Services.Configure<HubSettings>(options => builder.Configuration.GetSect
 builder.AddCorsPolicyFromServiceDiscovery();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+builder.Services.AddWorkflowServices();
 
 builder.Services.AddAgentServices(builder.Configuration);
 

@@ -2,14 +2,13 @@
 using Agents.Middleware;
 using Agents.Repository;
 using Application.Services;
-using Application.Settings;
 using Application.Users;
-using Application.Workflows;
-using Application.Workflows.Repository;
-using Infrastructure.Repository;
 using Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Workflows;
+using Workflows.Repository;
+using Workflows.Services;
 
 
 namespace Application.Extensions;
@@ -38,8 +37,6 @@ public static class ApplicationExtensions
         services.AddSingleton<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
 
         services.AddSingleton<ICheckpointRepository, CheckpointRepository>();
-
-        services.AddSingleton<ITravelPlanService, TravelPlanService>();
         
         services.AddSingleton<ITravelWorkflowService, TravelWorkflowService>();
 

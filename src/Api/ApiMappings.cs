@@ -1,13 +1,13 @@
 ﻿using Api.Dto;
 using Api.Extensions;
-using Application.Interfaces;
 using Application.Models;
 using Application.Services;
 using Application.Users;
-using Application.Workflows.Dto;
-using Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Workflows.Dto;
+using Workflows.Models;
+using Workflows.Services;
 
 namespace Api;
 
@@ -15,7 +15,6 @@ public static class ApiMappings
 {
     private const string ApiConversationsRoot = "api";
     private const string GetFlightPlanPath = "plans/{sessionId}/flights";
-    private const string GetHotelPlanPath = "plans/{sessionId}/hotels";
     private const string GetTravelPlanPath = "plans/{sessionId}/travel";
 
     public static WebApplication MapApi(this WebApplication app)

@@ -14,9 +14,9 @@ public class TravelWorkflow(
 {
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
-    private CheckpointInfo? CheckpointInfo { get; set; } = checkpointInfo;
+    public CheckpointInfo? CheckpointInfo { get; set; } = checkpointInfo;
 
-    private WorkflowState State { get; set; } = state;
+    public WorkflowState State { get; set; } = state;
 
     public async Task<WorkflowResponse> Execute(TravelWorkflowRequestDto requestDto)
     {

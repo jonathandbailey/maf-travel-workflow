@@ -1,21 +1,19 @@
-﻿using Application.Interfaces;
-using Application.Users;
-using Application.Workflows;
-using Application.Workflows.Dto;
+﻿using Application.Users;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Text.Json;
-using Agents;
-using Application.Workflows.Repository;
+using Workflows;
+using Workflows.Dto;
+using Workflows.Repository;
+using Workflows.Services;
 
 namespace Application.Services;
 
 public class TravelWorkflowService(
     IExecutionContextAccessor executionContext, 
     ICheckpointRepository repository,
-    IUserStreamingService userStreamingService,
     ITravelPlanService travelPlanService,
     IWorkflowFactory workflowFactory, 
     ILogger<TravelWorkflowService> logger,
@@ -32,7 +30,7 @@ public class TravelWorkflowService(
 
         var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, executionContext.Context.UserId, executionContext.Context.SessionId));
 
-        var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, userStreamingService, logger);
+        var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, logger);
 
         var serializedRequest = JsonSerializer.Serialize(request, new JsonSerializerOptions { WriteIndented = true });
 

@@ -1,7 +1,7 @@
 ﻿using Agents;
 using Application.Interfaces;
-using Application.Workflows.Dto;
 using Microsoft.Extensions.AI;
+using Workflows.Dto;
 
 namespace Application.Services;
 
