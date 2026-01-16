@@ -2,14 +2,6 @@
 
 namespace Travel.Workflows.Dto;
 
-public class UserParsedDto
-{
-    public string UserMessage { get; set; }
-
-    public string UserIntent { get; set; }
-    
-    public TravelPlanUpdateDto? IntentInputs { get; set; }
-}
 
 public class ReasoningOutputDto
 {

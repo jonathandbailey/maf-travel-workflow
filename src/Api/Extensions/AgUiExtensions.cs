@@ -1,6 +1,5 @@
 ﻿using Agents;
 using Agents.Services;
-using Application.Services;
 using Microsoft.Agents.AI.Hosting.AGUI.AspNetCore;
 
 namespace Api.Extensions;
