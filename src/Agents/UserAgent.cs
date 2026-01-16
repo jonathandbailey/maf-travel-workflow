@@ -20,6 +20,8 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery) : Del
 
         var threadId = options?.GetAgUiThreadId();
 
+        options = options.AddThreadId(threadId!);
+
         var tools = new Dictionary<string, FunctionCallContent>();
 
         await foreach (var update in InnerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))

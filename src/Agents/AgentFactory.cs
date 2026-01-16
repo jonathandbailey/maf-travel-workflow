@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using Agents.Dto;
+using Agents.Middleware;
 using Agents.Services;
 using Agents.Settings;
 using Azure.AI.OpenAI;
@@ -15,6 +16,7 @@ namespace Agents;
 public class AgentFactory(
     IAgentTemplateRepository templateRepository, 
     IAgentMemoryMiddleware agentMemoryMiddleware,
+    IAgentAgUiMiddleware agentAgUiMiddleware,
     IA2AAgentServiceDiscovery agentServiceDiscovery,
     IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
@@ -118,6 +120,7 @@ public class AgentFactory(
         var userAgent = new UserAgent(agent, agentServiceDiscovery);
 
         var middlewareAgent = userAgent.AsBuilder()
+            .Use(runFunc : null, runStreamingFunc: agentAgUiMiddleware.RunStreamingAsync)
             .Use(runFunc: null, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
             .Build();
 

@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Agents.Extensions;
 using Agents.Services;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
@@ -14,13 +15,15 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
         AIAgent innerAgent,
         CancellationToken cancellationToken)
     {
-        var memoryThread = await LoadAsync(innerAgent);
+        var threadId = options.GetThreadId();
+
+        var memoryThread = await LoadAsync(innerAgent, threadId);
 
         var response = await innerAgent.RunAsync(messages, memoryThread, options, cancellationToken);
 
         var threadState = memoryThread.Serialize();
 
-        await memory.SaveAsync(new AgentState(threadState), innerAgent.Name!);
+        await memory.SaveAsync(new AgentState(threadState), GetResourceName(innerAgent.Name!, threadId));
 
 
         return response;
@@ -33,7 +36,9 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
         AIAgent innerAgent,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var memoryThread = await LoadAsync(innerAgent);
+        var threadId = options.GetThreadId();
+        
+        var memoryThread = await LoadAsync(innerAgent, threadId);
         
         await foreach (var update in innerAgent.RunStreamingAsync(messages, memoryThread, options, cancellationToken))
         {
@@ -42,25 +47,30 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
 
         var threadState = memoryThread.Serialize();
 
-        await memory.SaveAsync(new AgentState(threadState), innerAgent.Name!);
+        await memory.SaveAsync(new AgentState(threadState), GetResourceName(innerAgent.Name!, threadId));
     }
 
-    private async Task<AgentThread> LoadAsync(AIAgent agent)
+    private async Task<AgentThread> LoadAsync(AIAgent agent, string threadId)
     {
         AgentThread? thread;
 
-        if (!await memory.ExistsAsync(agent.Name!))
+        if (!await memory.ExistsAsync(GetResourceName(agent.Name!, threadId)))
         {
             thread = agent.GetNewThread();
         }
         else
         {
-            var stateDto = await memory.LoadAsync(agent.Name!);
+            var stateDto = await memory.LoadAsync(GetResourceName(agent.Name!, threadId));
 
             thread = agent.DeserializeThread(stateDto.Thread);
         }
 
         return thread;
+    }
+
+    private static string GetResourceName(string agentName, string threadId)
+    {
+        return $"{agentName}_{threadId}";
     }
 }
 
