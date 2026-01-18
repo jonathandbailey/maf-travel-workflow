@@ -21,6 +21,8 @@ builder.AddProject<Projects.Travel_Workflows_Api>("travel-workflows-api")
     .WithReference(blobs)
     .WaitFor(storage);
 
-builder.AddProject<Projects.Travel_Application_Api>("travel-application-api");
+builder.AddProject<Projects.Travel_Application_Api>("travel-application-api")
+    .WithReference(blobs)
+    .WaitFor(storage);
 
 builder.Build().Run();

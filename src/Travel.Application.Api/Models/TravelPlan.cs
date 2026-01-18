@@ -16,10 +16,10 @@ public class TravelPlan
     public string? Destination { get; private set; }
     
     [JsonInclude]
-    public DateTime? StartDate { get; private set; }
-    
+    public DateTimeOffset? StartDate { get; private set; }
+
     [JsonInclude]
-    public DateTime? EndDate { get; private set; }
+    public DateTimeOffset? EndDate { get; private set; }
 
     [JsonInclude]
     public TravelPlanStatus TravelPlanStatus { get; private set; } = TravelPlanStatus.NotStarted;
@@ -37,12 +37,12 @@ public class TravelPlan
         }
     }
 
-    public void SetStartDate(DateTime startDate)
+    public void SetStartDate(DateTimeOffset startDate)
     {
         if (startDate != StartDate)
             StartDate = startDate;
     }
-    public void SetEndDate(DateTime endDate)
+    public void SetEndDate(DateTimeOffset endDate)
     {
         if (endDate != EndDate)
             EndDate = endDate;

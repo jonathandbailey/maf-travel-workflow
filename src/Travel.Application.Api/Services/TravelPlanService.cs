@@ -21,6 +21,7 @@ public interface ITravelPlanService
     Task<TravelPlan> SelectFlightOption(FlightSearchResultDto option, Guid userId, Guid travelPlanId);
     Task<FlightSearchResultDto> GetFlightOptionsAsync(Guid userId, Guid travelPlanId);
     Task<Guid> CreateTravelPlan(Guid userId);
+    Task<TravelPlan> GetTravelPlan(Guid userId, Guid travelPlanId);
 }
 
 public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepository artifactRepository, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
@@ -152,6 +153,11 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
         await SaveAsync(travelPlan, userId);
 
         return travelPlan.Id;
+    }
+
+    public async Task<TravelPlan> GetTravelPlan(Guid userId, Guid travelPlanId)
+    {
+        return await LoadAsync(userId, travelPlanId);
     }
 
     public async Task<bool> ExistsAsync(Guid userId, Guid travelPlanId)
