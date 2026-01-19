@@ -44,7 +44,21 @@ public class FlightWorkerNode(AIAgent agent, ITravelPlanService travelPlanServic
 
             WorkflowTelemetryTags.SetInputPreview(activity, serialized);
 
-            var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), cancellationToken: cancellationToken);
+            var threadId = await context.ReadStateAsync<string>("agent_thread_id", scopeName: "workflow", cancellationToken);
+
+            var chatOptions = new ChatClientAgentRunOptions()
+            {
+                ChatOptions = new ChatOptions()
+                {
+                    AdditionalProperties = new AdditionalPropertiesDictionary()
+                    {
+                        { "agent_thread_id", threadId! }
+                    }
+                }
+            };
+
+
+            var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), options: chatOptions, cancellationToken: cancellationToken);
    
             WorkflowTelemetryTags.SetOutputPreview(activity, response.Text);
        
