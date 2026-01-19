@@ -3,7 +3,6 @@ import AgentFeedback from "./AgentFeedback";
 import ChatInput from "./ChatInput";
 import { useEffect, useRef, useState } from "react";
 import type { Exchange } from "../domain/Exchange";
-import { ChatService } from "../api/chat.api";
 import { UIFactory } from "../factories/UIFactory";
 import { useStatusUpdateHandler } from "../hooks/useStatusUpdateHandler";
 import type { ChatResponseDto } from "../api/chat.dto";
@@ -18,6 +17,8 @@ const Chat = ({ sessionId }: ChatProps) => {
 
     const [activeExchange, setActiveExchange] = useState<Exchange>(UIFactory.createUIExchange(""));
     const agentRef = useRef<HttpAgent | null>(null);
+
+    const [isLoading, setIsLoading] = useState(false);
 
     useStatusUpdateHandler();
 
@@ -42,6 +43,15 @@ const Chat = ({ sessionId }: ChatProps) => {
                     const delta = (event as any).delta || '';
                     streamTextRef.current += delta;
                     setCurrentStream(streamTextRef.current);
+                }
+
+                if (event.type === EventType.TEXT_MESSAGE_END) {
+                    activeExchange.assistant.isLoading = false;
+                    setIsLoading(false);
+                }
+                if (event.type === EventType.TEXT_MESSAGE_START) {
+                    activeExchange.assistant.isLoading = true;
+                    setIsLoading(true);
                 }
             },
             onRunFailed: ({ error }: { error: Error }) => {
@@ -83,7 +93,7 @@ const Chat = ({ sessionId }: ChatProps) => {
 
         setActiveExchange(newExchange);
 
-        // Clear existing messages and add only the new message
+        setIsLoading(true);
         agentRef.current!.setMessages([{
             id: Date.now().toString(),
             role: "user",
@@ -103,7 +113,7 @@ const Chat = ({ sessionId }: ChatProps) => {
 
     return (<>
         <Flex vertical>
-            {activeExchange && <AgentFeedback message={activeExchange} currentStream={currentStream} />}
+            {activeExchange && <AgentFeedback isLoading={isLoading} message={activeExchange} currentStream={currentStream} />}
 
             <ChatInput onEnter={handlePrompt} />
         </Flex>

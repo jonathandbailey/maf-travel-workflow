@@ -41,7 +41,7 @@ export class UIFactory {
     static createAssistantMessage(id?: string): Message {
         return this.createUIMessage('', 'assistant', {
             id,
-            isLoading: true
+            isLoading: false
         });
     }
 

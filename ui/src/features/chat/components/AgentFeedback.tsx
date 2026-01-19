@@ -6,9 +6,10 @@ import { useStatusStore } from "../stores/status.store";
 interface AgentFeedbackProps {
     message: Exchange;
     currentStream?: string;
+    isLoading: boolean;
 }
 
-const AgentFeedback = ({ message, currentStream }: AgentFeedbackProps) => {
+const AgentFeedback = ({ message, currentStream, isLoading }: AgentFeedbackProps) => {
 
 
     const { activeStatus } = useStatusStore();
@@ -22,14 +23,10 @@ const AgentFeedback = ({ message, currentStream }: AgentFeedbackProps) => {
                     <Card style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", marginLeft: "16px", width: "600px" }}>
                         <div style={{ maxWidth: "600px" }}>{currentStream}</div>
                     </Card>
-
-
-
-
                 </Flex>
 
             </div>
-            {message?.assistant.isLoading && (
+            {isLoading && (
                 <Flex align="center" gap="small" style={{ padding: "16px" }}>
                     <Spin size="small" />
                     {activeStatus?.message && (
