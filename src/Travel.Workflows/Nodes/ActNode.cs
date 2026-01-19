@@ -25,9 +25,12 @@ public class ActNode(ITravelPlanService travelPlanService) : ReflectingExecutor<
 
         WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, serialized);
 
-        if(message.TravelPlanUpdate != null)
+        var threadId = await context.ReadStateAsync<string>("agent_thread_id", scopeName: "workflow", cancellationToken);
+
+
+        if (message.TravelPlanUpdate != null)
         {
-            await travelPlanService.UpdateAsync(message.TravelPlanUpdate!);
+            await travelPlanService.UpdateTravelPlanFromEndpoint(message.TravelPlanUpdate!, Guid.Parse(threadId!));
 
             await context.AddEventAsync(new TravelPlanUpdatedEvent(), cancellationToken);
         }

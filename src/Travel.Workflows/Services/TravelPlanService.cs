@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Infrastructure.Interfaces;
 using Infrastructure.Settings;
@@ -21,6 +22,7 @@ public interface ITravelPlanService
     Task<FlightSearchResultDto> GetFlightOptionsAsync();
     Task CreateTravelPlan();
     Task<TravelPlanSummary> GetSummary(Guid threadId);
+    Task UpdateTravelPlanFromEndpoint(TravelPlanUpdateDto messageTravelPlanUpdate, Guid threadId);
 }
 
 public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepository artifactRepository, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
@@ -147,7 +149,19 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
 
         var summaryEx = new TravelPlanSummary(travelPlanDto);
 
-        return summary;
+        return summaryEx;
+    }
+
+    public async Task UpdateTravelPlanFromEndpoint(TravelPlanUpdateDto messageTravelPlanUpdate, Guid threadId)
+    {
+        var httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:7010/") };
+
+        var content = new StringContent(JsonSerializer.Serialize(messageTravelPlanUpdate), Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync($"/api/travel/plans/{threadId}", content);
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Failed to retrieve travel plan: {response.ReasonPhrase}");
     }
 
     public async Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate)
