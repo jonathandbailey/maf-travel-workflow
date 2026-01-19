@@ -7,9 +7,10 @@ interface AgentFeedbackProps {
     message: Exchange;
     currentStream?: string;
     isLoading: boolean;
+    statusMessage?: string;
 }
 
-const AgentFeedback = ({ message, currentStream, isLoading }: AgentFeedbackProps) => {
+const AgentFeedback = ({ message, currentStream, isLoading, statusMessage }: AgentFeedbackProps) => {
 
 
     const { activeStatus } = useStatusStore();
@@ -29,9 +30,9 @@ const AgentFeedback = ({ message, currentStream, isLoading }: AgentFeedbackProps
             {isLoading && (
                 <Flex align="center" gap="small" style={{ padding: "16px" }}>
                     <Spin size="small" />
-                    {activeStatus?.message && (
+                    {statusMessage && (
                         <span style={{ fontSize: '14px', color: '#666' }}>
-                            {activeStatus.message}
+                            {statusMessage}
                         </span>
                     )}
                 </Flex>

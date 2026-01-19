@@ -2,6 +2,7 @@
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Agents.Extensions;
 using Agents.Services;
 
@@ -22,6 +23,13 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery) : Del
 
         options = options.AddThreadId(threadId!);
 
+        var stateBytes = JsonSerializer.SerializeToUtf8Bytes("Thinking...");
+
+        yield return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
+
         var tools = new Dictionary<string, FunctionCallContent>();
 
         await foreach (var update in InnerAgent.RunStreamingAsync(messages, thread, options, cancellationToken))
@@ -38,6 +46,13 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery) : Del
         }
 
         var toolResults = new List<AIContent>();
+
+        stateBytes = JsonSerializer.SerializeToUtf8Bytes("Executing Travel Workflow...");
+
+        yield return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
 
         foreach (var functionCallContent in tools)
         {
@@ -58,6 +73,13 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery) : Del
             activity?.SetTag("Tool Response", toolResponse.Messages.First().Text);
 
         }
+
+        stateBytes = JsonSerializer.SerializeToUtf8Bytes("Processing Results...");
+
+        yield return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
 
         await foreach (var update in InnerAgent.RunStreamingAsync([new ChatMessage(ChatRole.Tool, toolResults)], thread, cancellationToken: cancellationToken))
         {

@@ -7,7 +7,7 @@ import { UIFactory } from "../factories/UIFactory";
 import { useStatusUpdateHandler } from "../hooks/useStatusUpdateHandler";
 import type { ChatResponseDto } from "../api/chat.dto";
 import streamingService from "../../../app/api/streaming.api";
-import { EventType, HttpAgent, type BaseEvent } from "@ag-ui/client";
+import { EventType, HttpAgent, type BaseEvent, type StateSnapshotEvent } from "@ag-ui/client";
 
 interface ChatProps {
     sessionId: string;
@@ -19,6 +19,7 @@ const Chat = ({ sessionId }: ChatProps) => {
     const agentRef = useRef<HttpAgent | null>(null);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [statusMessage, setStatusMessage] = useState<string>("");
 
     useStatusUpdateHandler();
 
@@ -52,6 +53,10 @@ const Chat = ({ sessionId }: ChatProps) => {
                 if (event.type === EventType.TEXT_MESSAGE_START) {
                     activeExchange.assistant.isLoading = true;
                     setIsLoading(true);
+                }
+
+                if (event.type === EventType.STATE_SNAPSHOT) {
+                    setStatusMessage((event as StateSnapshotEvent).snapshot || '');
                 }
             },
             onRunFailed: ({ error }: { error: Error }) => {
@@ -113,7 +118,7 @@ const Chat = ({ sessionId }: ChatProps) => {
 
     return (<>
         <Flex vertical>
-            {activeExchange && <AgentFeedback isLoading={isLoading} message={activeExchange} currentStream={currentStream} />}
+            {activeExchange && <AgentFeedback statusMessage={statusMessage} isLoading={isLoading} message={activeExchange} currentStream={currentStream} />}
 
             <ChatInput onEnter={handlePrompt} />
         </Flex>
