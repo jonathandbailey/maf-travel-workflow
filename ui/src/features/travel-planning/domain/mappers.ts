@@ -1,9 +1,9 @@
 import type { TravelPlan, FlightPlan, FlightOption, FlightEndpoint, Price } from '../domain/TravelPlan';
 import type { TravelPlanDto, FlightPlanDto, FlightOptionDto, FlightEndpointDto, PriceDto } from '../api/travel.dto';
 
-export function mapTravelPlanDtoToDomain(dto: TravelPlanDto): TravelPlan {
+export function mapTravelPlanDtoToDomain(dto: TravelPlanDto, sessionId?: string): TravelPlan {
     return {
-        id: dto.id,
+        id: sessionId || dto.id || '',
         destination: dto.destination,
         startDate: new Date(dto.startDate),
         endDate: new Date(dto.endDate),

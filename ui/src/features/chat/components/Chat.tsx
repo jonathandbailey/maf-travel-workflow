@@ -60,9 +60,8 @@ const Chat = ({ sessionId }: ChatProps) => {
                     // Call TravelPlan Service and update store
                     travelService.getTravelPlan(sessionId)
                         .then(travelPlanDto => {
-                            const travelPlan = mapTravelPlanDtoToDomain(travelPlanDto);
+                            const travelPlan = mapTravelPlanDtoToDomain(travelPlanDto, sessionId);
                             addTravelPlan(travelPlan);
-                            console.log("Travel plan updated in store:", travelPlan);
                         })
                         .catch(error => {
                             console.error("Failed to fetch travel plan:", error);
