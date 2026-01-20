@@ -1,4 +1,5 @@
 ﻿using A2A;
+using Azure;
 using System.Text;
 using System.Threading.Tasks;
 using Travel.Planning.Api.Services;
@@ -49,6 +50,18 @@ public class WorkflowService : IWorkflowService
 
                 await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.InputRequired, message, final: false, cancellationToken);
             }
+
+            if (response.State == WorkflowState.Executing && response.Action == WorkflowAction.StatusUpdate)
+            {
+                var message = new AgentMessage
+                {
+                    Role = MessageRole.Agent,
+                    ContextId = agentTask.ContextId,
+                    Parts = new List<Part> { new TextPart() { Text = response.Message } }
+                };
+
+                await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Working, message, final: false, cancellationToken);
+            }
         }
 
         /* 
@@ -69,7 +82,7 @@ public class WorkflowService : IWorkflowService
         {
             Role = MessageRole.Agent,
             ContextId = agentTask.ContextId,
-            Parts = []
+            Parts = new List<Part> { new TextPart() { Text = "Travel Workflow Completed." } }
         };
 
         // Send final completion status

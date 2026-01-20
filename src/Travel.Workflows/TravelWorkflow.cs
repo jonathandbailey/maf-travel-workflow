@@ -43,6 +43,11 @@ public class TravelWorkflow(
                 }
             }
 
+            if(evt is WorkflowStatusEvent workflowStatusEvent)
+            {
+                yield return new WorkflowResponse(WorkflowState.Executing, workflowStatusEvent.Status, WorkflowAction.StatusUpdate);
+            }
+
             if (evt is TravelWorkflowErrorEvent travelWorkflowErrorEvent)
             {
                 logger.LogError(travelWorkflowErrorEvent.Exception, $"Travel Workflow Error:{travelWorkflowErrorEvent.Message}, {travelWorkflowErrorEvent.Description}");

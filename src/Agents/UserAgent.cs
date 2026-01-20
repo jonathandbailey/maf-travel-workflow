@@ -7,6 +7,7 @@ using Microsoft.Extensions.AI;
 using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.Agents.AI.A2A;
 
 namespace Agents;
 
@@ -65,35 +66,46 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery) : Del
             var argument = functionCallContent.Value.Arguments["jsonPayload"].ToString();
 
 
-            try
-            {
-                await foreach (var agentRunUpdate in agentMeta.Agent.RunStreamingAsync(new ChatMessage(ChatRole.User, argument), agentThread, cancellationToken: cancellationToken))
-                {
-                    if (agentRunUpdate.RawRepresentation is TaskArtifactUpdateEvent)
-                    {
-                        var artifactEvent = agentRunUpdate.RawRepresentation as TaskArtifactUpdateEvent;
-                        var messageText = artifactEvent.Artifact.Parts.OfType<TextPart>().First().Text;
+            var ex = new A2AAgentEx(agentMeta.Agent);
 
+            await foreach (var agentRunUpdate in ex.RunCoreStreamingAsync(agentMeta.Client,
+                               new List<ChatMessage>() { new ChatMessage(ChatRole.User, argument) },(A2AAgentThread) agentThread,
+                               cancellationToken: cancellationToken))
+            {
+                if (agentRunUpdate.RawRepresentation is TaskArtifactUpdateEvent)
+                {
+                    var artifactEvent = agentRunUpdate.RawRepresentation as TaskArtifactUpdateEvent;
+                    var messageText = artifactEvent.Artifact.Parts.OfType<TextPart>().First().Text;
+
+                    toolResults.Add(new FunctionResultContent(
+                        functionCallContent.Value.CallId,
+                        messageText));
+                }
+
+                if (agentRunUpdate.RawRepresentation is TaskStatusUpdateEvent)
+                {
+                    var message = agentRunUpdate.RawRepresentation as TaskStatusUpdateEvent;
+                    var messageText = message.Status.Message.Parts.OfType<TextPart>().First().Text;
+
+                    if (message.Status.State == TaskState.InputRequired)
+                    {
                         toolResults.Add(new FunctionResultContent(
                             functionCallContent.Value.CallId,
                             messageText));
                     }
 
-                    if (agentRunUpdate.RawRepresentation is TaskStatusUpdateEvent)
+                    if (message.Status.State == TaskState.Working)
                     {
-                        var message = agentRunUpdate.RawRepresentation as TaskStatusUpdateEvent;
-                        var messageText = message.Status.Message.Parts.OfType<TextPart>().First().Text;
+                        stateBytes = JsonSerializer.SerializeToUtf8Bytes(messageText);
 
-                        toolResults.Add(new FunctionResultContent(
-                            functionCallContent.Value.CallId,
-                            messageText));
+                        yield return new AgentRunResponseUpdate
+                        {
+                            Contents = [new DataContent(stateBytes, "application/json")]
+                        };
                     }
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+         
         }
 
         stateBytes = JsonSerializer.SerializeToUtf8Bytes("Processing Results...");

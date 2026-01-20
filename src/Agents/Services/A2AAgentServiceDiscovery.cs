@@ -51,7 +51,7 @@ public class A2AAgentServiceDiscovery : IA2AAgentServiceDiscovery
 
             var tool = CreateFunctionTool(agent, card).AsDeclarationOnly();
 
-            var agentMeta = new AgentMeta(card.Name, agent, card, tool);
+            var agentMeta = new AgentMeta(card.Name, agent, card, tool, client);
 
             _agentMetas.Add(agentMeta);
         }
@@ -93,7 +93,7 @@ public class AgentToolSettings
     public required string CardPath { get; init; }
 }
 
-public class AgentMeta(string name, A2AAgent agent, AgentCard card, AITool tool)
+public class AgentMeta(string name, A2AAgent agent, AgentCard card, AITool tool, A2AClient client)
 {
     public string Name { get; } = name;
 
@@ -102,6 +102,7 @@ public class AgentMeta(string name, A2AAgent agent, AgentCard card, AITool tool)
     public AgentCard Card { get; } = card;
 
     public AITool Tool { get; } = tool;
+    public A2AClient Client { get; } = client;
 }
 
 public interface IA2AAgentServiceDiscovery
