@@ -7,6 +7,7 @@ using Azure.AI.OpenAI;
 using Infrastructure.Dto;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using IAgentMemoryMiddleware = Agents.Middleware.IAgentMemoryMiddleware;
 using IAgentTemplateRepository = Agents.Repository.IAgentTemplateRepository;
@@ -18,6 +19,7 @@ public class AgentFactory(
     IAgentMemoryMiddleware agentMemoryMiddleware,
     IAgentAgUiMiddleware agentAgUiMiddleware,
     IA2AAgentServiceDiscovery agentServiceDiscovery,
+    ILogger<IAgentFactory>  logger,
     IOptions<LanguageModelSettings> settings) : IAgentFactory
 {
  
@@ -117,7 +119,7 @@ public class AgentFactory(
             .AsBuilder()
             .BuildAIAgent(options: clientChatOptions);
 
-        var userAgent = new UserAgent(agent, agentServiceDiscovery);
+        var userAgent = new UserAgent(agent, agentServiceDiscovery, logger);
 
         var middlewareAgent = userAgent.AsBuilder()
             .Use(runFunc : null, runStreamingFunc: agentAgUiMiddleware.RunStreamingAsync)

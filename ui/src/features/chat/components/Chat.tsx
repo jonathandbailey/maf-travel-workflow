@@ -40,6 +40,8 @@ const Chat = ({ sessionId }: ChatProps) => {
 
         const subscription = agentRef.current.subscribe({
             onEvent: ({ event }: { event: BaseEvent }) => {
+                console.log("Received agent event:", event);
+
                 if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
                     const delta = (event as any).delta || '';
                     streamTextRef.current += delta;
@@ -53,6 +55,11 @@ const Chat = ({ sessionId }: ChatProps) => {
                 if (event.type === EventType.TEXT_MESSAGE_START) {
                     activeExchange.assistant.isLoading = true;
                     setIsLoading(true);
+                }
+
+                if (event.type === EventType.RUN_ERROR) {
+                    activeExchange.assistant.isLoading = false;
+                    setIsLoading(false);
                 }
 
                 if (event.type === EventType.STATE_SNAPSHOT) {

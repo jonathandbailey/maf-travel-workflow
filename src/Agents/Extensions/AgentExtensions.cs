@@ -3,10 +3,10 @@ using Agents.Repository;
 using Agents.Services;
 using Agents.Settings;
 using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using Microsoft.Extensions.AI;
+using System.Text.Json;
 
 namespace Agents.Extensions;
 
@@ -32,6 +32,16 @@ public static class AgentExtensions
         var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
         additionalPropertiesDictionary["agent_thread_id"] = threadId;
         return options;
+    }
+
+    public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this string message)
+    {
+        var stateBytes = JsonSerializer.SerializeToUtf8Bytes(message);
+
+        return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
     }
 
     public static string GetThreadId(this AgentRunOptions options)

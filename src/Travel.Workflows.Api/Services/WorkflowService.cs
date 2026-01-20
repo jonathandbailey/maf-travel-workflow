@@ -48,7 +48,7 @@ public class WorkflowService : IWorkflowService
                     Parts = new List<Part> { new TextPart() {Text = response.Message}}
                 };
 
-                await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.InputRequired, message, final: false, cancellationToken);
+                await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.InputRequired, message, final: true, cancellationToken);
             }
 
             if (response.State == WorkflowState.Executing && response.Action == WorkflowAction.StatusUpdate)
@@ -61,6 +61,17 @@ public class WorkflowService : IWorkflowService
                 };
 
                 await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Working, message, final: false, cancellationToken);
+            }
+            if (response.State == WorkflowState.Completed)
+            {
+                var message = new AgentMessage
+                {
+                    Role = MessageRole.Agent,
+                    ContextId = agentTask.ContextId,
+                    Parts = new List<Part> { new TextPart() { Text = "Workflow Completed." } }
+                };
+
+                await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Completed, message, final: true, cancellationToken);
             }
         }
 
@@ -78,15 +89,7 @@ public class WorkflowService : IWorkflowService
 
         await TaskManager.ReturnArtifactAsync(agentTask.Id, artifact, cancellationToken);
         */
-        var finalMessage = new AgentMessage
-        {
-            Role = MessageRole.Agent,
-            ContextId = agentTask.ContextId,
-            Parts = new List<Part> { new TextPart() { Text = "Travel Workflow Completed." } }
-        };
-
-        // Send final completion status
-        await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Completed, finalMessage, final: true, cancellationToken);
+       
     }
     /*
     private async Task<A2AResponse> OnMessageReceived(MessageSendParams messageSendParams, CancellationToken cancellationToken)
