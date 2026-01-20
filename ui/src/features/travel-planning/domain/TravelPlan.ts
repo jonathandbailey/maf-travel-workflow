@@ -1,8 +1,8 @@
 export interface TravelPlan {
     id: string;
     destination: string;
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | null;
+    endDate: Date | null;
     origin: string;
     flightPlan?: FlightPlan;
 }
@@ -23,7 +23,7 @@ export interface FlightOption {
 export interface FlightEndpoint {
     airport: string;
     airportCode: string;
-    datetime: Date;
+    datetime: Date | null;
 }
 
 export interface Price {

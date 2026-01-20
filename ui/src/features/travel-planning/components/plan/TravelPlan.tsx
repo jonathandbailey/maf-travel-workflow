@@ -13,16 +13,19 @@ interface TravelPlanProps {
     sessionId: string;
 }
 
-const formatDate = (date: Date | undefined): string => {
+const formatDate = (date: Date | null | undefined): string => {
     if (!date) return '';
     return dayjs(date).format('Do, MMM, YYYY');
 };
 
 const TravelPlan = ({ sessionId }: TravelPlanProps) => {
 
-    const travelPlan = useTravelPlanStore((state) =>
-        state.travelPlans.find(tp => tp.id === sessionId)
-    );
+    const travelPlan = useTravelPlanStore((state) => {
+        console.log("TravelPlan lookup - SessionId:", sessionId, "Available IDs:", state.travelPlans.map(tp => tp.id));
+        return state.travelPlans.find(tp => tp.id === sessionId);
+    });
+
+    console.log("Found travel plan:", travelPlan ? "YES" : "NO");
 
     const showOriginCard = !!(travelPlan?.origin || travelPlan?.startDate);
     const showDestinationCard = !!(travelPlan?.destination || travelPlan?.endDate);

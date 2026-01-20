@@ -14,7 +14,8 @@ interface UseArtifactHandlerProps {
 
 export const useArtifactHandler = ({ sessionId, setTabs, setActiveKey }: UseArtifactHandlerProps) => {
     useEffect(() => {
-        const handleArtifact = (response: ArtifactStatusDto) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _handleArtifact = (response: ArtifactStatusDto) => {
 
             if (response.key === 'Flights') {
                 const travelService = new TravelService();

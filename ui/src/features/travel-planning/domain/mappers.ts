@@ -1,12 +1,21 @@
 import type { TravelPlan, FlightPlan, FlightOption, FlightEndpoint, Price } from '../domain/TravelPlan';
 import type { TravelPlanDto, FlightPlanDto, FlightOptionDto, FlightEndpointDto, PriceDto } from '../api/travel.dto';
 
+// Helper function to safely convert date strings to Date objects
+function safeDateConversion(dateString: string | null | undefined): Date | null {
+    if (!dateString || dateString.trim() === '') {
+        return null;
+    }
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? null : date;
+}
+
 export function mapTravelPlanDtoToDomain(dto: TravelPlanDto, sessionId?: string): TravelPlan {
     return {
         id: sessionId || dto.id || '',
         destination: dto.destination,
-        startDate: new Date(dto.startDate),
-        endDate: new Date(dto.endDate),
+        startDate: safeDateConversion(dto.startDate),
+        endDate: safeDateConversion(dto.endDate),
         origin: dto.origin,
         flightPlan: dto.flightPlan ? mapFlightPlanDtoToDomain(dto.flightPlan) : { flightOption: null },
     };
@@ -16,8 +25,8 @@ export function mapTravelPlanToDto(domain: TravelPlan): TravelPlanDto {
     return {
         id: domain.id,
         destination: domain.destination,
-        startDate: domain.startDate.toISOString(),
-        endDate: domain.endDate.toISOString(),
+        startDate: domain.startDate ? domain.startDate.toISOString() : '',
+        endDate: domain.endDate ? domain.endDate.toISOString() : '',
         origin: domain.origin,
         flightPlan: domain.flightPlan ? mapFlightPlanToDto(domain.flightPlan) : undefined,
     };
@@ -61,7 +70,7 @@ function mapFlightEndpointDtoToDomain(dto: FlightEndpointDto): FlightEndpoint {
     return {
         airport: dto.airport,
         airportCode: dto.airportCode,
-        datetime: new Date(dto.datetime),
+        datetime: safeDateConversion(dto.datetime),
     };
 }
 
@@ -69,7 +78,7 @@ function mapFlightEndpointToDto(domain: FlightEndpoint): FlightEndpointDto {
     return {
         airport: domain.airport,
         airportCode: domain.airportCode,
-        datetime: domain.datetime.toISOString(),
+        datetime: domain.datetime ? domain.datetime.toISOString() : '',
     };
 }
 

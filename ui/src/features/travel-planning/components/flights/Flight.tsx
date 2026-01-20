@@ -9,7 +9,7 @@ const { Text } = Typography;
 
 dayjs.extend(advancedFormat);
 
-const formatDate = (date: Date | undefined): string => {
+const formatDate = (date: Date | null | undefined): string => {
     if (!date) return '';
     return dayjs(date).format('HH:mm');
 };

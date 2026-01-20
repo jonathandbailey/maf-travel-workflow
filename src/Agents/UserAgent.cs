@@ -102,10 +102,6 @@ public class UserAgent(AIAgent agent, IA2AAgentServiceDiscovery discovery, ILogg
                         {
                             { "MessageText", messageText }
                         }));
-
-                    toolResults.Add(new FunctionResultContent(
-                        functionCallContent.Value.CallId,
-                        messageText));
                 }
 
                 if (agentRunUpdate.RawRepresentation is TaskStatusUpdateEvent)

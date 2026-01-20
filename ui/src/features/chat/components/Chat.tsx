@@ -4,7 +4,6 @@ import ChatInput from "./ChatInput";
 import { useEffect, useRef, useState } from "react";
 import type { Exchange } from "../domain/Exchange";
 import { UIFactory } from "../factories/UIFactory";
-import { useStatusUpdateHandler } from "../hooks/useStatusUpdateHandler";
 import { EventType, HttpAgent, type BaseEvent, type StateSnapshotEvent } from "@ag-ui/client";
 import { TravelService } from "../../travel-planning/api/travel.api";
 import { useTravelPlanStore } from "../../travel-planning/stores/travel-plan.store";
@@ -24,7 +23,7 @@ const Chat = ({ sessionId }: ChatProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [statusMessage, setStatusMessage] = useState<string>("");
 
-    useStatusUpdateHandler();
+
 
     const [currentStream, setCurrentStream] = useState('');
     const streamTextRef = useRef('');
@@ -57,10 +56,10 @@ const Chat = ({ sessionId }: ChatProps) => {
                     activeExchange.assistant.isLoading = false;
                     setIsLoading(false);
 
-                    // Call TravelPlan Service and update store
                     travelService.getTravelPlan(sessionId)
                         .then(travelPlanDto => {
                             const travelPlan = mapTravelPlanDtoToDomain(travelPlanDto, sessionId);
+                            console.log("Storing travel plan with ID:", travelPlan.id, "SessionId:", sessionId);
                             addTravelPlan(travelPlan);
                         })
                         .catch(error => {
