@@ -8,6 +8,8 @@ import { EventType, HttpAgent, type BaseEvent, type StateSnapshotEvent } from "@
 import { TravelService } from "../../travel-planning/api/travel.api";
 import { useTravelPlanStore } from "../../travel-planning/stores/travel-plan.store";
 import { mapTravelPlanDtoToDomain } from "../../travel-planning/domain/mappers";
+import type { StatusUpdate } from "../domain/StatusUpdate";
+import { useStatusUpdateStore } from "../stores/status-update.store";
 
 interface ChatProps {
     sessionId: string;
@@ -18,6 +20,7 @@ const Chat = ({ sessionId }: ChatProps) => {
     const [activeExchange, setActiveExchange] = useState<Exchange>(UIFactory.createUIExchange(""));
     const agentRef = useRef<HttpAgent | null>(null);
     const travelService = new TravelService();
+    const { addStatusUpdate } = useStatusUpdateStore();
     const { addTravelPlan } = useTravelPlanStore();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +80,27 @@ const Chat = ({ sessionId }: ChatProps) => {
                 }
 
                 if (event.type === EventType.STATE_SNAPSHOT) {
-                    setStatusMessage((event as StateSnapshotEvent).snapshot || '');
+                    const snapshotEvent = event as StateSnapshotEvent;
+                    const snapshot = snapshotEvent.snapshot;
+
+                    if (typeof snapshot === 'object' && snapshot !== null && 'Type' in snapshot && snapshot.Type === 'StatusUpdate') {
+                        // Handle StatusUpdate type
+                        const payload = (snapshot as any).Payload;
+                        if (payload) {
+                            const statusUpdate: StatusUpdate = {
+                                type: payload.Type,
+                                source: payload.Source,
+                                status: payload.Status,
+                                details: payload.Details
+                            };
+
+                            addStatusUpdate(statusUpdate);
+                            setStatusMessage(statusUpdate.status);
+                        }
+                    } else {
+                        // Handle other snapshot types as before
+                        setStatusMessage(snapshot || '');
+                    }
                 }
             },
             onRunFailed: ({ error }: { error: Error }) => {
