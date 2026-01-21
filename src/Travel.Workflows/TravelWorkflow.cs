@@ -1,4 +1,5 @@
-﻿using Microsoft.Agents.AI.Workflows;
+﻿using System.Text.Json;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.Logging;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Events;
@@ -45,7 +46,12 @@ public class TravelWorkflow(
 
             if(evt is WorkflowStatusEvent workflowStatusEvent)
             {
-                yield return new WorkflowResponse(WorkflowState.Executing, workflowStatusEvent.Status, WorkflowAction.StatusUpdate);
+                var statusUpdate = new StatusUpdate(workflowStatusEvent.Source, workflowStatusEvent.Status,
+                    workflowStatusEvent.Details);
+
+                var serialized = JsonSerializer.SerializeToElement(statusUpdate);
+
+                yield return new WorkflowResponse(WorkflowState.Executing, workflowStatusEvent.Status, WorkflowAction.StatusUpdate, serialized);
             }
 
             if (evt is ArtifactStatusEvent artifactStatusEvent)

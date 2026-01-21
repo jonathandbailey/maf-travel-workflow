@@ -1,6 +1,7 @@
 using Agents.Extensions;
 using Infrastructure.Extensions;
 using Infrastructure.Settings;
+using System.Text.Json.Serialization;
 using Travel.Planning.Api.Services;
 using Travel.Workflows.Api.Services;
 using Travel.Workflows.Extensions;
@@ -12,6 +13,11 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddWorkflowServices();
 builder.Services.AddAgentServices(builder.Configuration);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.Configure<AzureStorageSeedSettings>((options) => builder.Configuration.GetSection("AzureStorageSeedSettings").Bind(options));
 

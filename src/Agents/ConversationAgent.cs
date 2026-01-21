@@ -77,19 +77,23 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
 
                 if (agentRunUpdate.RawRepresentation is TaskStatusUpdateEvent taskStatusUpdateEvent)
                 {
-                    var messageText = taskStatusUpdateEvent.GetPartText();
-
-                    toolActivity?.AddEvent(agentRunUpdate, taskStatusUpdateEvent.Status.State, messageText);
-
                     if (taskStatusUpdateEvent.Status.State is TaskState.InputRequired or TaskState.Completed)
                     {
+                        var content = taskStatusUpdateEvent.GetPartText();
+
+                        toolActivity?.AddEvent(agentRunUpdate, taskStatusUpdateEvent.Status.State, content);
+
                         toolResults.Add(new FunctionResultContent(
                             functionCallContent.Value.CallId,
-                            messageText));
+                            content));
                     }
 
                     if (taskStatusUpdateEvent.Status.State == TaskState.Working)
                     {
+                        var messageText = taskStatusUpdateEvent.GetPartStatusDataText().Status;
+
+                        toolActivity?.AddEvent(agentRunUpdate, taskStatusUpdateEvent.Status.State, messageText);
+
                         yield return messageText.ToAgentResponseStatusMessage();
                     }
                 }

@@ -1,7 +1,5 @@
-﻿using A2A;
-using Azure;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
+using A2A;
 using Travel.Planning.Api.Services;
 using Travel.Workflows.Dto;
 
@@ -20,7 +18,6 @@ public class WorkflowService : IWorkflowService
         _travelWorkflowService = travelWorkflowService;
         
         TaskManager.OnAgentCardQuery+= OnAgentCardQuery;
-        //TaskManager.OnMessageReceived += OnMessageReceived;
         TaskManager.OnTaskCreated += OnTaskCreated;
     }
 
@@ -51,13 +48,16 @@ public class WorkflowService : IWorkflowService
                 await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.InputRequired, message, final: true, cancellationToken);
             }
 
-            if (response.State == WorkflowState.Executing && response.Action == WorkflowAction.StatusUpdate)
+            if (response is { State: WorkflowState.Executing, Action: WorkflowAction.StatusUpdate })
             {
                 var message = new AgentMessage
                 {
                     Role = MessageRole.Agent,
                     ContextId = agentTask.ContextId,
-                    Parts = new List<Part> { new TextPart() { Text = response.Message } }
+                    Parts = [new DataPart {  Data = new Dictionary<string, JsonElement>
+                    {
+                        ["status"] = response.Payload!.Value,
+                    }}]
                 };
 
                 await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Working, message, final: false, cancellationToken);
@@ -91,51 +91,10 @@ public class WorkflowService : IWorkflowService
             }
         }
 
-        /* 
-        var artifact = new Artifact
-        {
-            Parts =
-            [
-                new TextPart()
-                {
-                    Text = workResponse.Message
-                }
-            ]
-        };
-
-        await TaskManager.ReturnArtifactAsync(agentTask.Id, artifact, cancellationToken);
-        */
+      
        
     }
-    /*
-    private async Task<A2AResponse> OnMessageReceived(MessageSendParams messageSendParams, CancellationToken cancellationToken)
-    {
-        var messageText = messageSendParams.Message.Parts.OfType<TextPart>().First().Text;
-
-        var workflowRequest = new WorkflowRequest
-        {
-            Meta =
-            {
-                ThreadId = messageSendParams.Message.ContextId!,
-                RawUserMessage = messageText
-            }
-        };
-
-        var workResponse = await _travelWorkflowService.Execute(workflowRequest);
-
-        var message = new AgentMessage()
-        {
-            Role = MessageRole.Agent,
-            MessageId = Guid.NewGuid().ToString(),
-            ContextId = messageSendParams.Message.ContextId,
-            Parts = [new TextPart() {
-                Text = workResponse.Message
-            }]
-        };
-
-        return message;
-    }
-    */
+   
     private Task<AgentCard> OnAgentCardQuery(string url, CancellationToken cancellationToken)
     {
         return _agentDiscoveryService.GetAgentCard(url);

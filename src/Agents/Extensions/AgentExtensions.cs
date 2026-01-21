@@ -34,6 +34,28 @@ public static class AgentExtensions
         return taskStatusUpdateEvent.Status.Message.Parts.OfType<TextPart>().First().Text;
     }
 
+    public class StatusUpdate(string type, string source, string status, string details)
+    {
+        public string Type { get; } = type;
+
+        public string Source { get; } = source;
+
+        public string Status { get; } = status;
+
+        public string Details { get; } = details;
+    }
+
+    public static StatusUpdate GetPartStatusDataText(this TaskStatusUpdateEvent taskStatusUpdateEvent)
+    {
+        var dataPart = taskStatusUpdateEvent.Status.Message.Parts.OfType<DataPart>().First();
+
+        var statusPayload = dataPart.Data["status"];
+
+        var statusUpdate = JsonSerializer.Deserialize<StatusUpdate>(statusPayload);
+
+        return statusUpdate;
+    }
+
     public static void AddToolCalls(this Dictionary<string, FunctionCallContent> tools, IList<AIContent> contents)
     {
         foreach (var content in contents)

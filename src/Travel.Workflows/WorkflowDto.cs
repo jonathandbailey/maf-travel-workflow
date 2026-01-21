@@ -11,13 +11,27 @@ public class WorkflowStateDto(WorkflowState state, CheckpointInfo? checkpointInf
     public CheckpointInfo? CheckpointInfo { get; } = checkpointInfo;
 }
 
-public class WorkflowResponse(WorkflowState state, string message, WorkflowAction action)
+public class WorkflowResponse(WorkflowState state, string message, WorkflowAction action, JsonElement? payload = null)
 {
     public WorkflowState State { get; } = state;
 
     public WorkflowAction Action { get; } = action;
+    public JsonElement? Payload { get; } = payload;
     public string Message { get; } = message;
 }
+
+public class StatusUpdate(string source, string status, string details)
+{
+    public string Type { get; } = nameof(WorkflowAction.StatusUpdate);
+    
+    public string Source { get; } = source;
+
+    public string Status { get; } = status;
+
+    public string Details { get; } = details;
+}
+
+
 
 public class StoreStateDto(CheckpointInfo checkpointInfo, JsonElement jsonElement)
 {
