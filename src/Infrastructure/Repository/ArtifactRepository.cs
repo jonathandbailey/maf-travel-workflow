@@ -26,6 +26,13 @@ public class ArtifactRepository(IAzureStorageRepository repository, IOptions<Azu
             artifact, ApplicationJsonContentType);
     }
 
+    public async Task SaveFlightSearchAsync(string artifact, Guid id)
+    {
+        await repository.UploadTextBlobAsync(GetFlightSearchFileName(id),
+            settings.Value.ContainerName,
+            artifact, ApplicationJsonContentType);
+    }
+
     public async Task<FlightSearchResultDto> GetFlightPlanAsync()
     {
         var filename = GetArtifactFileName("flights");
@@ -48,5 +55,10 @@ public class ArtifactRepository(IAzureStorageRepository repository, IOptions<Azu
     private string GetArtifactFileName(string name)
     {
         return $"artifacts/{name}.json";
+    }
+
+    private string GetFlightSearchFileName(Guid id)
+    {
+        return $"artifacts/flights/search-{id}.json";
     }
 }

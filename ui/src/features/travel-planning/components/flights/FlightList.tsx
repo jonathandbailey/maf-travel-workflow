@@ -1,7 +1,7 @@
 import { Flex, Typography } from "antd";
 import Flight from "./Flight";
 import type { FlightOptionDto } from "../../api/travel.dto";
-
+import { mapFlightOptionDtoToDomain } from "../../domain/mappers";
 const { Text } = Typography;
 
 interface FlightListProps {
@@ -14,17 +14,19 @@ const FlightList = ({ flights, returnFlights }: FlightListProps) => {
         <Flex gap={24}>
             <Flex vertical gap="middle" wrap="wrap" justify="center">
                 <Text type="secondary" style={{ fontSize: '12px' }}>Outbound</Text>
-                {flights.map((flight, index) => (
-                    <Flight key={index} flight={flight} />
-                ))}
+                {flights.map((flightDto, index) => {
+                    const flight = mapFlightOptionDtoToDomain(flightDto);
+                    return <Flight key={index} flight={flight} />;
+                })}
 
             </Flex>
             <Flex vertical gap="middle" wrap="wrap" justify="center">
                 <Text type="secondary" style={{ fontSize: '12px' }}>Return</Text>
 
-                {returnFlights.map((flight, index) => (
-                    <Flight key={index} flight={flight} />
-                ))}
+                {returnFlights.map((flightDto, index) => {
+                    const flight = mapFlightOptionDtoToDomain(flightDto);
+                    return <Flight key={index} flight={flight} />;
+                })}
 
             </Flex>
         </Flex>

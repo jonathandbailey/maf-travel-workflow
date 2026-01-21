@@ -134,9 +134,11 @@ const Chat = ({ sessionId }: ChatProps) => {
                             addStatusUpdate(statusUpdate);
                             setStatusMessage(statusUpdate.status);
                         }
+
+
                     } else {
                         // Handle other snapshot types as before
-                        setStatusMessage(snapshot || '');
+                        console.log("Received non-StatusUpdate snapshot:", snapshot);
                     }
                 }
             },

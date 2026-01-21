@@ -67,7 +67,7 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
 
         var id = Guid.NewGuid();
 
-        await artifactRepository.SaveAsync(payload, id.ToString());
+        await artifactRepository.SaveFlightSearchAsync(payload, id);
 
         travelPlan.AddFlightSearchOption(new FlightOptionSearch(id));
 

@@ -44,7 +44,7 @@ function mapFlightPlanToDto(domain: FlightPlan): FlightPlanDto {
     };
 }
 
-function mapFlightOptionDtoToDomain(dto: FlightOptionDto): FlightOption {
+export function mapFlightOptionDtoToDomain(dto: FlightOptionDto): FlightOption {
     return {
         airline: dto.airline,
         flightNumber: dto.flightNumber,
