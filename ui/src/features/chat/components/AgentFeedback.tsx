@@ -20,8 +20,8 @@ const AgentFeedback = ({ message, currentStream, isLoading, statusMessage }: Age
             <div style={{ marginBottom: "96px", marginLeft: "24px", height: "32px" }} >
 
                 <Flex>
-                    <OpenAIOutlined height={48} width={48} />
-                    <Card style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", marginLeft: "16px", width: "600px" }}>
+
+                    <Card variant="borderless" style={{ boxShadow: "0 0px 0px rgba(0, 0, 0, 0.1)", marginLeft: "16px", width: "600px" }}>
                         <div style={{ maxWidth: "600px" }}>{currentStream}</div>
                     </Card>
                 </Flex>

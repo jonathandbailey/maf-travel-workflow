@@ -28,7 +28,7 @@ const ChatOutput = () => {
                                                 <UserMessage message={exchange.user} />
                                             </Flex>
                                             <AssistantMessage message={exchange.assistant} />
-                                            <Divider />
+
                                             <Divider />
                                         </div>
                                     ))}

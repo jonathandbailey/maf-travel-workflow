@@ -58,7 +58,21 @@ const Chat = ({ sessionId }: ChatProps) => {
                 }
 
                 if (event.type === EventType.TEXT_MESSAGE_END) {
-                    activeExchange.assistant.isLoading = false;
+                    setActiveExchange(prevExchange => {
+                        const updatedExchange = {
+                            ...prevExchange,
+                            assistant: {
+                                ...prevExchange.assistant,
+                                isLoading: false,
+                                text: streamTextRef.current
+                            }
+                        };
+
+                        // Add to store after state is updated
+                        setTimeout(() => addExchange(updatedExchange), 0);
+
+                        return updatedExchange;
+                    });
                     setIsLoading(false);
 
                     travelService.getTravelPlan(sessionId)
@@ -72,20 +86,34 @@ const Chat = ({ sessionId }: ChatProps) => {
                         });
 
 
-                    activeExchange.assistant.text = streamTextRef.current;
-                    addExchange(activeExchange);
-
-
                 }
                 if (event.type === EventType.TEXT_MESSAGE_START) {
-                    activeExchange.assistant.isLoading = true;
+                    setActiveExchange(prevExchange => ({
+                        ...prevExchange,
+                        assistant: {
+                            ...prevExchange.assistant,
+                            isLoading: true
+                        }
+                    }));
                     setIsLoading(true);
                 }
 
                 if (event.type === EventType.RUN_ERROR) {
-                    activeExchange.assistant.isLoading = false;
-                    setIsLoading(false);
+                    setActiveExchange(prevExchange => {
+                        const updatedExchange = {
+                            ...prevExchange,
+                            assistant: {
+                                ...prevExchange.assistant,
+                                isLoading: false
+                            }
+                        };
 
+                        // Add to store after state is updated
+                        setTimeout(() => addExchange(updatedExchange), 0);
+
+                        return updatedExchange;
+                    });
+                    setIsLoading(false);
                 }
 
                 if (event.type === EventType.STATE_SNAPSHOT) {
@@ -126,10 +154,10 @@ const Chat = ({ sessionId }: ChatProps) => {
 
 
     useEffect(() => {
-        // Reset stream when activeExchange changes
+        // Reset stream when activeExchange ID changes (new exchange created)
         streamTextRef.current = '';
         setCurrentStream('');
-    }, [activeExchange]);
+    }, [activeExchange.id]);
 
 
     function handlePrompt(value: string): void {
