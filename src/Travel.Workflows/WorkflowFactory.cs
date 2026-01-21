@@ -21,9 +21,7 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         var actNode = new ActNode(travelPlanService);
      
         var flightWorkerNode = new FlightWorkerNode(flightAgent, travelPlanService);
-    
-        var artifactStorageNode = new ArtifactStorageNode(artifactRepository);
-
+   
         var startNode = new StartNode();
      
         var builder = new WorkflowBuilder(startNode);
@@ -38,8 +36,6 @@ public class WorkflowFactory(IAgentFactory agentFactory, IArtifactRepository art
         builder.AddEdge(actNode, reasonNode);
         
         builder.AddEdge(actNode, flightWorkerNode);
- 
-        builder.AddEdge(flightWorkerNode, artifactStorageNode);
         
         builder.AddEdge(flightWorkerNode, actNode);
    

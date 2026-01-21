@@ -74,25 +74,20 @@ public class WorkflowService : IWorkflowService
                 await TaskManager.UpdateStatusAsync(agentTask.Id, TaskState.Completed, message, final: true, cancellationToken);
             }
 
-            if (response.State == WorkflowState.Executing && response.Action == WorkflowAction.ArtifactCreated)
+            if (response is { State: WorkflowState.Executing, Action: WorkflowAction.ArtifactCreated })
             {
                 var artifact = new Artifact
                 {
                     Parts =
-                    [
-                        new TextPart()
-                        {
-                            Text = response.Message
-                        }
-                    ]
+                    [new DataPart {  Data = new Dictionary<string, JsonElement>
+                    {
+                        ["artifact"] = response.Payload!.Value,
+                    }}]
                 };
 
                 await TaskManager.ReturnArtifactAsync(agentTask.Id, artifact, cancellationToken);
             }
         }
-
-      
-       
     }
    
     private Task<AgentCard> OnAgentCardQuery(string url, CancellationToken cancellationToken)

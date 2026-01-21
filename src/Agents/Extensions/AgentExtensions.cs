@@ -51,6 +51,13 @@ public static class AgentExtensions
         public string Details { get; } = details;
     }
 
+    public class ArtifactCreated(string type, Guid id, string key)
+    {
+        public Guid Id { get; } = id;
+        public string Key { get; } = key;
+        public string Type { get; } = type;
+    }
+
     public static StatusUpdate GetPartStatusDataText(this TaskStatusUpdateEvent taskStatusUpdateEvent)
     {
         var dataPart = taskStatusUpdateEvent.Status.Message.Parts.OfType<DataPart>().First();
@@ -60,6 +67,17 @@ public static class AgentExtensions
         var statusUpdate = JsonSerializer.Deserialize<StatusUpdate>(statusPayload);
 
         return statusUpdate;
+    }
+
+    public static ArtifactCreated GetPartArtifactDataText(this TaskArtifactUpdateEvent taskStatusUpdateEvent)
+    {
+        var dataPart = taskStatusUpdateEvent.Artifact.Parts.OfType<DataPart>().First();
+
+        var statusPayload = dataPart.Data["artifact"];
+
+        var artifactCreated = JsonSerializer.Deserialize<ArtifactCreated>(statusPayload);
+
+        return artifactCreated;
     }
 
     public static void AddToolCalls(this Dictionary<string, FunctionCallContent> tools, IList<AIContent> contents)
@@ -83,6 +101,18 @@ public static class AgentExtensions
     public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this StatusUpdate statusUpdate)
     {
         var snapshot = new SnapShot<StatusUpdate>(statusUpdate.Type, statusUpdate);
+
+        var stateBytes = JsonSerializer.SerializeToUtf8Bytes(snapshot);
+
+        return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
+    }
+
+    public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this ArtifactCreated artifactCreated)
+    {
+        var snapshot = new SnapShot<ArtifactCreated>(artifactCreated.Type, artifactCreated);
 
         var stateBytes = JsonSerializer.SerializeToUtf8Bytes(snapshot);
 

@@ -17,7 +17,7 @@ public interface ITravelPlanService
     Task<TravelPlan> LoadAsync();
     Task<TravelPlanSummary> GetSummary();
     Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate);
-    Task<TravelPlan> AddFlightSearchOption(FlightSearchResultDto option);
+    Task<Guid> AddFlightSearchOption(FlightSearchResultDto option);
     Task<TravelPlan> SelectFlightOption(FlightSearchResultDto option);
     Task<FlightSearchResultDto> GetFlightOptionsAsync();
     Task CreateTravelPlan();
@@ -59,7 +59,7 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
         return travelPlanDto;
     }
 
-    public async Task<TravelPlan> AddFlightSearchOption(FlightSearchResultDto option)
+    public async Task<Guid> AddFlightSearchOption(FlightSearchResultDto option)
     {
         var travelPlan = await LoadAsync();
 
@@ -73,7 +73,7 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
 
         await SaveAsync(travelPlan);
 
-        return travelPlan;
+        return id;
     }
 
     public async Task<FlightSearchResultDto> GetFlightOptionsAsync()

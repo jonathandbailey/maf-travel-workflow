@@ -70,9 +70,11 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
        
                 if (agentRunUpdate.RawRepresentation is TaskArtifactUpdateEvent artifactUpdateEvent)
                 {
-                    var messageText = artifactUpdateEvent.Artifact.Parts.OfType<TextPart>().First().Text;
+                    var messageText = artifactUpdateEvent.GetPartArtifactDataText();
 
-                    toolActivity?.AddEvent(agentRunUpdate, messageText);
+                    toolActivity?.AddEvent(agentRunUpdate, messageText.Key);
+
+                    yield return messageText.ToAgentResponseStatusMessage();
                 }
 
                 if (agentRunUpdate.RawRepresentation is TaskStatusUpdateEvent taskStatusUpdateEvent)

@@ -20,6 +20,12 @@ public class WorkflowResponse(WorkflowState state, string message, WorkflowActio
     public string Message { get; } = message;
 }
 
+public class ArtifactCreated(Guid id, string key)
+{
+    public Guid Id { get; } = id;
+    public string Key { get; } = key;
+    public string Type { get; } = nameof(WorkflowAction.ArtifactCreated);
+}
 public class StatusUpdate(string source, string status, string details)
 {
     public string Type { get; } = nameof(WorkflowAction.StatusUpdate);

@@ -71,9 +71,9 @@ public class FlightWorkerNode(AIAgent agent, ITravelPlanService travelPlanServic
             {
                 case FlightAction.FlightOptionsCreated:
                 {
-                    await travelPlanService.AddFlightSearchOption(flightSearchResults.Results);
+                    var id =  await travelPlanService.AddFlightSearchOption(flightSearchResults.Results);
 
-                    await context.AddEventAsync(new ArtifactStatusEvent(flightSearchResults.Results.ArtifactKey, ArtifactStatus.Created), cancellationToken);
+                    await context.AddEventAsync(new ArtifactStatusEvent(id, flightSearchResults.Results.ArtifactKey, ArtifactStatus.Created), cancellationToken);
 
                     return new AgentResponse(FlightAgent, FlightsOptionsCreated, AgentResponseStatus.Success);
                 }

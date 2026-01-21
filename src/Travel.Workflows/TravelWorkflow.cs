@@ -56,7 +56,11 @@ public class TravelWorkflow(
 
             if (evt is ArtifactStatusEvent artifactStatusEvent)
             {
-                yield return new WorkflowResponse(WorkflowState.Executing, artifactStatusEvent.Key, WorkflowAction.ArtifactCreated);
+                var artifactCreated = new ArtifactCreated(artifactStatusEvent.Id, artifactStatusEvent.Key);
+
+                var serialized = JsonSerializer.SerializeToElement(artifactCreated);
+
+                yield return new WorkflowResponse(WorkflowState.Executing, artifactStatusEvent.Key, WorkflowAction.ArtifactCreated, serialized);
             }
 
             if (evt is TravelWorkflowErrorEvent travelWorkflowErrorEvent)

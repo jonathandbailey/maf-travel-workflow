@@ -11,8 +11,9 @@ public sealed class TravelWorkflowErrorEvent(string description, string message,
     public Exception? Exception { get; } = exception;
 }
 
-public sealed class ArtifactStatusEvent(string key, ArtifactStatus status) : WorkflowEvent
+public sealed class ArtifactStatusEvent(Guid id, string key, ArtifactStatus status) : WorkflowEvent
 {
+    public Guid Id { get; } = id;
     public string Key { get; } = key;
 
     private ArtifactStatus Status { get; } = status;
