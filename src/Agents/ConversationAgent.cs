@@ -90,9 +90,9 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
 
                     if (taskStatusUpdateEvent.Status.State == TaskState.Working)
                     {
-                        var messageText = taskStatusUpdateEvent.GetPartStatusDataText().Status;
+                        var messageText = taskStatusUpdateEvent.GetPartStatusDataText();
 
-                        toolActivity?.AddEvent(agentRunUpdate, taskStatusUpdateEvent.Status.State, messageText);
+                        toolActivity?.AddEvent(agentRunUpdate, taskStatusUpdateEvent.Status.State, messageText.Status);
 
                         yield return messageText.ToAgentResponseStatusMessage();
                     }

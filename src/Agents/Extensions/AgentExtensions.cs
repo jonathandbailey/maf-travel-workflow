@@ -34,6 +34,12 @@ public static class AgentExtensions
         return taskStatusUpdateEvent.Status.Message.Parts.OfType<TextPart>().First().Text;
     }
 
+    public class SnapShot<T>(string type, T payload)
+    {
+        public string Type { get; } = type;
+        public T Payload { get; } = payload;
+    }
+
     public class StatusUpdate(string type, string source, string status, string details)
     {
         public string Type { get; } = type;
@@ -74,9 +80,25 @@ public static class AgentExtensions
         return options;
     }
 
+    public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this StatusUpdate statusUpdate)
+    {
+        var snapshot = new SnapShot<StatusUpdate>(statusUpdate.Type, statusUpdate);
+
+        var stateBytes = JsonSerializer.SerializeToUtf8Bytes(snapshot);
+
+        return new AgentRunResponseUpdate
+        {
+            Contents = [new DataContent(stateBytes, "application/json")]
+        };
+    }
+
     public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this string message)
     {
-        var stateBytes = JsonSerializer.SerializeToUtf8Bytes(message);
+        var statusUpdate = new StatusUpdate("StatusUpdate", "ConversationAgent", message, string.Empty);
+
+        var snapshot = new SnapShot<StatusUpdate>(statusUpdate.Type, statusUpdate);
+
+        var stateBytes = JsonSerializer.SerializeToUtf8Bytes(snapshot);
 
         return new AgentRunResponseUpdate
         {
