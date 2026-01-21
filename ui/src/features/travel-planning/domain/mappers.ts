@@ -55,7 +55,7 @@ export function mapFlightOptionDtoToDomain(dto: FlightOptionDto): FlightOption {
     };
 }
 
-function mapFlightOptionToDto(domain: FlightOption): FlightOptionDto {
+export function mapFlightOptionToDto(domain: FlightOption): FlightOptionDto {
     return {
         airline: domain.airline,
         flightNumber: domain.flightNumber,

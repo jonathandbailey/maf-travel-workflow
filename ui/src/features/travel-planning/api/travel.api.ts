@@ -5,7 +5,7 @@ export class TravelService {
 
     async getFlightPlan(sessionId: string): Promise<FlightSearchResultDto> {
 
-        const response = await apiClient.get<FlightSearchResultDto>(`api/plans/${sessionId}/flights`);
+        const response = await apiClient.get<FlightSearchResultDto>(`api/travel/flights/search/${sessionId}`);
         return response.data;
     }
 
