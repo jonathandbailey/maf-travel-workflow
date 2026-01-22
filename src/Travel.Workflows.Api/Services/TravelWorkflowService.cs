@@ -1,5 +1,4 @@
 ﻿using Microsoft.Agents.AI.Workflows;
-using Microsoft.Extensions.AI;
 using Travel.Workflows.Dto;
 using Workflows;
 using Workflows.Interfaces;
@@ -18,18 +17,18 @@ public class TravelWorkflowService(
     {
         var workflow = await workflowFactory.Create();
 
-        var state = await workflowRepository.LoadAsync(request.Meta.ThreadId);
+        var state = await workflowRepository.LoadAsync(request.ThreadId);
   
-        var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, request.Meta.ThreadId));
+        var checkpointManager = CheckpointManager.CreateJson(new CheckpointStore(repository, request.ThreadId));
 
         var travelWorkflow = new TravelWorkflow(workflow, checkpointManager, state.CheckpointInfo, state.State, logger);
 
-        await foreach (var response in travelWorkflow.Execute(new TravelWorkflowRequestDto(new ChatMessage(ChatRole.User, request.Meta.RawUserMessage), request.Meta.ThreadId)))
+        await foreach (var response in travelWorkflow.Execute(request))
         {
-            yield return new WorkflowResponse( response.State, response.Message, response.Action, response.Payload);
+            yield return response;
         }
 
-        await workflowRepository.SaveAsync(request.Meta.ThreadId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
+        await workflowRepository.SaveAsync(request.ThreadId, travelWorkflow.State, travelWorkflow.CheckpointInfo);
     }
 }
 

@@ -33,9 +33,9 @@ public static class WorkflowServiceExtensions
         return await context.ReadStateAsync<Guid>("agent_thread_id", scopeName: "workflow", cancellationToken);
     }
 
-    public static async Task AddThreadId(this IWorkflowContext context, string threadId, CancellationToken cancellationToken)
+    public static async Task AddThreadId(this IWorkflowContext context, Guid threadId, CancellationToken cancellationToken)
     {
-        await context.QueueStateUpdateAsync("agent_thread_id", Guid.Parse(threadId), scopeName: "workflow", cancellationToken: cancellationToken);
+        await context.QueueStateUpdateAsync("agent_thread_id", threadId, scopeName: "workflow", cancellationToken: cancellationToken);
     }
 
     public static ChatClientAgentRunOptions ToChatClientAgentRunOptions(this Guid threadId)

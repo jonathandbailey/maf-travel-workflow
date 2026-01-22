@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using A2A;
+using Microsoft.Extensions.AI;
 using Travel.Workflows.Dto;
 using Workflows;
 
@@ -25,16 +26,9 @@ public class WorkflowTaskManager : IWorkflowTaskManager
     {
         var messageText = agentTask.History.OfType<AgentMessage>().First().Parts.OfType<TextPart>().First().Text;
 
-        var workflowRequest = new WorkflowRequest
-        {
-            Meta =
-            {
-                ThreadId = agentTask.ContextId,
-                RawUserMessage = messageText
-            }
-        };
+        var request = new WorkflowRequest(new ChatMessage(ChatRole.User, messageText), Guid.Parse(agentTask.ContextId));
 
-        await foreach (var response in _travelWorkflowService.Execute(workflowRequest))
+        await foreach (var response in _travelWorkflowService.Execute(request))
         {
             if (response.State == WorkflowState.WaitingForUserInput)
             {

@@ -29,9 +29,9 @@ public enum NextAction
     Error
 }
 
-public class StartWorkflowDto(string threadId, ReasoningInputDto reasoningInputDto)
+public class StartWorkflowDto(Guid threadId, ReasoningInputDto reasoningInputDto)
 {
-    public string ThreadId { get; } = threadId;
+    public Guid ThreadId { get; } = threadId;
     public ReasoningInputDto ReasoningInputDto { get; } = reasoningInputDto;
 }
 

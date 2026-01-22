@@ -44,7 +44,7 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         return stateDto;
     }
 
-    public async Task<StoreStateDto> LoadAsync(string threadId, string checkpointId, string runId)
+    public async Task<StoreStateDto> LoadAsync(Guid threadId, string checkpointId, string runId)
     {
         var blob = await repository.DownloadTextBlobAsync(GetCheckpointFileName(threadId, checkpointId, runId), settings.Value.ContainerName);
 
@@ -95,7 +95,7 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         return checkpoints;
     }
 
-    public async Task SaveAsync(string threadId, StoreStateDto storeState)
+    public async Task SaveAsync(Guid threadId, StoreStateDto storeState)
     {
         var serializedConversation = JsonSerializer.Serialize(storeState, SerializerOptions);
 
@@ -111,7 +111,7 @@ public class CheckpointRepository(IAzureStorageRepository repository, IOptions<A
         return $"{userId}/{sessionId}/checkpoints/{runId}/{checkpointId}.json";
     }
 
-    private static string GetCheckpointFileName(string threadId, string checkpointId, string runId)
+    private static string GetCheckpointFileName(Guid threadId, string checkpointId, string runId)
     {
         return $"{threadId}/checkpoints/{runId}/{checkpointId}.json";
     }

@@ -17,14 +17,14 @@ public class TravelWorkflow(
 {
     private CheckpointManager CheckpointManager { get; set; } = checkpointManager;
 
-    public CheckpointInfo? CheckpointInfo { get; set; } = checkpointInfo;
+    public CheckpointInfo? CheckpointInfo { get; private set; } = checkpointInfo;
 
-    public WorkflowState State { get; set; } = state;
+    public WorkflowState State { get; private set; } = state;
 
-    public async IAsyncEnumerable<WorkflowResponse> Execute(TravelWorkflowRequestDto requestDto)
+    public async IAsyncEnumerable<WorkflowResponse> Execute(WorkflowRequest request)
     {
 
-        var startWorkflow = new StartWorkflowDto(requestDto.ThreadId, new ReasoningInputDto(requestDto.Message.Text));
+        var startWorkflow = new StartWorkflowDto(request.ThreadId, new ReasoningInputDto(request.Message.Text));
 
         var run = await workflow.CreateStreamingRun(
             startWorkflow, State, CheckpointManager, CheckpointInfo);
@@ -87,7 +87,7 @@ public class TravelWorkflow(
                     }
                     case WorkflowState.WaitingForUserInput:
                     {
-                        var resp = requestInfoEvent.Request.CreateResponse(new ReasoningInputDto(requestDto.Message.Text));
+                        var resp = requestInfoEvent.Request.CreateResponse(new ReasoningInputDto(request.Message.Text));
 
                         State = WorkflowState.Executing;
                         await run.Run.SendResponseAsync(resp);

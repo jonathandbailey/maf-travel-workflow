@@ -51,7 +51,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
         return stateDto;
     }
 
-    public async Task SaveAsync(string threadId, WorkflowState state, CheckpointInfo? checkpointInfo)
+    public async Task SaveAsync(Guid threadId, WorkflowState state, CheckpointInfo? checkpointInfo)
     {
         var workflowStateDto = new WorkflowStateDto(state, checkpointInfo);
 
@@ -61,7 +61,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
             serializedWorkflowState, ApplicationJsonContentType);
     }
 
-    public async Task<WorkflowStateDto> LoadAsync(string threadId)
+    public async Task<WorkflowStateDto> LoadAsync(Guid threadId)
     {
         var blobExists = await repository.BlobExists(GetFileName(threadId), settings.Value.ContainerName);
 
@@ -80,7 +80,7 @@ public class WorkflowRepository(IAzureStorageRepository repository, IOptions<Azu
         return stateDto;
     }
 
-    private static string GetFileName(string threadId)
+    private static string GetFileName(Guid threadId)
     {
         return $"{threadId}/workflows/state.json";
     }
