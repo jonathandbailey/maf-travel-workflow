@@ -4,7 +4,7 @@ using Microsoft.Agents.AI.Workflows.Checkpointing;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Repository;
 
-namespace Travel.Workflows;
+namespace Travel.Workflows.Services;
 
 public class CheckpointStore(ICheckpointRepository checkpointRepository, string threadId) : JsonCheckpointStore
 {

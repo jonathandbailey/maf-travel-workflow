@@ -1,4 +1,4 @@
-﻿namespace Travel.Workflows;
+﻿namespace Travel.Workflows.Dto;
 
 public static class WorkflowConstants
 {

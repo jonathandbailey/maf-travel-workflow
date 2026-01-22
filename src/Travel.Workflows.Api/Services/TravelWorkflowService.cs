@@ -2,6 +2,7 @@
 using Microsoft.Extensions.AI;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Repository;
+using Travel.Workflows.Services;
 
 namespace Travel.Workflows.Api.Services;
 
