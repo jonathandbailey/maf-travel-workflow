@@ -1,8 +1,10 @@
 ﻿
 
 using Infrastructure.Dto;
+using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Travel.Application.Api.Application.Commands;
 using Travel.Application.Api.Dto;
 using Travel.Application.Api.Extensions;
 using Travel.Application.Api.Models.Flights;
@@ -134,40 +136,15 @@ public static class ApiMappings
     private static async Task<Ok<SessionDto>> CreateSession(
         ITravelPlanService travelPlanService,
         ISessionService sessionService,
+        IMediator mediator,
         HttpContext context)
     {
-        var id = await travelPlanService.CreateAsync(context.User.Id());
+      
+        var id = await mediator.Send(new CreateTravelPlanCommand(context.User.Id()));
 
-        var session = await sessionService.Create(context.User.Id(), id);
-
-        var dto = new SessionDto(session.ThreadId, session.TravelPlanId);
-
-        return TypedResults.Ok(dto);
-    }
-
-    private static FlightOption MapFlightOption(FlightOptionDto flightOption)
-    {
-        return new FlightOption
-        {
-            Airline = flightOption.Airline,
-            FlightNumber = flightOption.FlightNumber,
-            Departure = new FlightEndpoint
-            {
-                Airport = flightOption.Departure.Airport,
-                Datetime = flightOption.Departure.Datetime
-            },
-            Arrival = new FlightEndpoint
-            {
-                Airport = flightOption.Arrival.Airport,
-                Datetime = flightOption.Arrival.Datetime
-            },
-            Duration = flightOption.Duration,
-            Price = new FlightPrice
-            {
-                Amount = flightOption.Price.Amount,
-                Currency = flightOption.Price.Currency
-            }
-        };
+        var session = await mediator.Send(new CreateSessionCommand(context.User.Id(), id));
+     
+        return TypedResults.Ok(session);
     }
 
     private static FlightOption MapFlightOption(Infrastructure.Dto.FlightOptionDto flightOption)

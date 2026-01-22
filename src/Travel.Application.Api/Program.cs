@@ -15,6 +15,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(ApiMappings).Assembly);
+});
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddHostedService<AzureStorageSeedService>();
