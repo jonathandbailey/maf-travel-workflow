@@ -1,12 +1,11 @@
 ﻿using System.Text.Json;
-using Application.Observability;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Agents.AI.Workflows.Reflection;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Events;
+using Travel.Workflows.Extensions;
 using Travel.Workflows.Observability;
 using Travel.Workflows.Services;
-using WorkflowTelemetryTags = Travel.Workflows.Observability.WorkflowTelemetryTags;
 
 namespace Travel.Workflows.Nodes;
 
@@ -25,12 +24,12 @@ public class ActNode(ITravelService travelService) : ReflectingExecutor<ActNode>
 
         WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, serialized);
 
-        var threadId = await context.ReadStateAsync<string>("agent_thread_id", scopeName: "workflow", cancellationToken);
+        var threadId = await context.GetThreadId(cancellationToken);
 
 
         if (message.TravelPlanUpdate != null)
         {
-            await travelService.UpdateTravelPlanFromEndpoint(message.TravelPlanUpdate!, Guid.Parse(threadId!));
+            await travelService.UpdateTravelPlan(message.TravelPlanUpdate!, threadId);
 
             await context.AddEventAsync(new TravelPlanUpdatedEvent(), cancellationToken);
         }
@@ -41,7 +40,7 @@ public class ActNode(ITravelService travelService) : ReflectingExecutor<ActNode>
                 await context.SendMessageAsync(new UserRequest(serialized), cancellationToken: cancellationToken);
                 break;
             case NextAction.FlightAgent:
-                var plan = await travelService.GetSummary(Guid.Parse(threadId!));
+                var plan = await travelService.GetSummary(threadId);
                 await context.SendMessageAsync(new CreateFlightOptions(plan, message), cancellationToken: cancellationToken);
                 break;
             case NextAction.Error:

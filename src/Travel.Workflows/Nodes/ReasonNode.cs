@@ -6,54 +6,12 @@ using Microsoft.Agents.AI.Workflows.Reflection;
 using Microsoft.Extensions.AI;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Events;
+using Travel.Workflows.Extensions;
 using Travel.Workflows.Observability;
 using Travel.Workflows.Services;
-using WorkflowTelemetryTags = Travel.Workflows.Observability.WorkflowTelemetryTags;
 
 namespace Travel.Workflows.Nodes;
 
-public class NullableDateTimeConverter : JsonConverter<DateTime?>
-{
-    public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        if (reader.TokenType == JsonTokenType.Null)
-        {
-            return null;
-        }
-
-        if (reader.TokenType == JsonTokenType.String)
-        {
-            var stringValue = reader.GetString();
-
-            // Handle empty strings or the string "null"
-            if (string.IsNullOrWhiteSpace(stringValue) || stringValue.Equals("null", StringComparison.OrdinalIgnoreCase))
-            {
-                return null;
-            }
-
-            // Try to parse the date string
-            if (DateTime.TryParse(stringValue, out var dateTime))
-            {
-                return dateTime;
-            }
-        }
-
-        // If we can't parse it, return null instead of throwing
-        return null;
-    }
-
-    public override void Write(Utf8JsonWriter writer, DateTime? value, JsonSerializerOptions options)
-    {
-        if (value.HasValue)
-        {
-            writer.WriteStringValue(value.Value);
-        }
-        else
-        {
-            writer.WriteNullValue();
-        }
-    }
-}
 
 public class ReasonNode(AIAgent agent, ITravelService travelService) : ReflectingExecutor<ReasonNode>(WorkflowConstants.ReasonNodeName),
    
@@ -66,7 +24,7 @@ public class ReasonNode(AIAgent agent, ITravelService travelService) : Reflectin
         WriteIndented = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter(), new NullableDateTimeConverter() }
+        Converters = { new JsonStringEnumConverter(), new Extensions.WorkflowExtensions.NullableDateTimeConverter() }
     };
 
     public async ValueTask<ReasoningOutputDto> HandleAsync(
@@ -78,9 +36,9 @@ public class ReasonNode(AIAgent agent, ITravelService travelService) : Reflectin
             
         try
         {
-            var threadId = await context.ReadStateAsync<string>("agent_thread_id", scopeName: "workflow", cancellationToken);
+            var threadId = await context.GetThreadId(cancellationToken);
 
-            var travelPlanSummary = await travelService.GetSummary(Guid.Parse(threadId!));
+            var travelPlanSummary = await travelService.GetSummary(threadId);
 
             var template = JsonSerializer.Serialize(new ReasoningState(reasoningInput.Observation, travelPlanSummary));
 
@@ -95,7 +53,7 @@ public class ReasonNode(AIAgent agent, ITravelService travelService) : Reflectin
                 {
                     AdditionalProperties = new AdditionalPropertiesDictionary()
                     {
-                      { "agent_thread_id", threadId! }
+                      { "agent_thread_id", threadId }
                     }
                 }
             };

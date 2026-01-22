@@ -50,7 +50,7 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
         await memory.SaveAsync(new AgentState(threadState), GetResourceName(innerAgent.Name!, threadId));
     }
 
-    private async Task<AgentThread> LoadAsync(AIAgent agent, string threadId)
+    private async Task<AgentThread> LoadAsync(AIAgent agent, Guid threadId)
     {
         AgentThread? thread;
 
@@ -68,7 +68,7 @@ public class AgentMemoryMiddleware(IAgentMemoryService memory) : IAgentMemoryMid
         return thread;
     }
 
-    private static string GetResourceName(string agentName, string threadId)
+    private static string GetResourceName(string agentName, Guid threadId)
     {
         return $"{agentName}_{threadId}";
     }
