@@ -16,6 +16,7 @@ public class FlightService(IArtifactRepository artifactRepository) : IFlightServ
         var id = Guid.NewGuid();
         var payload = JsonSerializer.Serialize(flightSearch);
         await artifactRepository.SaveFlightSearchAsync(payload, id);
+
         return id;
     }
 }

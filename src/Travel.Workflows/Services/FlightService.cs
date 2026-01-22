@@ -15,7 +15,7 @@ public class FlightService : IFlightService
         PropertyNameCaseInsensitive = true
     };
 
-    public async Task<Guid> SaveFlightSearch(FlightSearchResultDto option)
+    public async Task<Guid> SaveFlightSearch(FlightSearchResultDto option, string threadId)
     {
         var payload = JsonSerializer.Serialize(option, SerializerOptions);
 
@@ -23,7 +23,7 @@ public class FlightService : IFlightService
 
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-        var response = await httpClient.PostAsync($"/api/travel/flights/search/", content);
+        var response = await httpClient.PostAsync($"/api/travel/flights/search/{threadId}", content);
 
         if (!response.IsSuccessStatusCode)
             throw new HttpRequestException($"Failed to retrieve travel plan: {response.ReasonPhrase}");
@@ -33,9 +33,24 @@ public class FlightService : IFlightService
 
         return id;
     }
+
+    public async Task SaveFlightOption(FlightSearchResultDto option, string threadId)
+    {
+        var payload = JsonSerializer.Serialize(option, SerializerOptions);
+
+        var httpClient = new HttpClient() { BaseAddress = new Uri("https://localhost:7010/") };
+
+        var content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PutAsync($"/api/travel/flights/search/{threadId}", content);
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Failed to retrieve travel plan: {response.ReasonPhrase}");
+    }
 }
 
 public interface IFlightService
 {
-    Task<Guid> SaveFlightSearch(FlightSearchResultDto option);
+    Task<Guid> SaveFlightSearch(FlightSearchResultDto option, string threadId);
+    Task SaveFlightOption(FlightSearchResultDto option, string threadId);
 }

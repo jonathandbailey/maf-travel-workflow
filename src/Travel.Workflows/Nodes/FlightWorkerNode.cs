@@ -71,7 +71,7 @@ public class FlightWorkerNode(AIAgent agent, ITravelService travelService, IFlig
             {
                 case FlightAction.FlightOptionsCreated:
                 {
-                    var id =  await flightService.SaveFlightSearch(flightSearchResults.Results);
+                    var id =  await flightService.SaveFlightSearch(flightSearchResults.Results, threadId!);
 
                     await context.AddEventAsync(new ArtifactStatusEvent(id, flightSearchResults.Results.ArtifactKey, ArtifactStatus.Created), cancellationToken);
 
@@ -80,7 +80,7 @@ public class FlightWorkerNode(AIAgent agent, ITravelService travelService, IFlig
                 
                 case FlightAction.FlightOptionsSelected:
                 {
-                    await travelService.SelectFlightOption(flightSearchResults.Results);
+                    await flightService.SaveFlightOption(flightSearchResults.Results, threadId!);
 
                     return new AgentResponse(FlightAgent, FlightOptionSelected, AgentResponseStatus.Success);
                 }

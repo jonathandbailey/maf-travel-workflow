@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Infrastructure.Dto;
 using Infrastructure.Interfaces;
 using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
@@ -10,19 +9,7 @@ using Travel.Application.Api.Models.Flights;
 
 namespace Travel.Application.Api.Services;
 
-public interface ITravelPlanService
-{
-    Task SaveAsync(TravelPlan state, Guid userId);
-    Task<bool> ExistsAsync(Guid userId, Guid travelPlanId);
-    Task<TravelPlan> LoadAsync(Guid userId, Guid travelPlanId);
-    Task<TravelPlanSummary> GetSummary(Guid userId, Guid travelPlanId);
-    Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate, Guid userId, Guid travelPlanId);
-    Task<TravelPlan> AddFlightSearchOption(FlightSearchResultDto option, Guid userId, Guid travelPlanId);
-    Task<TravelPlan> SelectFlightOption(FlightSearchResultDto option, Guid userId, Guid travelPlanId);
-    Task<FlightSearchResultDto> GetFlightOptionsAsync(Guid userId, Guid travelPlanId);
-    Task<Guid> CreateTravelPlan(Guid userId);
-    Task<TravelPlan> GetTravelPlan(Guid userId, Guid travelPlanId);
-}
+
 
 public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepository artifactRepository, IOptions<AzureStorageSeedSettings> settings) : ITravelPlanService
 {
@@ -33,86 +20,6 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Converters = { new JsonStringEnumConverter() },
     };
-
-    public async Task<TravelPlan> AddFlightSearchOption(FlightSearchResultDto option, Guid userId, Guid travelPlanId)  
-    {
-        var travelPlan = await LoadAsync(userId, travelPlanId);
-
-        var payload = JsonSerializer.Serialize(option, SerializerOptions);
-
-        var id = Guid.NewGuid();
-
-        await artifactRepository.SaveAsync(payload, id.ToString());
-
-        travelPlan.AddFlightSearchOption(new FlightOptionSearch(id));
-
-        await SaveAsync(travelPlan, userId);
-
-        return travelPlan;
-    }
-
-    public async Task<FlightSearchResultDto> GetFlightOptionsAsync(Guid userId, Guid travelPlanId)
-    {
-
-        var travelPlan = await LoadAsync(userId, travelPlanId);
-
-        var filename = GetArtifactFileName(travelPlan.FlightPlan.FlightOptions.First().Id.ToString());
-
-        var response = await repository.DownloadTextBlobAsync(filename, settings.Value.ContainerName);
-
-        var flightPlan = JsonSerializer.Deserialize<FlightSearchResultDto>(response, SerializerOptions);
-
-        return flightPlan ?? throw new InvalidOperationException($"Failed to deserialize flight plan from blob: {filename}");
-    }
-
-    public async Task<TravelPlan> SelectFlightOption(FlightSearchResultDto option, Guid userId, Guid travelPlanId)
-    {
-        var travelPlan = await LoadAsync(userId, travelPlanId);
-
-        var flightOption = option.DepartureFlightOptions.First();
-
-        var mapped = MapFlightOption(flightOption);
-
-        travelPlan.SelectFlightOption(mapped);
-
-        await SaveAsync(travelPlan, userId);
-
-        return travelPlan;
-    }
-
-    private FlightOption MapFlightOption(FlightOptionDto flightOption)
-    {
-        return new FlightOption
-        {
-            Airline = flightOption.Airline,
-            FlightNumber = flightOption.FlightNumber,
-            Departure = new FlightEndpoint
-            {
-                Airport = flightOption.Departure.Airport,
-                Datetime = flightOption.Departure.Datetime
-            },
-            Arrival = new FlightEndpoint
-            {
-                Airport = flightOption.Arrival.Airport,
-                Datetime = flightOption.Arrival.Datetime
-            },
-            Duration = flightOption.Duration,
-            Price = new FlightPrice
-            {
-                Amount = flightOption.Price.Amount,
-                Currency = flightOption.Price.Currency
-            }
-        };
-    }
-
-    public async Task<TravelPlanSummary> GetSummary(Guid userId, Guid travelPlanId)
-    {
-        var travelPlan = await LoadAsync(userId, travelPlanId);
-
-        var summary = new TravelPlanSummary(travelPlan);
-      
-        return summary;
-    }
 
     public async Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate, Guid userId, Guid travelPlanId)
     {
@@ -146,23 +53,31 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
             ApplicationJsonContentType);
     }
 
-    public async Task<Guid> CreateTravelPlan(Guid userId)
+    public async Task UpdateFlightSearchOption(Guid userId, Guid travelPlanId, Guid searchId)
+    {
+        var travelPlan = await LoadAsync(userId, travelPlanId);
+
+        travelPlan.AddFlightSearchOption(new FlightOptionSearch(searchId));
+
+        await SaveAsync(travelPlan, userId);
+    }
+
+    public async Task SaveFlightOption(Guid userId, Guid travelPlanId, FlightOption flightOption)
+    {
+        var travelPlan = await LoadAsync(userId, travelPlanId);
+
+        travelPlan.SelectFlightOption(flightOption);
+
+        await SaveAsync(travelPlan, userId);
+    }
+
+    public async Task<Guid> CreateAsync(Guid userId)
     {
         var travelPlan = new TravelPlan();
  
         await SaveAsync(travelPlan, userId);
 
         return travelPlan.Id;
-    }
-
-    public async Task<TravelPlan> GetTravelPlan(Guid userId, Guid travelPlanId)
-    {
-        return await LoadAsync(userId, travelPlanId);
-    }
-
-    public async Task<bool> ExistsAsync(Guid userId, Guid travelPlanId)
-    {
-        return await repository.BlobExists(GetStorageFileName(userId, travelPlanId), settings.Value.ContainerName);
     }
 
     public async Task<TravelPlan> LoadAsync(Guid userId, Guid travelPlanId)
@@ -182,9 +97,14 @@ public class TravelPlanService(IAzureStorageRepository repository, IArtifactRepo
     {
         return $"{userId}/plans/travel-plan-{travelPlanId}.json";
     }
+}
 
-    private string GetArtifactFileName(string name)
-    {
-        return $"/artifacts/{name}.json";
-    }
+public interface ITravelPlanService
+{
+    Task SaveAsync(TravelPlan state, Guid userId);
+    Task<TravelPlan> LoadAsync(Guid userId, Guid travelPlanId);
+    Task UpdateAsync(TravelPlanUpdateDto messageTravelPlanUpdate, Guid userId, Guid travelPlanId);
+    Task<Guid> CreateAsync(Guid userId);
+    Task UpdateFlightSearchOption(Guid userId, Guid travelPlanId, Guid searchId);
+    Task SaveFlightOption(Guid userId, Guid travelPlanId, FlightOption flightOption);
 }
