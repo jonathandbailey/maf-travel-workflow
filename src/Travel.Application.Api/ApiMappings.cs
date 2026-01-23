@@ -1,17 +1,13 @@
-﻿
-
-using Infrastructure.Dto;
+﻿using Infrastructure.Dto;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Travel.Application.Api.Application.Commands;
+using Travel.Application.Api.Application.Queries;
 using Travel.Application.Api.Dto;
 using Travel.Application.Api.Extensions;
 using Travel.Application.Api.Models.Flights;
 using Travel.Application.Api.Services;
-using FlightEndpointDto = Travel.Application.Api.Dto.FlightEndpointDto;
-using FlightOptionDto = Travel.Application.Api.Dto.FlightOptionDto;
-using PriceDto = Travel.Application.Api.Dto.PriceDto;
 
 namespace Travel.Application.Api;
 
@@ -31,7 +27,7 @@ public static class ApiMappings
         var api = app.MapGroup(ApiConversationsRoot);
 
         api.MapPost(CreateSessionPath, CreateSession);
-        api.MapGet(GetTravelPlanPath, GetTravelPlan);
+        api.MapGet(GetTravelPlanPath,GetTravelPlan);
         api.MapGet(GetSessionPath, GetSession);
         api.MapPost(UpdateTravelPlanPath, UpdateTravelPlan);
         api.MapPost(TravelFlightsSearchPath, SaveFlightSearch);
@@ -40,6 +36,47 @@ public static class ApiMappings
         api.MapPut(TravelPlanFlightsSearchPath, SaveFlightSearchToTravelPlan);
 
         return app;
+    }
+
+    
+
+    private static async Task UpdateTravelPlan(
+        [FromBody] TravelPlanUpdateDto travelPlanUpdateDto, 
+        Guid threadId, 
+        HttpContext context,
+        IMediator mediator)
+    {
+        await mediator.Send(new UpdateTravelPlanCommand(context.User.Id(), threadId, travelPlanUpdateDto));
+    }
+
+    private static async Task<Ok<SessionDto>> GetSession(Guid sessionId, IMediator  mediator, ISessionService sessionService, HttpContext context)
+    {
+        var sessionDto = await mediator.Send(new GetSessionQuery(context.User.Id(), sessionId));
+
+        return TypedResults.Ok(sessionDto);
+    }
+
+    private static async Task<Ok<TravelPlanDto>> GetTravelPlan(HttpContext context, Guid travelPlanId, IMediator mediator)
+    {
+        var travelPlanDto = await mediator.Send(new GetTravelPlanQuery(context.User.Id(), travelPlanId));
+
+        return TypedResults.Ok(travelPlanDto);
+    }
+
+        
+
+    private static async Task<Ok<SessionDto>> CreateSession(
+        ITravelPlanService travelPlanService,
+        ISessionService sessionService,
+        IMediator mediator,
+        HttpContext context)
+    {
+      
+        var id = await mediator.Send(new CreateTravelPlanCommand(context.User.Id()));
+
+        var session = await mediator.Send(new CreateSessionCommand(context.User.Id(), id));
+     
+        return TypedResults.Ok(session);
     }
 
     private static async Task<Ok<FlightSearchResultDto>> GetFlightSearch(
@@ -76,7 +113,7 @@ public static class ApiMappings
         ISessionService sessionService,
         HttpContext context)
     {
-       
+
         var session = await sessionService.Get(context.User.Id(), threadId);
 
         var flightOption = flightSearch.DepartureFlightOptions.First();
@@ -88,64 +125,6 @@ public static class ApiMappings
         return TypedResults.Ok();
     }
 
-    private static async Task UpdateTravelPlan(
-        [FromBody] TravelPlanUpdateDto travelPlanUpdateDto, 
-        Guid threadId, 
-        HttpContext context, 
-        ITravelPlanService travelPlanService,
-        ISessionService sessionService)
-    {
-        var session = await sessionService.Get(context.User.Id(), threadId);
-
-
-
-        await travelPlanService.UpdateAsync(travelPlanUpdateDto, context.User.Id(), session.TravelPlanId);
-    }
-
-    private static async Task<Ok<SessionDto>> GetSession(Guid sessionId, ISessionService sessionService, HttpContext context)
-    {
-        var session = await sessionService.Get(context.User.Id(), sessionId);
-
-        var dto = new SessionDto(session.ThreadId, session.TravelPlanId);
-
-        return TypedResults.Ok(dto);
-    }
-
-    private static async Task<Ok<TravelPlanDto>> GetTravelPlan(HttpContext context, Guid travelPlanId,ISessionService sessionService, ITravelPlanService travelPlanService)
-    {
-        var session = await sessionService.Get(context.User.Id(), travelPlanId);
-        
-        var travelPlan = await travelPlanService.LoadAsync(context.User.Id(), session.TravelPlanId);
-
-        var dto = new TravelPlanDto(
-            travelPlan.Origin, 
-            travelPlan.Destination, 
-            travelPlan.StartDate, 
-            travelPlan.EndDate, 
-            travelPlan.FlightPlan.FlightOptionsStatus, 
-            travelPlan.FlightPlan.UserFlightOptionStatus,
-            travelPlan.TravelPlanStatus,
-       
-            travelPlan.Id,
-            MapFlightPlan(travelPlan.FlightPlan)
-            );
-
-        return TypedResults.Ok(dto);
-    }
-
-    private static async Task<Ok<SessionDto>> CreateSession(
-        ITravelPlanService travelPlanService,
-        ISessionService sessionService,
-        IMediator mediator,
-        HttpContext context)
-    {
-      
-        var id = await mediator.Send(new CreateTravelPlanCommand(context.User.Id()));
-
-        var session = await mediator.Send(new CreateSessionCommand(context.User.Id(), id));
-     
-        return TypedResults.Ok(session);
-    }
 
     private static FlightOption MapFlightOption(Infrastructure.Dto.FlightOptionDto flightOption)
     {
@@ -168,40 +147,6 @@ public static class ApiMappings
             {
                 Amount = flightOption.Price.Amount,
                 Currency = flightOption.Price.Currency
-            }
-        };
-    }
-
-    private static FlightPlanDto MapFlightPlan(FlightPlan flightPlan)
-    {
-        if (flightPlan?.FlightOption == null)
-        {
-            return null;
-        }
-
-        return new FlightPlanDto
-        {
-            FlightOption = new FlightOptionDto
-            {
-                Airline = flightPlan.FlightOption.Airline,
-                FlightNumber = flightPlan.FlightOption.FlightNumber,
-                Departure = new FlightEndpointDto
-                {
-                    Airport = flightPlan.FlightOption.Departure.Airport,
-                    Datetime = flightPlan.FlightOption.Departure.Datetime
-                },
-                Arrival = new FlightEndpointDto
-                {
-                    Airport = flightPlan.FlightOption.Arrival.Airport,
-                   
-                    Datetime = flightPlan.FlightOption.Arrival.Datetime
-                },
-                Duration = flightPlan.FlightOption.Duration,
-                Price = new PriceDto
-                {
-                    Amount = flightPlan.FlightOption.Price.Amount,
-                    Currency = flightPlan.FlightOption.Price.Currency
-                }
             }
         };
     }
