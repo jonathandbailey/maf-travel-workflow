@@ -19,22 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Templates\Act-Agent.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Templates\conversation_agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\Flight-Agent.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Templates\Hotel-Agent.md">
+    <None Update="Templates\flight_agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\Parser-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\Reason-Agent.md">
+    <None Update="Templates\planning_agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\User-Agent.md">

@@ -1,5 +1,6 @@
 ﻿using Agents;
 using Microsoft.Agents.AI.Workflows;
+using Microsoft.Extensions.AI;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Nodes;
 using Travel.Workflows.Services;
@@ -10,9 +11,24 @@ public class WorkflowFactory(IAgentFactory agentFactory, ITravelService travelSe
 {
     public async Task<Workflow> Create()
     {
-        var reasonAgent = await agentFactory.CreateReasonAgent();
+        var schema = AIJsonUtilities.CreateJsonSchema(typeof(ReasoningOutputDto));
 
-        var flightAgent = await agentFactory.CreateFlightAgent();
+        var format = ChatResponseFormat.ForJsonSchema(
+            schema: schema,
+            schemaName: "ReasoningActRequest",
+            schemaDescription: "Reasoning State for Act.");
+
+
+        var reasonAgent = await agentFactory.Create("planning_agent", format);
+
+        var fllightSchema = AIJsonUtilities.CreateJsonSchema(typeof(FlightActionResultDto));
+
+        var flightChatResponseFormat = ChatResponseFormat.ForJsonSchema(
+            schema: fllightSchema,
+            schemaName: "FlightPlan",
+            schemaDescription: "User Flight Options for their vacation.");
+
+        var flightAgent = await agentFactory.Create("flight_agent", flightChatResponseFormat);
       
         var requestPort = RequestPort.Create<UserRequest, ReasoningInputDto>("user-input");
 

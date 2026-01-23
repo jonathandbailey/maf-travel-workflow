@@ -35,56 +35,20 @@ public class AgentFactory : IAgentFactory
             .GetChatClient(settings.Value.DeploymentName);
     }
 
-    public async Task<AIAgent> CreateFlightAgent()
+    public async Task<AIAgent> Create(string name, ChatResponseFormat? chatResponseFormat = null, List<AITool>? tools = null)
     {
-        var template = await _templateRepository.Load("Flight-Agent");
-     
-        var schema = AIJsonUtilities.CreateJsonSchema(typeof(FlightActionResultDto));
-
+        var template = await _templateRepository.Load(name);
+    
         ChatOptions chatOptions = new()
         {
-            ResponseFormat = ChatResponseFormat.ForJsonSchema(
-                schema: schema,
-                schemaName: "FlightPlan",
-                schemaDescription: "User Flight Options for their vacation."),
-            Instructions = template
-        };
-
-        var clientChatOptions = new ChatClientAgentOptions
-        {
-            Name = "flight_agent",
-            ChatOptions = chatOptions
-        };
-
-        var agent = _chatClient.AsIChatClient()
-            .AsBuilder()
-            .BuildAIAgent(options: clientChatOptions);
-
-        var middlewareAgent = agent.AsBuilder()
-            .Use(runFunc: _agentMemoryMiddleware.RunAsync, runStreamingFunc: _agentMemoryMiddleware.RunStreamingAsync)
-            .Build();
-
-        return middlewareAgent;
-    }
-
-    public async Task<AIAgent> CreateReasonAgent()
-    {
-        var template = await _templateRepository.Load("Reason-Agent");
-     
-        var schema = AIJsonUtilities.CreateJsonSchema(typeof(ReasoningOutputDto));
-
-        ChatOptions chatOptions = new()
-        {
-            ResponseFormat = ChatResponseFormat.ForJsonSchema(
-                schema: schema,
-                schemaName: "ReasoningActRequest",
-                schemaDescription: "Reasoning State for Act."),
-            Instructions = template
+            ResponseFormat = chatResponseFormat,
+            Instructions = template,
+            Tools = tools
         };
       
         var clientChatOptions = new ChatClientAgentOptions
         {
-            Name = "reason_agent",
+            Name = name,
             
             ChatOptions = chatOptions
         };
@@ -135,8 +99,7 @@ public class AgentFactory : IAgentFactory
 
 public interface IAgentFactory
 {
-    Task<AIAgent> CreateReasonAgent();
-    Task<AIAgent> CreateFlightAgent();
+    Task<AIAgent> Create(string name, ChatResponseFormat? chatResponseFormat = null, List<AITool>? tools = null);
     Task<AIAgent> Create(string name, List<AITool> tools);
     AIAgent ExtendConversationAgent(AIAgent agent);
 }
