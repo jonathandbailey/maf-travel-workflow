@@ -5,7 +5,7 @@ using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Travel.Application.Api.Models;
 
-namespace Travel.Application.Api.Services;
+namespace Travel.Application.Api.Infrastructure;
 
 public class TravelPlanPlanRepository(IAzureStorageRepository repository, IOptions<AzureStorageSettings> settings) : ITravelPlanRepository
 {

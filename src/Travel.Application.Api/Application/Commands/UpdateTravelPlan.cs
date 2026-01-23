@@ -1,8 +1,11 @@
-﻿using Infrastructure.Dto;
+﻿
+using Infrastructure.Dto;
 using MediatR;
 using Travel.Application.Api.Dto;
+using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Models.Flights;
-using Travel.Application.Api.Services;
+using FlightOptionDto = Infrastructure.Dto.FlightOptionDto;
+
 
 namespace Travel.Application.Api.Application.Commands;
 
@@ -10,11 +13,11 @@ public record UpdateTravelPlanCommand(Guid UserId, Guid SessionId, TravelPlanUpd
 
 public record UpdateTravelPlanFlightSearchCommand(Guid UserId, Guid SessionId, FlightSearchDto flightSearchDto) : IRequest;
 
-public class UpdateTravelPlanHandler(ITravelPlanRepository travelPlanRepository, ISessionService sessionService) : IRequestHandler<UpdateTravelPlanCommand>
+public class UpdateTravelPlanHandler(ITravelPlanRepository travelPlanRepository, ISessionRepository sessionRepository) : IRequestHandler<UpdateTravelPlanCommand>
 {
     public async Task Handle(UpdateTravelPlanCommand request, CancellationToken cancellationToken)
     {
-        var session = await sessionService.Get(request.UserId, request.SessionId);
+        var session = await sessionRepository.LoadAsync(request.UserId, request.SessionId);
 
         var travelPlan = await travelPlanRepository.LoadAsync(request.UserId, session.TravelPlanId);
 
@@ -34,11 +37,11 @@ public class UpdateTravelPlanHandler(ITravelPlanRepository travelPlanRepository,
     }
 }
 
-public class UpdateTravelPlanFlightSearchHandler(ITravelPlanRepository travelPlanRepository, ISessionService sessionService) : IRequestHandler<UpdateTravelPlanFlightSearchCommand>
+public class UpdateTravelPlanFlightSearchHandler(ITravelPlanRepository travelPlanRepository, ISessionRepository sessionRepository) : IRequestHandler<UpdateTravelPlanFlightSearchCommand>
 {
     public async Task Handle(UpdateTravelPlanFlightSearchCommand request, CancellationToken cancellationToken)
     {
-        var session = await sessionService.Get(request.UserId, request.SessionId);
+        var session = await sessionRepository.LoadAsync(request.UserId, request.SessionId);
 
         var travelPlan = await travelPlanRepository.LoadAsync(request.UserId, session.TravelPlanId);
 
@@ -49,7 +52,7 @@ public class UpdateTravelPlanFlightSearchHandler(ITravelPlanRepository travelPla
         await travelPlanRepository.SaveAsync(travelPlan, request.UserId);
     }
 
-    private static FlightOption MapFlightOption(Infrastructure.Dto.FlightOptionDto flightOption)
+    private static FlightOption MapFlightOption(FlightOptionDto flightOption)
     {
         return new FlightOption
         {

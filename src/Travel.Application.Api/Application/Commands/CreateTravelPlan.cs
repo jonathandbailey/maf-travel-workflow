@@ -1,6 +1,6 @@
 ﻿using MediatR;
+using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Models;
-using Travel.Application.Api.Services;
 
 namespace Travel.Application.Api.Application.Commands;
 

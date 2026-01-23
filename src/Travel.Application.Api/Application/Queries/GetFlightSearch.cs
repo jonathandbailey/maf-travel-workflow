@@ -1,12 +1,12 @@
 ﻿using Infrastructure.Dto;
 using MediatR;
-using Travel.Application.Api.Services;
+using Travel.Application.Api.Infrastructure;
 
 namespace Travel.Application.Api.Application.Queries;
 
 public record GetFlightSearchQuery(Guid UserId, Guid Id) : IRequest<FlightSearchDto>;
 
-public class GetFlightSearchHandler(IFlightService flightSearchRepository) : IRequestHandler<GetFlightSearchQuery, FlightSearchDto>
+public class GetFlightSearchHandler(IFlightRepository flightSearchRepository) : IRequestHandler<GetFlightSearchQuery, FlightSearchDto>
 {
     public async Task<FlightSearchDto> Handle(GetFlightSearchQuery request, CancellationToken cancellationToken)
     {

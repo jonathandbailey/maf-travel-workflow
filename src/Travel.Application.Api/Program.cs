@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Infrastructure.Extensions;
 using Infrastructure.Settings;
 using Travel.Application.Api;
+using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,8 +25,8 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHostedService<AzureStorageSeedService>();
 
 builder.Services.AddScoped<ITravelPlanRepository, TravelPlanPlanRepository>();
-builder.Services.AddScoped<ISessionService, SessionService>();
-builder.Services.AddScoped<IFlightService, FlightService>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
 builder.Services.AddOpenApi();
 

@@ -4,25 +4,23 @@ using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 using Travel.Application.Api.Models;
 
-namespace Travel.Application.Api.Services;
+namespace Travel.Application.Api.Infrastructure;
 
-public class SessionService(IAzureStorageRepository azureStorageRepository, IOptions<AzureStorageSettings> settings) : ISessionService
+public class SessionRepository(IAzureStorageRepository azureStorageRepository, IOptions<AzureStorageSettings> settings) : ISessionRepository
 {
     private const string ApplicationJsonContentType = "application/json";
 
-    public async Task<Session> Create(Guid userId, Guid travelPlanId)
+    public async Task SaveAsync(Guid userId, Session session)
     {
-        var session = new Session(userId, travelPlanId);
-
         var serializedSession = JsonSerializer.Serialize(session);
 
         await azureStorageRepository.UploadTextBlobAsync
             (GetResource(userId, session.ThreadId), settings.Value.ContainerName, serializedSession, ApplicationJsonContentType);
 
-        return await Task.FromResult(session);
+        
     }
 
-    public async Task<Session> Get(Guid userId, Guid sessionId)
+    public async Task<Session> LoadAsync(Guid userId, Guid sessionId)
     {
         var payload = await azureStorageRepository.DownloadTextBlobAsync(GetResource(userId, sessionId), settings.Value.ContainerName);
 
@@ -40,8 +38,8 @@ public class SessionService(IAzureStorageRepository azureStorageRepository, IOpt
     }
 }
 
-public interface ISessionService
+public interface ISessionRepository
 {
-    Task<Session> Create(Guid userId, Guid travelPlanId);
-    Task<Session> Get(Guid userId, Guid sessionId);
+    Task SaveAsync(Guid userId, Session session);
+    Task<Session> LoadAsync(Guid userId, Guid sessionId);
 }

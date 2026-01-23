@@ -2,9 +2,9 @@
 using Infrastructure.Dto;
 using Infrastructure.Interfaces;
 
-namespace Travel.Application.Api.Services;
+namespace Travel.Application.Api.Infrastructure;
 
-public class FlightService(IArtifactRepository artifactRepository) : IFlightService
+public class FlightRepository(IArtifactRepository artifactRepository) : IFlightRepository
 {
     public async Task<FlightSearchDto> GetFlightSearch(Guid userId, Guid searchId)
     {
@@ -21,7 +21,7 @@ public class FlightService(IArtifactRepository artifactRepository) : IFlightServ
     }
 }
 
-public interface IFlightService
+public interface IFlightRepository
 {
     Task<FlightSearchDto> GetFlightSearch(Guid userId, Guid searchId);
     Task<Guid> SaveFlightSearch(FlightSearchDto flightSearch);

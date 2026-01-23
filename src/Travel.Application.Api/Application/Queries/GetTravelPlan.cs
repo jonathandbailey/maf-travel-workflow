@@ -1,18 +1,18 @@
 ﻿using MediatR;
 using Travel.Application.Api.Dto;
+using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Models.Flights;
-using Travel.Application.Api.Services;
 
 namespace Travel.Application.Api.Application.Queries;
 
 public record GetTravelPlanQuery(Guid User, Guid TravelPlanId) : IRequest<TravelPlanDto>;
 
-public class GetTravelPlanHandler(ITravelPlanRepository travelPlanRepository, ISessionService sessionService)
+public class GetTravelPlanHandler(ITravelPlanRepository travelPlanRepository, ISessionRepository sessionRepository)
     : IRequestHandler<GetTravelPlanQuery, TravelPlanDto>
 {
     public async Task<TravelPlanDto> Handle(GetTravelPlanQuery request, CancellationToken cancellationToken)
     {
-        var session = await sessionService.Get(request.User, request.TravelPlanId);
+        var session = await sessionRepository.LoadAsync(request.User, request.TravelPlanId);
 
         var travelPlan = await travelPlanRepository.LoadAsync(request.User, session.TravelPlanId);
 
