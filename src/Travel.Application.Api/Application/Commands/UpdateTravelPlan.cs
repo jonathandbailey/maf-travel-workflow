@@ -1,10 +1,8 @@
 ﻿
-using Infrastructure.Dto;
 using MediatR;
 using Travel.Application.Api.Dto;
 using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Models.Flights;
-using FlightOptionDto = Infrastructure.Dto.FlightOptionDto;
 
 
 namespace Travel.Application.Api.Application.Commands;

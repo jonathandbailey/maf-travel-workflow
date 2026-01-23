@@ -28,3 +28,11 @@ public class PriceDto
     public decimal Amount { get; set; }
     public string Currency { get; set; }
 }
+
+public class FlightSearchDto
+{
+    public string ArtifactKey { get; set; }
+    public List<FlightOptionDto> DepartureFlightOptions { get; set; }
+
+    public List<FlightOptionDto> ReturnFlightOptions { get; set; }
+}

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Infrastructure.Dto;
+using Travel.Workflows.Dto;
 
 namespace Travel.Workflows.Services;
 

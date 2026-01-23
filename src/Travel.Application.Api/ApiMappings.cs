@@ -1,5 +1,4 @@
-﻿using Infrastructure.Dto;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Travel.Application.Api.Application.Commands;

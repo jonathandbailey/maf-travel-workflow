@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Infrastructure.Dto;
-using Infrastructure.Interfaces;
+﻿using Infrastructure.Interfaces;
 using Infrastructure.Settings;
 using Microsoft.Extensions.Options;
 
@@ -11,66 +8,24 @@ public class ArtifactRepository(IAzureStorageRepository repository, IOptions<Azu
 {
     private const string ApplicationJsonContentType = "application/json";
 
-    private static readonly JsonSerializerOptions SerializerOptions = new()
+    public async Task SaveAsync(string artifact, Guid id, string path)
     {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() },
-        PropertyNameCaseInsensitive = true
-    };
-
-    public async Task SaveAsync(string artifact, string name)
-    {
-        await repository.UploadTextBlobAsync(GetArtifactFileName(name),
+        await repository.UploadTextBlobAsync(GetFlightSearchFileName(id, path),
             settings.Value.ContainerName,
             artifact, ApplicationJsonContentType);
     }
 
-    public async Task SaveFlightSearchAsync(string artifact, Guid id)
+    public async Task<string> LoadAsync(Guid id, string path)
     {
-        await repository.UploadTextBlobAsync(GetFlightSearchFileName(id),
-            settings.Value.ContainerName,
-            artifact, ApplicationJsonContentType);
-    }
-
-    public async Task<FlightSearchDto> GetFlightSearch(Guid id)
-    {
-        var filename = GetFlightSearchFileName(id);
+        var filename = GetFlightSearchFileName(id, path);
 
         var response = await repository.DownloadTextBlobAsync(filename, settings.Value.ContainerName);
 
-        var flightPlan = JsonSerializer.Deserialize<FlightSearchDto>(response, SerializerOptions);
-
-        return flightPlan ?? throw new InvalidOperationException($"Failed to deserialize flight plan from blob: {filename}");
+        return response;
     }
 
-    public async Task<FlightSearchDto> GetFlightPlanAsync()
+    private string GetFlightSearchFileName(Guid id, string path)
     {
-        var filename = GetArtifactFileName("flights");
-
-        var response = await repository.DownloadTextBlobAsync(filename, settings.Value.ContainerName);
-
-        var flightPlan = JsonSerializer.Deserialize<FlightSearchDto>(response, SerializerOptions);
-
-        return flightPlan ?? throw new InvalidOperationException($"Failed to deserialize flight plan from blob: {filename}");
-    }
-
-    public async Task<bool> FlightsExistsAsync()
-    {
-        var filename = GetArtifactFileName("flights");
-        var exists = await repository.BlobExists(filename, settings.Value.ContainerName);
-        
-        return exists;
-    }
-
-    private string GetArtifactFileName(string name)
-    {
-        return $"artifacts/{name}.json";
-    }
-
-    private string GetFlightSearchFileName(Guid id)
-    {
-        return $"artifacts/flights/search-{id}.json";
+        return $"artifacts/{path}/{id}.json";
     }
 }

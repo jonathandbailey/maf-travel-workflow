@@ -1,5 +1,5 @@
-﻿using Infrastructure.Dto;
-using MediatR;
+﻿using MediatR;
+using Travel.Application.Api.Dto;
 using Travel.Application.Api.Infrastructure;
 
 namespace Travel.Application.Api.Application.Queries;

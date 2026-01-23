@@ -1,12 +1,7 @@
-﻿using Infrastructure.Dto;
-
-namespace Infrastructure.Interfaces;
+﻿namespace Infrastructure.Interfaces;
 
 public interface IArtifactRepository
 {
-    Task SaveAsync(string artifact, string name);
-    Task<FlightSearchDto> GetFlightPlanAsync();
-    Task<bool> FlightsExistsAsync();
-    Task SaveFlightSearchAsync(string artifact, Guid id);
-    Task<FlightSearchDto> GetFlightSearch(Guid id);
+    Task SaveAsync(string artifact, Guid id, string path);
+    Task<string> LoadAsync(Guid id, string path);
 }
