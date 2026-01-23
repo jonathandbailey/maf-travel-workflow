@@ -22,7 +22,7 @@
     <None Update="Templates\Act-Agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Templates\Conversation-Agent.md">
+    <None Update="Templates\conversation_agent.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Templates\Flight-Agent.md">

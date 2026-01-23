@@ -8,24 +8,36 @@ using Infrastructure.Dto;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
+using OpenAI.Chat;
+using ChatResponseFormat = Microsoft.Extensions.AI.ChatResponseFormat;
 
 
 namespace Agents;
 
-public class AgentFactory(
-    IAgentTemplateRepository templateRepository, 
-    IAgentMemoryMiddleware agentMemoryMiddleware,
-    IAgentAgUiMiddleware agentAgUiMiddleware,
-    IOptions<LanguageModelSettings> settings) : IAgentFactory
+public class AgentFactory : IAgentFactory
 {
- 
-    public async Task<AIAgent> CreateFlightAgent()
-    {
-        var template = await templateRepository.Load("Flight-Agent");
+    private readonly IAgentTemplateRepository _templateRepository;
+    private readonly IAgentMemoryMiddleware _agentMemoryMiddleware;
+    private readonly IAgentAgUiMiddleware _agentAgUiMiddleware;
+    private readonly ChatClient _chatClient;
 
-        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
+    public AgentFactory(IAgentTemplateRepository templateRepository, 
+        IAgentMemoryMiddleware agentMemoryMiddleware,
+        IAgentAgUiMiddleware agentAgUiMiddleware,
+        IOptions<LanguageModelSettings> settings)
+    {
+        _templateRepository = templateRepository;
+        _agentMemoryMiddleware = agentMemoryMiddleware;
+        _agentAgUiMiddleware = agentAgUiMiddleware;
+
+        _chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
                 new ApiKeyCredential(settings.Value.ApiKey))
             .GetChatClient(settings.Value.DeploymentName);
+    }
+
+    public async Task<AIAgent> CreateFlightAgent()
+    {
+        var template = await _templateRepository.Load("Flight-Agent");
      
         var schema = AIJsonUtilities.CreateJsonSchema(typeof(FlightActionResultDto));
 
@@ -44,12 +56,12 @@ public class AgentFactory(
             ChatOptions = chatOptions
         };
 
-        var agent = chatClient.AsIChatClient()
+        var agent = _chatClient.AsIChatClient()
             .AsBuilder()
             .BuildAIAgent(options: clientChatOptions);
 
         var middlewareAgent = agent.AsBuilder()
-            .Use(runFunc: agentMemoryMiddleware.RunAsync, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
+            .Use(runFunc: _agentMemoryMiddleware.RunAsync, runStreamingFunc: _agentMemoryMiddleware.RunStreamingAsync)
             .Build();
 
         return middlewareAgent;
@@ -57,12 +69,8 @@ public class AgentFactory(
 
     public async Task<AIAgent> CreateReasonAgent()
     {
-        var template = await templateRepository.Load("Reason-Agent");
-
-        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
-                new ApiKeyCredential(settings.Value.ApiKey))
-            .GetChatClient(settings.Value.DeploymentName);
-
+        var template = await _templateRepository.Load("Reason-Agent");
+     
         var schema = AIJsonUtilities.CreateJsonSchema(typeof(ReasoningOutputDto));
 
         ChatOptions chatOptions = new()
@@ -81,28 +89,24 @@ public class AgentFactory(
             ChatOptions = chatOptions
         };
 
-        var agent = chatClient.AsIChatClient()
+        var agent = _chatClient.AsIChatClient()
             .AsBuilder()
             .BuildAIAgent(options: clientChatOptions);
 
         var middlewareAgent = agent.AsBuilder()
-            .Use(runFunc: agentMemoryMiddleware.RunAsync, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
+            .Use(runFunc: _agentMemoryMiddleware.RunAsync, runStreamingFunc: _agentMemoryMiddleware.RunStreamingAsync)
             .Build();
 
         return middlewareAgent;
     }
 
-    public async Task<AIAgent> ConversationAgent(List<AITool> tools)
+    public async Task<AIAgent> Create(string name, List<AITool> tools)
     {
-        var template = await templateRepository.Load("Conversation-Agent");
-
-        var chatClient = new AzureOpenAIClient(new Uri(settings.Value.EndPoint),
-                new ApiKeyCredential(settings.Value.ApiKey))
-            .GetChatClient(settings.Value.DeploymentName);
+        var template = await _templateRepository.Load(name);
 
         var clientChatOptions = new ChatClientAgentOptions
         {
-            Name = "conversation_agent",
+            Name = name,
 
             ChatOptions = new ChatOptions
             {
@@ -111,7 +115,7 @@ public class AgentFactory(
             }
         };
 
-        var agent = chatClient.AsIChatClient()
+        var agent = _chatClient.AsIChatClient()
             .AsBuilder()
             .BuildAIAgent(options: clientChatOptions);
 
@@ -121,8 +125,8 @@ public class AgentFactory(
     public AIAgent ExtendConversationAgent(AIAgent agent)
     {
         var middlewareAgent = agent.AsBuilder()
-            .Use(runFunc: null, runStreamingFunc: agentAgUiMiddleware.RunStreamingAsync)
-            .Use(runFunc: null, runStreamingFunc: agentMemoryMiddleware.RunStreamingAsync)
+            .Use(runFunc: null, runStreamingFunc: _agentAgUiMiddleware.RunStreamingAsync)
+            .Use(runFunc: null, runStreamingFunc: _agentMemoryMiddleware.RunStreamingAsync)
             .Build();
 
         return middlewareAgent;
@@ -133,7 +137,7 @@ public interface IAgentFactory
 {
     Task<AIAgent> CreateReasonAgent();
     Task<AIAgent> CreateFlightAgent();
-    Task<AIAgent> ConversationAgent(List<AITool> tools);
+    Task<AIAgent> Create(string name, List<AITool> tools);
     AIAgent ExtendConversationAgent(AIAgent agent);
 }
 
