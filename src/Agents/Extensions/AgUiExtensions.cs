@@ -1,0 +1,84 @@
+﻿using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+
+namespace Agents.Extensions;
+
+public static class AgUiExtensions
+{
+    public static Guid GetThreadId(this AgentRunOptions options)
+    {
+        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
+
+        if (!additionalPropertiesDictionary.ContainsKey("agent_thread_id"))
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] set.");
+        }
+
+        var additionalProperty = additionalPropertiesDictionary["agent_thread_id"];
+
+        if (additionalProperty == null)
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] not null.");
+        }
+
+        if (additionalProperty is not Guid threadId)
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] not empty.");
+        }
+
+        return threadId;
+    }
+
+    public static string GetAgUiThreadId(this AgentRunOptions options)
+    {
+        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
+
+        if (!additionalPropertiesDictionary.ContainsKey("ag_ui_thread_id"))
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] set.");
+        }
+
+        var additionalProperty = additionalPropertiesDictionary["ag_ui_thread_id"];
+
+        if (additionalProperty == null)
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] not null.");
+        }
+
+        var threadId = additionalProperty.ToString();
+
+        if (string.IsNullOrEmpty(threadId))
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] not empty.");
+        }
+
+        return threadId;
+    }
+
+    private static AdditionalPropertiesDictionary GetAdditionalPropertiesDictionary(AgentRunOptions options)
+    {
+        if (options is not ChatClientAgentRunOptions chatClientAgentOptions)
+        {
+            throw new ArgumentException($"Invalid agent run options, must be of type : ChatClientAgentRunOptions. Type is : {options.GetType()}");
+        }
+
+        if (chatClientAgentOptions.ChatOptions == null)
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions set.");
+        }
+
+        if (chatClientAgentOptions.ChatOptions.AdditionalProperties == null)
+        {
+            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties set.");
+        }
+
+        return chatClientAgentOptions.ChatOptions.AdditionalProperties;
+    }
+
+    public static AgentRunOptions AddThreadId(this AgentRunOptions options, string threadId)
+    {
+        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
+        additionalPropertiesDictionary["agent_thread_id"] = Guid.Parse(threadId);
+        return options;
+    }
+}

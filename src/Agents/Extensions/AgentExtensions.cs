@@ -1,83 +1,73 @@
 ﻿using A2A;
-using Agents.Middleware;
-using Agents.Repository;
-using Agents.Services;
-using Agents.Settings;
 using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
+using Agents.Dto;
 
 namespace Agents.Extensions;
 
 public static class AgentExtensions
 {
-    public static IServiceCollection AddAgentServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.Configure<LanguageModelSettings>(settings =>
-            configuration.GetSection("LanguageModelSettings").Bind(settings));
-
-
-        services.AddSingleton<IAgentMemoryService, AgentMemoryService>();
-        services.AddSingleton<IAgentMemoryMiddleware, AgentMemoryMiddleware>();
-        services.AddSingleton<IAgentAgUiMiddleware, AgentAgUiMiddleware>();
-        services.AddSingleton<IAgentFactory, AgentFactory>();
-        services.AddSingleton<IAgentTemplateRepository, AgentTemplateRepository>();
-
-        return services;
-    }
-
+    private const string ApplicationJsonMediaType = "application/json";
 
     public static string GetPartText(this TaskStatusUpdateEvent taskStatusUpdateEvent)
     {
-        return taskStatusUpdateEvent.Status.Message.Parts.OfType<TextPart>().First().Text;
+        if (taskStatusUpdateEvent.Status.Message == null)
+        {
+            throw new ArgumentException("The provided TaskStatusUpdateEvent must have a Status.Message set.");
+        }
+
+        var part = taskStatusUpdateEvent.Status.Message.Parts.OfType<TextPart>().FirstOrDefault();
+
+        return part == null ? throw new ArgumentException("The provided TaskStatusUpdateEvent must have a TextPart.") : part.Text;
     }
 
-    public class SnapShot<T>(string type, T payload)
-    {
-        public string Type { get; } = type;
-        public T Payload { get; } = payload;
-    }
-
-    public class StatusUpdate(string type, string source, string status, string details)
-    {
-        public string Type { get; } = type;
-
-        public string Source { get; } = source;
-
-        public string Status { get; } = status;
-
-        public string Details { get; } = details;
-    }
-
-    public class ArtifactCreated(string type, Guid id, string key)
-    {
-        public Guid Id { get; } = id;
-        public string Key { get; } = key;
-        public string Type { get; } = type;
-    }
 
     public static StatusUpdate GetPartStatusDataText(this TaskStatusUpdateEvent taskStatusUpdateEvent)
     {
-        var dataPart = taskStatusUpdateEvent.Status.Message.Parts.OfType<DataPart>().First();
+        if (taskStatusUpdateEvent.Status.Message == null)
+        {
+            throw new ArgumentException("The provided TaskStatusUpdateEvent must have a Status.Message set.");
+        }
+
+        var dataPart = taskStatusUpdateEvent.Status.Message.Parts.OfType<DataPart>().FirstOrDefault();
+
+        if (dataPart == null)
+        {
+            throw new ArgumentException("The provided TaskStatusUpdateEvent must have a DataPart.");
+        }
+
+        if (!dataPart.Data.ContainsKey("status"))
+        {
+            throw new ArgumentException("The provided TaskStatusUpdateEvent DataPart must contain a 'status' key.");
+        }
 
         var statusPayload = dataPart.Data["status"];
 
         var statusUpdate = JsonSerializer.Deserialize<StatusUpdate>(statusPayload);
 
-        return statusUpdate;
+        return statusUpdate ?? throw new ArgumentException("The provided TaskStatusUpdateEvent DataPart 'status' key must be a valid StatusUpdate.");
     }
 
     public static ArtifactCreated GetPartArtifactDataText(this TaskArtifactUpdateEvent taskStatusUpdateEvent)
     {
-        var dataPart = taskStatusUpdateEvent.Artifact.Parts.OfType<DataPart>().First();
+        var dataPart = taskStatusUpdateEvent.Artifact.Parts.OfType<DataPart>().FirstOrDefault();
+
+        if (dataPart == null)
+        {
+            throw new ArgumentException("The provided TaskArtifactUpdateEvent must have a DataPart.");
+        }
+
+        if (!dataPart.Data.ContainsKey("artifact"))
+        {
+            throw new ArgumentException("The provided TaskArtifactUpdateEvent DataPart must contain an 'artifact' key.");
+        }
 
         var statusPayload = dataPart.Data["artifact"];
 
         var artifactCreated = JsonSerializer.Deserialize<ArtifactCreated>(statusPayload);
 
-        return artifactCreated;
+        return artifactCreated ?? throw new ArgumentException("The provided TaskArtifactUpdateEvent DataPart 'artifact' key must be a valid ArtifactCreated.");
     }
 
     public static void AddToolCalls(this Dictionary<string, FunctionCallContent> tools, IList<AIContent> contents)
@@ -91,13 +81,6 @@ public static class AgentExtensions
         }
     }
 
-    public static AgentRunOptions AddThreadId(this AgentRunOptions options, string threadId)
-    {
-        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
-        additionalPropertiesDictionary["agent_thread_id"] = Guid.Parse(threadId);
-        return options;
-    }
-
     public static AgentRunResponseUpdate ToAgentResponseStatusMessage(this StatusUpdate statusUpdate)
     {
         var snapshot = new SnapShot<StatusUpdate>(statusUpdate.Type, statusUpdate);
@@ -106,7 +89,7 @@ public static class AgentExtensions
 
         return new AgentRunResponseUpdate
         {
-            Contents = [new DataContent(stateBytes, "application/json")]
+            Contents = [new DataContent(stateBytes, ApplicationJsonMediaType)]
         };
     }
 
@@ -118,7 +101,7 @@ public static class AgentExtensions
 
         return new AgentRunResponseUpdate
         {
-            Contents = [new DataContent(stateBytes, "application/json")]
+            Contents = [new DataContent(stateBytes, ApplicationJsonMediaType)]
         };
     }
 
@@ -132,77 +115,7 @@ public static class AgentExtensions
 
         return new AgentRunResponseUpdate
         {
-            Contents = [new DataContent(stateBytes, "application/json")]
+            Contents = [new DataContent(stateBytes, ApplicationJsonMediaType)]
         };
-    }
-
-    public static Guid GetThreadId(this AgentRunOptions options)
-    {
-        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
-
-        if (!additionalPropertiesDictionary.ContainsKey("agent_thread_id"))
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] set.");
-        }
-
-        var additionalProperty = additionalPropertiesDictionary["agent_thread_id"];
-
-        if (additionalProperty == null)
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] not null.");
-        }
-
-        if (additionalProperty is not Guid threadId)
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['agent_thread_id'] not empty.");
-        }
-
-        return threadId;
-    }
-
-    public static string GetAgUiThreadId(this AgentRunOptions options)
-    {
-        var additionalPropertiesDictionary = GetAdditionalPropertiesDictionary(options);
-
-        if (!additionalPropertiesDictionary.ContainsKey("ag_ui_thread_id"))
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] set.");
-        }
-
-        var additionalProperty = additionalPropertiesDictionary["ag_ui_thread_id"];
-
-        if (additionalProperty == null)
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] not null.");
-        }
-
-        var threadId = additionalProperty.ToString();
-
-        if (string.IsNullOrEmpty(threadId))
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties['ag_ui_thread_id'] not empty.");
-        }
-
-        return threadId;
-    }
-
-    private static AdditionalPropertiesDictionary GetAdditionalPropertiesDictionary(AgentRunOptions options)
-    {
-        if (options is not ChatClientAgentRunOptions chatClientAgentOptions)
-        {
-            throw new ArgumentException($"Invalid agent run options, must be of type : ChatClientAgentRunOptions. Type is : {options.GetType()}");
-        }
-
-        if (chatClientAgentOptions.ChatOptions == null)
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions set.");
-        }
-
-        if (chatClientAgentOptions.ChatOptions.AdditionalProperties == null)
-        {
-            throw new ArgumentException("The provided ChatClientAgentRunOptions must have ChatOptions.AdditionalProperties set.");
-        }
-
-        return chatClientAgentOptions.ChatOptions.AdditionalProperties;
     }
 }
