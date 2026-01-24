@@ -13,8 +13,8 @@ public static class AgUiExtensions
         await discovery.Initialize();
 
         var agentFactory = app.Services.GetRequiredService<IAgentFactory>();
-    
-        var agent = await agentFactory.Create("conversation_agent",discovery.GetTools());
+
+        var agent = await agentFactory.Create("conversation_agent", tools: discovery.GetTools());
 
         var conversationAgent = new ConversationAgent(agent, discovery);
 
