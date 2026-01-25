@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using A2A;
 using Agents;
+using Agents.Custom;
 using Agents.Extensions;
 using Agents.Observability;
 using Agents.Services;
