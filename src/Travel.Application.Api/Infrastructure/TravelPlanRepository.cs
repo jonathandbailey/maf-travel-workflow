@@ -22,17 +22,17 @@ public class TravelPlanPlanRepository(IAzureStorageRepository repository, IOptio
     {
         var blob = await repository.DownloadTextBlobAsync(GetStorageFileName(userId, travelPlanId), settings.Value.ContainerName);
 
-        var stateDto = JsonSerializer.Deserialize<TravelPlan>(blob, SerializerOptions);
+        var document = JsonSerializer.Deserialize<TravelPlanDocument>(blob, SerializerOptions);
 
-        if (stateDto == null)
+        if (document == null)
             throw new JsonException($"Failed to deserialize Travel Plan for session.");
 
-        return stateDto;
+        return document.ToDomain();
     }
 
     public async Task SaveAsync(TravelPlan travelPlan, Guid userId)
     {
-        var serializedConversation = JsonSerializer.Serialize(travelPlan, SerializerOptions);
+        var serializedConversation = JsonSerializer.Serialize(travelPlan.ToDocument(), SerializerOptions);
 
         await repository.UploadTextBlobAsync(
             GetStorageFileName(userId, travelPlan.Id),
