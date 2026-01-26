@@ -18,7 +18,6 @@ public static class ApiMappings
 
         api.MapSessionApi();
         api.MapTravelApi();
-
         api.MapFlightApi();
     }
 }
@@ -102,8 +101,6 @@ public static class TravelApiMappings
 
     public static void MapTravelApi(this RouteGroupBuilder api)
     {
-        api.MapSessionApi();
-
         api.MapGet(GetTravelPlanPath, GetTravelPlan);
         api.MapPost(UpdateTravelPlanPath, UpdateTravelPlan);
     }

@@ -1,8 +1,9 @@
-using System.Text.Json.Serialization;
 using Infrastructure.Extensions;
 using Infrastructure.Settings;
+using System.Text.Json.Serialization;
 using Travel.Application.Api;
 using Travel.Application.Api.Infrastructure;
+using Travel.Application.Api.Middleware;
 using Travel.Application.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(ApiMappings).Assembly);
 });
 
+builder.Services.AddTransient<GlobalExceptionHandler>();
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddHostedService<AzureStorageSeedService>();
@@ -36,6 +39,7 @@ app.MapDefaultEndpoints();
 
 app.MapApi();
 
+app.UseMiddleware<GlobalExceptionHandler>();
 
 if (app.Environment.IsDevelopment())
 {
