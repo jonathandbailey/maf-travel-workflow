@@ -3,11 +3,11 @@ using A2A;
 using Agents;
 using Agents.Custom;
 using Agents.Extensions;
-using Agents.Observability;
 using Agents.Services;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.A2A;
 using Microsoft.Extensions.AI;
+using Travel.Experience.Api.Observability;
 
 namespace Travel.Experience.Api.Agents;
 
@@ -32,7 +32,7 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
 
         options = options.AddThreadId(threadId);
 
-        using var activity = UserAgentTelemetry.Start(localMessages.First().Text, threadId);
+        using var agentActivity = UserAgentTelemetry.Start(localMessages.First().Text, threadId);
 
         yield return StatusMessageThinking.ToAgentResponseStatusMessage();
 
@@ -56,7 +56,7 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
         {
             var arguments = discovery.GetToolCallArguments(functionCallContent.Value);
 
-            var toolActivity = UserAgentTelemetry.StartTool(functionCallContent.Key, arguments);
+            var toolActivity = UserAgentTelemetry.StartTool(functionCallContent.Key, arguments, agentActivity);
        
             var agentMeta = discovery.GetAgentMeta(functionCallContent.Key);
 
