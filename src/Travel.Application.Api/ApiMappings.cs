@@ -50,7 +50,7 @@ public static class FlightsApiMappings
         IMediator mediator,
         HttpContext context)
     {
-        var id = await mediator.Send(new SearchFlightsCommand(context.User.Id(), threadId, flightSearch.Origin, flightSearch.Destination, flightSearch.DepartureDate, flightSearch.ReturnDate));
+        var id = await mediator.Send(new SearchFlightsCommand(flightSearch.Origin, flightSearch.Destination, flightSearch.DepartureDate, flightSearch.ReturnDate));
 
         return TypedResults.Ok(id);
     }

@@ -29,6 +29,11 @@ public class PriceDto
     public string Currency { get; set; }
 }
 
+public class FlightSearchResponseDto(Guid id)
+{
+    public Guid Id { get; private set; } = id;
+}
+
 public class FlightSearchDto
 {
     public string Origin { get; set; }
