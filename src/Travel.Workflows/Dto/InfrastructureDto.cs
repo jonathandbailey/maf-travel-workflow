@@ -54,6 +54,11 @@ public class FlightSearchDto
     public DateTimeOffset ReturnDate { get; set; }
 }
 
+public class FlightAgentReponseDto
+{
+    public Guid FlightSearchId { get; set; }
+}
+
 
 public class FlightSearchResultDto
 {

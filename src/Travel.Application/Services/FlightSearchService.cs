@@ -9,9 +9,9 @@ public class FlightSearchService : IFlightSearchService
     {
         var rng = new Random();
         
-        var originAirport = DataRegistry.EuropeanCities.FirstOrDefault(c => c.AirportCode == origin);
-        var destinationAirport = DataRegistry.EuropeanCities.FirstOrDefault(c => c.AirportCode == destination);
-        
+        var originAirport = DataRegistry.EuropeanCities.FirstOrDefault(c => c.City == origin);
+        var destinationAirport = DataRegistry.EuropeanCities.FirstOrDefault(c => c.City == destination);
+
         if (originAirport == null || destinationAirport == null)
         {
             return new FlightSearch(new List<FlightOption>(), new List<FlightOption>());

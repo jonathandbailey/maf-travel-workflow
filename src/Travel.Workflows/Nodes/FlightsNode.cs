@@ -51,12 +51,12 @@ public class FlightsNode(AIAgent agent, IFlightService flightService) :
    
             WorkflowTelemetryTags.SetOutputPreview(activity, response.Text);
        
-            var flightSearchResults = JsonSerializer.Deserialize<FlightSearchDto>(response.Text, SerializerOptions);
+            var flightSearchResults = JsonSerializer.Deserialize<FlightAgentReponseDto>(response.Text, SerializerOptions);
 
             if (flightSearchResults == null)
                 throw new JsonException(FailedToDeserializeFlightOptionsInFlightWorkerNode);
 
-            var id = await flightService.CreateFlightSearch(flightSearchResults, threadId);
+            var id = flightSearchResults.FlightSearchId;
 
             await context.AddEventAsync(new ArtifactStatusEvent(id, "Flights", ArtifactStatus.Created), cancellationToken);
 

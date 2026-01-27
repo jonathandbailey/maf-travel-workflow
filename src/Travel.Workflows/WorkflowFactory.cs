@@ -1,6 +1,7 @@
 ﻿using Agents.Services;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using ModelContextProtocol.Client;
 using Travel.Workflows.Dto;
 using Travel.Workflows.Nodes;
 using Travel.Workflows.Services;
@@ -23,14 +24,29 @@ public class WorkflowFactory(IAgentFactory agentFactory, ITravelService travelSe
 
         agentFactory.UseMiddleware(planningAgent, "agent-thread");
 
-        var fllightSchema = AIJsonUtilities.CreateJsonSchema(typeof(FlightSearchDto));
+        var fllightSchema = AIJsonUtilities.CreateJsonSchema(typeof(FlightAgentReponseDto));
+
 
         var flightChatResponseFormat = ChatResponseFormat.ForJsonSchema(
             schema: fllightSchema,
             schemaName: "FlightPlan",
             schemaDescription: "User Flight Options for their vacation.");
 
-        var flightAgent = await agentFactory.Create("flight_agent", flightChatResponseFormat);
+        var httpClient = new HttpClient();
+
+      
+        var serverUrl = "http://localhost:5146/";
+        var transport = new HttpClientTransport(new()
+        {
+            Endpoint = new Uri(serverUrl),
+            Name = "Travel MCP Client",
+        }, httpClient);
+
+        var mcpClient = await McpClient.CreateAsync(transport);
+
+        var mcpTools = await mcpClient.ListToolsAsync().ConfigureAwait(false);
+
+        var flightAgent = await agentFactory.Create("flight_agent", flightChatResponseFormat, tools: [..mcpTools]);
 
         agentFactory.UseMiddleware(flightAgent, "agent-thread");
       
