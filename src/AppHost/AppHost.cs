@@ -31,4 +31,7 @@ builder.AddProject<Projects.Travel_Application_Api>("travel-application-api")
     .WaitFor(storage);
 
 
+builder.AddProject<Projects.Travel_Application_Mcp>("travel-application-mcp");
+
+
 builder.Build().Run();
