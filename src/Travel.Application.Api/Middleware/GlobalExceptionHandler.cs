@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Travel.Application.Api.Middleware;
 
-public class GlobalExceptionHandler : IMiddleware, IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IMiddleware, IExceptionHandler
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
@@ -14,6 +14,8 @@ public class GlobalExceptionHandler : IMiddleware, IExceptionHandler
         }
         catch (Exception exception)
         {
+            logger.LogError(exception, "An unhandled exception occurred.");
+            
             await Handle(context, exception, CancellationToken.None);
         }
     }

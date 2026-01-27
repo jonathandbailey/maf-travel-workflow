@@ -4,9 +4,9 @@ using Travel.Application.Services;
 
 namespace Travel.Application.Extensions;
 
-public class ApplicationServicesExtensions
+public static class ApplicationServicesExtensions
 {
-    public static IServiceCollection AddApplicationServices(IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddHostedService<AzureStorageSeedService>();
 

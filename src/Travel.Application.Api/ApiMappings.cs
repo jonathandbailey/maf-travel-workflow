@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Travel.Application.Api.Application.Commands;
-using Travel.Application.Api.Application.Queries;
 using Travel.Application.Api.Dto;
 using Travel.Application.Api.Extensions;
+using Travel.Application.Application.Commands;
+using Travel.Application.Application.Queries;
 
 namespace Travel.Application.Api;
 

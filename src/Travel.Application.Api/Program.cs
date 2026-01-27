@@ -2,9 +2,8 @@ using Infrastructure.Extensions;
 using Infrastructure.Settings;
 using System.Text.Json.Serialization;
 using Travel.Application.Api;
-using Travel.Application.Api.Infrastructure;
 using Travel.Application.Api.Middleware;
-using Travel.Application.Api.Services;
+using Travel.Application.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,20 +18,13 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(ApiMappings).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(ApplicationServicesExtensions).Assembly);
 });
 
 builder.Services.AddTransient<GlobalExceptionHandler>();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
-builder.Services.AddHostedService<AzureStorageSeedService>();
-
-builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-
-builder.Services.AddScoped<ITravelPlanRepository, TravelPlanPlanRepository>();
-builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-builder.Services.AddScoped<IFlightRepository, FlightRepository>();
-builder.Services.AddScoped<IFlightSearchService, FlightSearchService>();
+builder.Services.AddApplicationServices();
 
 builder.Services.AddOpenApi();
 
