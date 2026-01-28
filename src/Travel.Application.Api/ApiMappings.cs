@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Travel.Application.Api.Dto;
 using Travel.Application.Api.Extensions;
+using Travel.Application.Api.Observability;
 using Travel.Application.Application.Commands;
 using Travel.Application.Application.Queries;
 
@@ -88,6 +89,8 @@ public static class SessionsApiMappings
 
     private static async Task<Ok<SessionDto>> CreateSession(IMediator mediator, HttpContext context)
     {
+        using var activity = TravelApiTelemetry.CreateSession(context.User.Id());
+
         var session = await mediator.Send(new CreateSessionCommand(context.User.Id()));
 
         return TypedResults.Ok(session);

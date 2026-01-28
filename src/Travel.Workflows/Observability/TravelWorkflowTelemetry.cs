@@ -21,7 +21,7 @@ public static class TravelWorkflowTelemetry
             { "gen_ai.conversation.id", threadId }
         };
 
-        return Source.StartActivity($"invoke_node {name}");
+        return Source.StartActivity($"invoke_node {name}", ActivityKind.Internal, null, tags);
     }
 
     public static void AddNodeUsage(this Activity activity, AgentRunResponse agentRunResponse)
