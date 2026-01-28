@@ -21,6 +21,7 @@ public class FlightsNode(AIAgent agent) :
     private const string FlightAgent = "Flight Agent";
     private const string FlightsOptionsCreated = "Flights Options Created";
     private const string FailedToDeserializeFlightOptionsInFlightWorkerNode = "Failed to deserialize flight options in Flight Worker Node";
+    private const string Flights = "Flights";
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
@@ -32,24 +33,27 @@ public class FlightsNode(AIAgent agent) :
     public async ValueTask<AgentResponse> HandleAsync(CreateFlightOptions message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Start($"{WorkflowConstants.FlightNodeName}{WorkflowConstants.HandleRequest}");
-
-        activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.FlightNodeName);
-
+   
         try
         {
+            var threadId = await context.GetThreadId(cancellationToken);
+
+            using var activity = TravelWorkflowTelemetry.InvokeNode(WorkflowConstants.FlightNodeName, threadId);
+
             var serialized = JsonSerializer.Serialize(message);
 
-            WorkflowTelemetryTags.SetInputPreview(activity, serialized);
+            activity?.AddNodeInput(serialized);
 
-            var threadId = await context.GetThreadId(cancellationToken);
 
             var chatOptions = threadId.ToChatClientAgentRunOptions();
 
             var response = await agent.RunAsync(new ChatMessage(ChatRole.User, serialized), options: chatOptions, cancellationToken: cancellationToken);
    
-            WorkflowTelemetryTags.SetOutputPreview(activity, response.Text);
-       
+            
+            activity?.AddNodeOutput(response.Text);
+
+            activity?.AddNodeUsage(response);
+
             var flightSearchResults = JsonSerializer.Deserialize<FlightAgentReponseDto>(response.Text, SerializerOptions);
 
             if (flightSearchResults == null)
@@ -57,7 +61,7 @@ public class FlightsNode(AIAgent agent) :
 
             var id = flightSearchResults.FlightSearchId;
 
-            await context.AddEventAsync(new ArtifactStatusEvent(id, "Flights", ArtifactStatus.Created), cancellationToken);
+            await context.AddEventAsync(new ArtifactStatusEvent(id, Flights, ArtifactStatus.Created), cancellationToken);
 
             return new AgentResponse(FlightAgent, FlightsOptionsCreated, AgentResponseStatus.Success);
         }

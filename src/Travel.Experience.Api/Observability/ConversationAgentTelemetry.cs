@@ -4,7 +4,7 @@ using Microsoft.Agents.AI;
 
 namespace Travel.Experience.Api.Observability;
 
-public static class UserAgentTelemetry
+public static class ConversationAgentTelemetry
 {
     private const string Name = "Conversation";
     
@@ -19,7 +19,7 @@ public static class UserAgentTelemetry
             { "gen_ai.conversation.id", threadId }
         };
 
-        var source = Source.StartActivity($"invoke_agent {Name}", ActivityKind.Client, null, tags);
+        var source = Source.StartActivity($"invoke_agent {Name}", ActivityKind.Internal, null, tags);
      
         return source;
     }
@@ -32,7 +32,7 @@ public static class UserAgentTelemetry
             { "gen_ai.tool.parameters", arguments }
         };
 
-        var source = Source.StartActivity($"execute_tool {key}", ActivityKind.Client, parent?.Id, tags);
+        var source = Source.StartActivity($"execute_tool {key}", ActivityKind.Internal, parent?.Id, tags);
 
         return source;
     }

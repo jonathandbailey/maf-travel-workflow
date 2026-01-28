@@ -32,7 +32,7 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
 
         options = options.AddThreadId(threadId);
 
-        using var agentActivity = UserAgentTelemetry.Start(localMessages.First().Text, threadId);
+        using var agentActivity = ConversationAgentTelemetry.Start(localMessages.First().Text, threadId);
 
         yield return StatusMessageThinking.ToAgentResponseStatusMessage();
 
@@ -56,7 +56,7 @@ public class ConversationAgent(AIAgent agent, IA2AAgentServiceDiscovery discover
         {
             var arguments = discovery.GetToolCallArguments(functionCallContent.Value);
 
-            var toolActivity = UserAgentTelemetry.StartTool(functionCallContent.Key, arguments, agentActivity);
+            var toolActivity = ConversationAgentTelemetry.StartTool(functionCallContent.Key, arguments, agentActivity);
        
             var agentMeta = discovery.GetAgentMeta(functionCallContent.Key);
 

@@ -18,16 +18,13 @@ public class ExecutionNode(ITravelService travelService) : ReflectingExecutor<Ex
     public async ValueTask HandleAsync(ReasoningOutputDto message, IWorkflowContext context,
         CancellationToken cancellationToken = default)
     {
-        using var activity = Telemetry.Start($"{WorkflowConstants.ExecutionNode}{WorkflowConstants.HandleRequest}");
-
-        activity?.SetTag(WorkflowTelemetryTags.Node, WorkflowConstants.ExecutionNode);
-    
-        var serialized = JsonSerializer.Serialize(message);
-
-        WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, serialized);
-
         var threadId = await context.GetThreadId(cancellationToken);
 
+        using var activity = TravelWorkflowTelemetry.InvokeNode(WorkflowConstants.ExecutionNode, threadId);
+      
+        var serialized = JsonSerializer.Serialize(message);
+
+        activity?.AddNodeInput(serialized);
 
         if (message.TravelPlanUpdate != null)
         {

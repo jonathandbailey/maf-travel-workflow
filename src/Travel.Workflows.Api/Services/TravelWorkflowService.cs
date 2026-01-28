@@ -1,5 +1,6 @@
 ﻿using Microsoft.Agents.AI.Workflows;
 using Travel.Workflows.Dto;
+using Travel.Workflows.Observability;
 using Workflows;
 using Workflows.Interfaces;
 
@@ -15,6 +16,8 @@ public class TravelWorkflowService(
 
     public async IAsyncEnumerable<WorkflowResponse> Execute(WorkflowRequest request)
     {
+        using var activity = TravelWorkflowTelemetry.Start($"invoke_workflow TravelPlanning");
+
         var workflow = await workflowFactory.Create();
 
         var state = await workflowRepository.LoadAsync(request.ThreadId);

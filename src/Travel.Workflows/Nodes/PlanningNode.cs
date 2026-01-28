@@ -34,11 +34,12 @@ public class PlanningNode(AIAgent agent, ITravelService travelService) : Reflect
         IWorkflowContext context,
         CancellationToken cancellationToken)
     {
-        using var activity = Telemetry.Start($"{WorkflowConstants.PlanningNodeName}{WorkflowConstants.Observe}");
             
         try
         {
             var threadId = await context.GetThreadId(cancellationToken);
+
+            using var activity = TravelWorkflowTelemetry.InvokeNode(WorkflowConstants.PlanningNodeName, threadId);
 
             var travelPlanSummary = await travelService.GetSummary(threadId);
 
@@ -46,14 +47,17 @@ public class PlanningNode(AIAgent agent, ITravelService travelService) : Reflect
 
             var message = new ChatMessage(ChatRole.User, template);
 
-            WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.InputNodePreview, message.Text);
-
+            activity?.AddNodeInput(message.Text);
+         
 
             var chatOptions = threadId.ToChatClientAgentRunOptions();
 
             var response = await agent.RunAsync(message, options:chatOptions, cancellationToken: cancellationToken);
 
-            WorkflowTelemetryTags.Preview(activity, WorkflowTelemetryTags.OutputNodePreview, response.Text);
+            
+            activity?.AddNodeOutput(response.Text);
+
+            activity?.AddNodeUsage(response);
 
             var reasoningOutput = JsonSerializer.Deserialize<ReasoningOutputDto>(response.Text, SerializerOptions)
                 ?? throw new JsonException(FailedToDeserializeResponse);

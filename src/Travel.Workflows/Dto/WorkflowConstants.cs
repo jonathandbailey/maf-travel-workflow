@@ -2,9 +2,9 @@
 
 public static class WorkflowConstants
 {
-    public const string ExecutionNode = "ExecutionNode";
+    public const string ExecutionNode = "Execution";
 
-    public const string PlanningNodeName = "PlanningNode";
+    public const string PlanningNodeName = "Planning";
 
     public const string Observe = ".observe";
 
