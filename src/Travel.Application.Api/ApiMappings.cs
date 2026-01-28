@@ -93,6 +93,8 @@ public static class SessionsApiMappings
 
         var session = await mediator.Send(new CreateSessionCommand(context.User.Id()));
 
+        activity?.AddSession(session);
+
         return TypedResults.Ok(session);
     }
 }   
@@ -116,6 +118,8 @@ public static class TravelApiMappings
         HttpContext context,
         IMediator mediator)
     {
+        using var activity = TravelApiTelemetry.UpdateTravelPlan(context.User.Id());
+
         await mediator.Send(new UpdateTravelPlanCommand(context.User.Id(), threadId, travelPlanUpdateDto));
     }
 
